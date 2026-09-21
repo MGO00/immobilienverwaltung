@@ -1,0 +1,2324 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-6b28d4d7-acc9-4291-a5fa-485299cca693/styles.css">
+<script src="_ds/modernist-6b28d4d7-acc9-4291-a5fa-485299cca693/_ds_bundle.js"></script>
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; background: var(--color-neutral-200); }
+  a { color: var(--color-accent); }
+  a:hover { color: var(--color-accent-700); }
+  .num { font-variant-numeric: tabular-nums; }
+  .app {
+    container-type: inline-size;
+    --color-divider: color-mix(in srgb, #201e1d 15%, transparent);
+    --color-bg: #ffffff;
+    --color-surface: var(--color-neutral-100);
+    --color-accent: #14756b;
+    --color-accent-100: #eaf5f3;
+    --color-accent-200: #cfe8e4;
+    --color-accent-300: #a3d3cc;
+    --color-accent-400: #5fb3a8;
+    --color-accent-500: #1f8b7e;
+    --color-accent-600: #0f6058;
+    --color-accent-700: #0a4a44;
+    --color-accent-800: #083831;
+    --color-accent-900: #062a25;
+    --color-error: #b3261e;
+    --color-error-bg: #fdf3f2;
+    --color-error-border: #f0c9c5;
+    position: relative;
+  }
+  .tabs { display: flex; gap: var(--space-4); overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .detail2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-8); }
+  .wizgrid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--space-8); align-items: start; }
+  .ugrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+  @container (max-width: 1180px) { .ugrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .cards3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+  .duo3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+  .adr { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); gap: var(--space-3); }
+  @keyframes skelpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+  .skel { background: var(--color-neutral-200); animation: skelpulse 1.4s ease-in-out infinite; }
+  @container (max-width: 860px) {
+    .detail2, .wizgrid, .cards3, .duo3, .adr, .ugrid { grid-template-columns: minmax(0, 1fr); }
+    .utable thead { display: none; }
+    .utable tbody tr { display: grid; gap: 2px; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-divider); }
+    .utable tbody tr:last-child { border-bottom: 0; }
+    .utable td { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding: 2px 0; border: 0; text-align: left !important; }
+    .utable td::before { content: attr(data-label); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-neutral-600); }
+    .utable td:first-child { font-family: var(--font-heading); font-weight: 600; }
+  }
+  .shell { display: flex; flex-direction: column; }
+  .bottomnav { display: none; }
+  .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .kpi { border-left: 1px solid var(--color-divider); padding: var(--space-4) var(--space-4) var(--space-4) 0; }
+  .kpi:first-child { border-left: 0; }
+  .kpi-num { font-size: clamp(16px, 1.75cqi, 24px); white-space: nowrap; }
+  .num { font-variant-numeric: tabular-nums; }
+  .table td.num-cell, .kpi-num { white-space: nowrap; }
+  @container (max-width: 1180px) { .kpi { padding-right: var(--space-3); } }
+  .app .btn-primary { color: #ffffff; }
+  .app .table th { border-bottom-width: 1px; }
+  .app .hr { height: 1px; }
+  .objgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+  .calcgrid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-8); }
+  .rgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+  .pagehead { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+  .duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+  @container (max-width: 860px) {
+    .sidebar { display: none !important; }
+    .bottomnav { display: grid; }
+    .kpis { display: flex; overflow-x: auto; scrollbar-width: none; }
+    .kpis::-webkit-scrollbar { display: none; }
+    .kpi { flex: 0 0 46%; padding-right: var(--space-4); border-left: 1px solid var(--color-divider); }
+    .kpi:first-child { border-left: 0; }
+    .brand-lock { white-space: nowrap; font-size: 14px; }
+    .kpi-num { font-size: 24px; }
+    .objgrid, .calcgrid, .rgrid { grid-template-columns: minmax(0, 1fr); }
+    .pagehead { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column; font-family: var(--font-body); color: var(--color-text);">
+
+  <div style="display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; padding: 10px var(--space-4); background: var(--color-neutral-900); color: var(--color-neutral-100);">
+    <span style="font-family: var(--font-heading); font-weight: 600; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; margin-right: auto;">Immobilienverwaltung · Prototyp</span>
+    <div style="display: flex; align-items: center; gap: var(--space-2);">
+      <span style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6;">Ansicht</span>
+      <div style="display: flex; border: 1px solid var(--color-neutral-700);">
+        <button type="button" onClick="{{ setDesktop }}" style="{{ tabDesktop }}">Desktop</button>
+        <button type="button" onClick="{{ setMobil }}" style="{{ tabMobil }}">Mobil</button>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: var(--space-2);">
+      <span style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6;">Daten</span>
+      <div style="display: flex; border: 1px solid var(--color-neutral-700);">
+        <button type="button" onClick="{{ setDatenBeispiel }}" style="{{ tabBeispiel }}">3 Objekte</button>
+        <button type="button" onClick="{{ setDatenLeer }}" style="{{ tabLeer }}">Leer</button>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: var(--space-2);">
+      <span style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6;">Zustand</span>
+      <div style="display: flex; border: 1px solid var(--color-neutral-700);">
+        <button type="button" onClick="{{ setZNormal }}" style="{{ tabZNormal }}">Normal</button>
+        <button type="button" onClick="{{ setZLaden }}" style="{{ tabZLaden }}">Laden</button>
+        <button type="button" onClick="{{ setZFehler }}" style="{{ tabZFehler }}">Ladefehler</button>
+      </div>
+      <div style="display: flex; border: 1px solid var(--color-neutral-700);">
+        <button type="button" onClick="{{ toggleOhneFin }}" style="{{ tabOhneFin }}">Ohne Finanzierung</button>
+      </div>
+      <div style="display: flex; border: 1px solid var(--color-neutral-700);">
+        <button type="button" onClick="{{ goAuth }}" style="{{ tabAuth }}">Login</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex: 1; display: flex; justify-content: center; padding: {{ framePad }}; background: var(--color-neutral-300);">
+    <div class="app" style="width: {{ frameWidth }}; max-width: 100%; height: {{ frameHeight }}; overflow: {{ frameOverflow }}; background: var(--color-bg); box-shadow: var(--shadow-md);">
+      <sc-if value="{{ zeigeApp }}" hint-placeholder-val="{{ true }}">
+      <div class="shell" style="min-height: 100%;">
+
+        <main style="display: flex; flex-direction: column; min-width: 0;">
+
+          <header style="display: flex; align-items: stretch; gap: var(--space-6); padding: 0 var(--space-6); border-bottom: 1px solid var(--color-divider); background: var(--color-bg); position: sticky; top: 0; z-index: 5;">
+            <div style="display: flex; align-items: center; white-space: nowrap; padding: var(--space-3) var(--space-2) var(--space-3) 0;">
+              <span style="font-family: var(--font-heading); font-weight: 600; font-size: 16px; letter-spacing: -0.02em;">Immobilien<span style="font-weight: 400;">verwaltung</span></span>
+            </div>
+            <nav class="sidebar" style="display: flex; align-items: stretch; gap: var(--space-2); margin-right: auto;">
+              <button type="button" onClick="{{ goUebersicht }}" style="{{ navUebersicht }}">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 21V4h9v17"></path><path d="M14 9h5v12"></path><path d="M8 8h3M8 12h3M8 16h3"></path><path d="M3 21h18"></path></svg>
+                <span>Übersicht</span>
+              </button>
+              <button type="button" onClick="{{ goRechner }}" style="{{ navRechner }}">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="14" height="18"></rect><path d="M8 7h8M8 12h2M12 12h2M16 12h0M8 16h2M12 16h2M16 16h0"></path></svg>
+                <span>Rechner</span>
+              </button>
+              <button type="button" onClick="{{ goEinstellungen }}" style="{{ navEinstellungen }}">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h18M3 17h18"></path><circle cx="9" cy="7" r="2.4"></circle><circle cx="15" cy="17" r="2.4"></circle></svg>
+                <span>Einstellungen</span>
+              </button>
+            </nav>
+            <div class="bottomnav" style="margin-right: auto;"></div>
+            <div style="position: relative; display: flex; align-items: center;">
+              <button type="button" onClick="{{ toggleUserMenu }}" style="display: flex; align-items: center; gap: var(--space-2); padding: 5px 8px 5px 5px; background: transparent; border: 1px solid var(--color-divider); cursor: pointer; font: inherit; font-size: 13px;" style-hover="background: color-mix(in srgb, var(--color-text) 7%, transparent);">
+                <span style="width: 26px; height: 26px; display: grid; place-items: center; background: var(--color-neutral-900); color: var(--color-neutral-100); font-family: var(--font-heading); font-weight: 600; font-size: 11px;">{{ initialen }}</span>
+                <span class="sidebar" style="white-space: nowrap;">{{ nutzerName }}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
+              </button>
+              <sc-if value="{{ userMenuOffen }}" hint-placeholder-val="{{ false }}">
+                <div style="position: absolute; right: 0; top: calc(100% + 6px); width: 200px; background: var(--color-bg); border: 1px solid var(--color-divider); box-shadow: var(--shadow-lg); z-index: 20; display: flex; flex-direction: column;">
+                  <div style="padding: var(--space-3); border-bottom: 1px solid var(--color-divider);">
+                    <div style="font-size: 13px; font-family: var(--font-heading); font-weight: 600;">{{ nutzerName }}</div>
+                    <div style="font-size: 12px; color: var(--color-neutral-700);">{{ nutzerMail }}</div>
+                  </div>
+                  <button type="button" onClick="{{ goEinstellungen }}" style="text-align: left; padding: 10px var(--space-3); background: transparent; border: 0; border-bottom: 1px solid var(--color-divider); font: inherit; font-size: 13px; cursor: pointer;" style-hover="background: color-mix(in srgb, var(--color-text) 7%, transparent);">Profil</button>
+                  <button type="button" onClick="{{ abmelden }}" style="display: flex; align-items: center; gap: 8px; text-align: left; padding: 10px var(--space-3); background: transparent; border: 0; font: inherit; font-size: 13px; color: var(--color-text); cursor: pointer;" style-hover="background: var(--color-neutral-100);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M14 4H6v16h8"></path><path d="M11 12h9M17 8l4 4-4 4"></path></svg>
+                    <span>Abmelden</span>
+                  </button>
+                </div>
+              </sc-if>
+            </div>
+          </header>
+
+          <sc-if value="{{ meldung }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-6); background: var(--color-neutral-100); border-bottom: 1px solid var(--color-divider);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" stroke-width="2.1" style="flex: none; margin-top: 1px;"><path d="M20 6L9 17l-5-5"></path></svg>
+              <div style="flex: 1; font-size: 13px; color: var(--color-text);">{{ meldung }}</div>
+              <button type="button" onClick="{{ meldungZu }}" aria-label="Meldung schließen" style="padding: 0; background: transparent; border: 0; cursor: pointer; color: var(--color-neutral-700);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+              </button>
+            </div>
+          </sc-if>
+
+          <div style="flex: 1; padding: var(--space-6);">
+
+            <sc-if value="{{ zeigeLaden }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="skel" style="width: 180px; height: 34px; margin-bottom: var(--space-6);"></div>
+                <div class="kpis" style="border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider);">
+                  <sc-for list="{{ fuenf }}" as="x" hint-placeholder-count="5">
+                    <div class="kpi">
+                      <div class="skel" style="width: 70px; height: 10px; margin-bottom: 10px;"></div>
+                      <div class="skel" style="width: 110px; height: 26px;"></div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div class="objgrid" style="margin-top: var(--space-8);">
+                  <sc-for list="{{ drei }}" as="x" hint-placeholder-count="3">
+                    <div style="padding: var(--space-4) var(--space-4) var(--space-4) 0; border-top: 1px solid var(--color-divider); display: flex; flex-direction: column; gap: var(--space-3);">
+                      <div class="skel" style="width: 120px; height: 18px;"></div>
+                      <div class="skel" style="width: 160px; height: 22px;"></div>
+                      <div class="skel" style="width: 100%; height: 12px;"></div>
+                      <div class="skel" style="width: 100%; height: 12px;"></div>
+                      <div class="skel" style="width: 60%; height: 12px;"></div>
+                    </div>
+                  </sc-for>
+                </div>
+                <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);" role="status">Daten werden geladen</span>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeLadefehler }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width: 460px;">
+                <div style="display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4); background: var(--color-error-bg); border: 1px solid var(--color-error-border); margin-bottom: var(--space-4);">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" stroke-width="1.9" style="flex: none; margin-top: 2px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.01"></path></svg>
+                  <div>
+                    <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px; color: var(--color-error); margin-bottom: 4px;">Daten konnten nicht geladen werden</div>
+                    <div style="font-size: 13px; color: var(--color-error);">Die Verbindung wurde unterbrochen. Deine Daten sind nicht verloren.</div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-secondary" onClick="{{ setZNormal }}">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 1 1-2.3-5.6"></path><path d="M20 4v4h-4"></path></svg>
+                  <span>Erneut versuchen</span>
+                </button>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeUebersicht }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div class="pagehead" style="margin-bottom: var(--space-6);">
+                  <div>
+                    <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Übersicht</h1>
+                    <p style="margin: 4px 0 0; font-size: 13px; color: var(--color-neutral-700);">Stand 19.09.2026 · alle Werte in Euro</p>
+                  </div>
+                  <button type="button" class="btn btn-primary" onClick="{{ goNeu }}" style="align-self: flex-end;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M12 5v14M5 12h14"></path></svg>
+                    <span>Immobilie hinzufügen</span>
+                  </button>
+                </div>
+
+                <div class="kpis" style="border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider);">
+                  <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+                    <div class="kpi">
+                      <div style="font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-700); margin-bottom: 6px;">{{ k.label }}</div>
+                      <div class="kpi-num num" style="font-family: var(--font-heading); font-weight: 600; line-height: 1.05; letter-spacing: -0.01em;">{{ k.wert }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div class="objgrid" style="margin-top: var(--space-8);">
+                  <sc-for list="{{ objekte }}" as="o" hint-placeholder-count="3">
+                    <div style="display: flex; flex-direction: column; border: 1px solid var(--color-divider); border-radius: 10px; background: var(--color-bg); overflow: hidden;" style-hover="border-color: var(--color-neutral-400);">
+                      <image-slot id="{{ o.fotoId }}" shape="rect" style="width: 100%; height: 132px;" placeholder="Foto hierher ziehen"></image-slot>
+                      <div onClick="{{ o.oeffnen }}" style="display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); cursor: pointer;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-2);">
+                          <div>
+                            <div style="font-family: var(--font-heading); font-weight: 600; font-size: 16px; line-height: 1.2;">{{ o.name }}</div>
+                            <div style="font-size: 12px; color: var(--color-neutral-700); margin-top: 2px;">{{ o.meta }}</div>
+                          </div>
+                          <span class="tag tag-neutral" style="border-radius: 999px; white-space: nowrap;">{{ o.einheitenText }}</span>
+                        </div>
+                        <div>
+                          <sc-for list="{{ o.zeilen }}" as="z" hint-placeholder-count="4">
+                            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding: 7px 0; border-bottom: 1px solid var(--color-divider);">
+                              <span style="font-size: 12px; color: var(--color-neutral-700);">{{ z.label }}</span>
+                              <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 14px;">{{ z.wert }}</span>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeLeer }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="margin-bottom: var(--space-6);">
+                  <h6 style="margin: 0 0 6px; color: var(--color-neutral-700);">Portfolio</h6>
+                  <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Übersicht</h1>
+                </div>
+                <div style="border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider); padding: var(--space-8) 0;">
+                  <div style="max-width: 520px;">
+                    <h2 style="font-size: 21px; font-weight: 600; margin: 0 0 var(--space-3);">Leg deine erste Immobilie an</h2>
+                    <p style="font-size: 15px; color: var(--color-neutral-800); margin: 0 0 var(--space-4); text-wrap: pretty;">Sobald ein Objekt angelegt ist, siehst du hier Wert, Miete, Cashflow und Rendite auf einen Blick. Du brauchst nur Kaufpreis, Miete und die Finanzierung — alles andere kannst du später ergänzen.</p>
+                    <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-6);">
+                      <button type="button" class="btn btn-primary" onClick="{{ goNeu }}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M12 5v14M5 12h14"></path></svg>
+                        <span>Erste Immobilie hinzufügen</span>
+                      </button>
+                      <button type="button" class="btn btn-secondary" onClick="{{ goRechner }}">Erst mal rechnen</button>
+                    </div>
+                    <div style="display: flex; flex-direction: column; border-top: 1px solid var(--color-divider);">
+                      <sc-for list="{{ schritte }}" as="s" hint-placeholder-count="3">
+                        <div style="display: flex; gap: var(--space-3); padding: 10px 0; border-bottom: 1px solid var(--color-divider);">
+                          <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 12px; color: var(--color-neutral-700); min-width: 22px;">{{ s.nr }}</span>
+                          <span style="font-size: 13px; color: var(--color-neutral-800);">{{ s.text }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeRechner }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="margin-bottom: var(--space-6);">
+                  <h6 style="margin: 0 0 6px; color: var(--color-neutral-700);">Werkzeuge</h6>
+                  <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Rechner</h1>
+                  <p style="margin: 6px 0 0; font-size: 14px; color: var(--color-neutral-700); max-width: 560px; text-wrap: pretty;">Vier Rechner für die Entscheidung vor dem Kauf. Ergebnisse kannst du einer deiner Immobilien zuordnen.</p>
+                </div>
+                <div class="rgrid">
+                  <sc-for list="{{ rechnerListe }}" as="r" hint-placeholder-count="4">
+                    <div style="display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4) var(--space-4) var(--space-4) 0; border-top: 1px solid var(--color-divider);">
+                      <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 12px; color: var(--color-neutral-700); letter-spacing: 0.08em;">{{ r.nr }}</span>
+                        <span class="tag {{ r.tagKlasse }}">{{ r.tag }}</span>
+                      </div>
+                      <div style="font-family: var(--font-heading); font-weight: 600; font-size: 19px; line-height: 1.15;">{{ r.titel }}</div>
+                      <p style="margin: 0; font-size: 13px; color: var(--color-neutral-800); flex: 1; text-wrap: pretty;">{{ r.text }}</p>
+                      <div style="margin-top: var(--space-2);">
+                        <button type="button" class="btn btn-secondary" onClick="{{ r.oeffnen }}" disabled="{{ r.gesperrt }}">{{ r.cta }}</button>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+                <p style="margin: var(--space-4) 0 0; font-size: 12px; line-height: 1.5; color: var(--color-neutral-700); max-width: 620px; text-wrap: pretty;">Keine Steuer- oder Anlageberatung. Die Rechner liefern Näherungswerte auf Basis deiner Eingaben. Für verbindliche Aussagen frag deine Steuerberatung.</p>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeNebenkosten }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <button type="button" onClick="{{ goRechner }}" style="display: flex; align-items: center; gap: 6px; padding: 0; margin-bottom: var(--space-3); background: transparent; border: 0; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+                  <span>Alle Rechner</span>
+                </button>
+                <div style="margin-bottom: var(--space-6);">
+                  <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Kaufnebenkosten</h1>
+                  <p style="margin: 6px 0 0; font-size: 14px; color: var(--color-neutral-700); max-width: 560px; text-wrap: pretty;">Grunderwerbsteuer, Notar, Grundbuch und Maklerprovision — die Kosten, die neben dem Kaufpreis anfallen.</p>
+                </div>
+
+                <div class="calcgrid" style="border-top: 1px solid var(--color-divider); padding-top: var(--space-6);">
+                  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <h6 style="margin: 0; color: var(--color-neutral-700);">Eingaben</h6>
+                    <div class="field">
+                      <label for="kp">Kaufpreis</label>
+                      <div style="display: flex; align-items: stretch;">
+                        <input id="kp" class="input num" type="text" inputmode="numeric" value="{{ kaufpreisText }}" onChange="{{ onKaufpreis }}" style="text-align: right; border-right: 0;">
+                        <span style="display: grid; place-items: center; min-width: 38px; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">€</span>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label for="bl">Bundesland (Grunderwerbsteuer)</label>
+                      <select id="bl" class="input" ref="{{ blRef }}" value="{{ land }}" onChange="{{ onLand }}">
+                        <option value="Baden-Württemberg">Baden-Württemberg · 5,0 %</option>
+                        <option value="Bayern">Bayern · 3,5 %</option>
+                        <option value="Berlin">Berlin · 6,0 %</option>
+                        <option value="Brandenburg">Brandenburg · 6,5 %</option>
+                        <option value="Bremen">Bremen · 5,0 %</option>
+                        <option value="Hamburg">Hamburg · 5,5 %</option>
+                        <option value="Hessen">Hessen · 6,0 %</option>
+                        <option value="Mecklenburg-Vorpommern">Mecklenburg-Vorpommern · 6,0 %</option>
+                        <option value="Niedersachsen">Niedersachsen · 5,0 %</option>
+                        <option value="Nordrhein-Westfalen">Nordrhein-Westfalen · 6,5 %</option>
+                        <option value="Rheinland-Pfalz">Rheinland-Pfalz · 5,0 %</option>
+                        <option value="Saarland">Saarland · 6,5 %</option>
+                        <option value="Sachsen">Sachsen · 5,5 %</option>
+                        <option value="Sachsen-Anhalt">Sachsen-Anhalt · 5,0 %</option>
+                        <option value="Schleswig-Holstein">Schleswig-Holstein · 6,5 %</option>
+                        <option value="Thüringen">Thüringen · 5,0 %</option>
+                      </select>
+                    </div>
+                    <div class="duo">
+                      <div class="field">
+                        <label for="no">Notar</label>
+                        <div style="display: flex; align-items: stretch;">
+                          <input id="no" class="input num" type="number" step="0.1" value="{{ notar }}" onChange="{{ onNotar }}" style="text-align: right; border-right: 0;">
+                          <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">%</span>
+                        </div>
+                      </div>
+                      <div class="field">
+                        <label for="gb">Grundbuch</label>
+                        <div style="display: flex; align-items: stretch;">
+                          <input id="gb" class="input num" type="number" step="0.1" value="{{ grundbuch }}" onChange="{{ onGrundbuch }}" style="text-align: right; border-right: 0;">
+                          <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div style="padding-top: var(--space-2); border-top: 1px solid var(--color-divider);">
+                      <label class="radio" style="margin-bottom: var(--space-3);">
+                        <input type="checkbox" checked="{{ maklerAn }}" onChange="{{ onMaklerAn }}">
+                        <span class="dot" style="border-radius: 0;"></span>
+                        <span>Maklerprovision einrechnen</span>
+                      </label>
+                      <div class="field">
+                        <label for="mk">Maklerprovision (Käuferanteil, inkl. USt.)</label>
+                        <div style="display: flex; align-items: stretch;">
+                          <input id="mk" class="input num" type="number" step="0.01" value="{{ makler }}" onChange="{{ onMakler }}" disabled="{{ maklerAus }}" style="text-align: right; border-right: 0;">
+                          <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <h6 style="margin: 0; color: var(--color-neutral-700);">Ergebnis</h6>
+                    <div style="border-top: 1px solid var(--color-divider); padding: var(--space-4);">
+                      <table class="table num">
+                        <thead>
+                          <tr><th>Position</th><th style="text-align: right;">Satz</th><th style="text-align: right;">Betrag</th></tr>
+                        </thead>
+                        <tbody>
+                          <sc-for list="{{ posten }}" as="p" hint-placeholder-count="4">
+                            <tr>
+                              <td>{{ p.label }}</td>
+                              <td style="text-align: right; color: var(--color-neutral-700);">{{ p.satz }}</td>
+                              <td class="num-cell" style="text-align: right; font-family: var(--font-heading); font-weight: 600; white-space: nowrap;">{{ p.betrag }}</td>
+                            </tr>
+                          </sc-for>
+                        </tbody>
+                      </table>
+                      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-2) 0;">
+                        <div>
+                          <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">Kaufnebenkosten gesamt</div>
+                          <div class="num" style="font-size: 12px; color: var(--color-neutral-700);">{{ anteilText }}</div>
+                        </div>
+                        <div class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 26px; letter-spacing: -0.02em; white-space: nowrap; color: var(--color-accent);">{{ nebenkostenSumme }}</div>
+                      </div>
+                      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-divider);">
+                        <div>
+                          <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">Gesamtinvestition</div>
+                          <div style="font-size: 12px; color: var(--color-neutral-700);">Kaufpreis + Nebenkosten</div>
+                        </div>
+                        <div class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 22px; letter-spacing: -0.02em; white-space: nowrap;">{{ gesamtInvest }}</div>
+                      </div>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--color-divider); padding: var(--space-4) 0 0;">
+                      <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px; margin-bottom: var(--space-1);">Ergebnis einer Immobilie zuordnen</div>
+                      <p style="font-size: 13px; color: var(--color-neutral-700); margin: 0 0 var(--space-3);">Die Nebenkosten werden dann bei Kauf und Finanzierung des Objekts gespeichert.</p>
+                      <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: flex-end;">
+                        <div class="field" style="flex: 1; min-width: 200px;">
+                          <label for="zu">Immobilie</label>
+                          <select id="zu" class="input" value="{{ zuordnung }}" onChange="{{ onZuordnung }}">
+                            <option value="">Bitte wählen</option>
+                            <sc-for list="{{ objekte }}" as="o" hint-placeholder-count="3">
+                              <option value="{{ o.name }}">{{ o.name }}</option>
+                            </sc-for>
+                          </select>
+                        </div>
+                        <button type="button" class="btn btn-primary" onClick="{{ zuordnen }}" disabled="{{ zuordnenAus }}">Zuordnen</button>
+                      </div>
+                      <sc-if value="{{ zugeordnet }}" hint-placeholder-val="{{ false }}">
+                        <div style="margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-divider); font-size: 13px; color: var(--color-text);">{{ zugeordnetText }}</div>
+                      </sc-if>
+                    </div>
+
+                    <p style="margin: var(--space-4) 0 0; font-size: 12px; line-height: 1.5; color: var(--color-neutral-700); max-width: 620px; text-wrap: pretty;">Keine Steuer- oder Anlageberatung. Notar- und Grundbuchkosten sind Erfahrungswerte und können im Einzelfall abweichen.</p>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeDetail }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <button type="button" onClick="{{ goUebersicht }}" style="display: flex; align-items: center; gap: 6px; padding: 0; margin-bottom: var(--space-3); background: transparent; border: 0; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+                  <span>Alle Immobilien</span>
+                </button>
+                <div class="pagehead" style="margin-bottom: var(--space-4);">
+                  <div>
+                    <span class="tag tag-neutral">{{ dArt }}</span>
+                    <h1 style="font-size: 25px; font-weight: 600; margin: 6px 0 0;">{{ dName }}</h1>
+                    <p style="margin: 4px 0 0; font-size: 14px; color: var(--color-neutral-700);">{{ dAdresse }}</p>
+                  </div>
+                  <button type="button" class="btn btn-secondary" onClick="{{ goBearbeiten }}" style="align-self: flex-end;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 20h4L20 8l-4-4L4 16z"></path></svg>
+                    <span>Bearbeiten</span>
+                  </button>
+                </div>
+
+                <div class="tabs" style="border-bottom: 1px solid var(--color-divider); margin-bottom: var(--space-6);">
+                  <sc-for list="{{ detailTabs }}" as="t" hint-placeholder-count="6">
+                    <button type="button" onClick="{{ t.klick }}" style="{{ t.stil }}">{{ t.label }}</button>
+                  </sc-for>
+                </div>
+
+                <sc-if value="{{ tabUebersicht }}" hint-placeholder-val="{{ true }}">
+                  <div>
+                    <div class="kpis" style="border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider);">
+                      <sc-for list="{{ dKpis }}" as="k" hint-placeholder-count="5">
+                        <div class="kpi">
+                          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-neutral-700); margin-bottom: 8px;">{{ k.label }}</div>
+                          <div class="kpi-num num" style="font-family: var(--font-heading); font-weight: 600; line-height: 1.05; letter-spacing: -0.02em;">{{ k.wert }}</div>
+                          <div style="font-size: 11px; color: var(--color-neutral-600); margin-top: 6px;">{{ k.hinweis }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: flex-start; margin-top: var(--space-8);">
+                      <image-slot id="{{ dFotoId }}" shape="rounded" radius="10" style="width: 280px; height: 188px;" placeholder="Foto hierher ziehen"></image-slot>
+                      <div style="flex: 1; min-width: 300px;">
+                        <h4 style="margin: 0 0 var(--space-3);">Stammdaten</h4>
+                    <div style="border-top: 1px solid var(--color-divider); max-width: 640px;">
+                      <sc-for list="{{ dStammdaten }}" as="r" hint-placeholder-count="7">
+                        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding: 10px 0; border-bottom: 1px solid var(--color-divider);">
+                          <span style="font-size: 13px; color: var(--color-neutral-700);">{{ r.label }}</span>
+                          <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 14px; text-align: right;">{{ r.wert }}</span>
+                        </div>
+                      </sc-for>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ tabEinheiten }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <sc-if value="{{ dEineEinheit }}" hint-placeholder-val="{{ false }}">
+                      <div style="display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) 0; border-top: 1px solid var(--color-divider); margin-bottom: var(--space-4);">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.8" style="flex: none; margin-top: 2px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.01"></path></svg>
+                        <div style="font-size: 13px; color: var(--color-neutral-800); text-wrap: pretty;">Wohnungen und Einfamilienhäuser haben genau eine Einheit — sie wird automatisch aus den Stammdaten geführt. Mehrere Einheiten gibt es nur beim Mehrfamilienhaus.</div>
+                      </div>
+                    </sc-if>
+                    <div class="ugrid">
+                      <sc-for list="{{ dEinheiten }}" as="e" hint-placeholder-count="6">
+                        <div style="display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--color-divider); border-radius: 10px; background: var(--color-bg);">
+                          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-2);">
+                            <div style="font-family: var(--font-heading); font-weight: 600; font-size: 16px;">{{ e.name }}</div>
+                            <span class="tag {{ e.tagKlasse }}" style="border-radius: 999px;">{{ e.status }}</span>
+                          </div>
+                          <div style="display: flex; flex-direction: column; gap: 0;">
+                            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding: 7px 0; border-bottom: 1px solid var(--color-divider);">
+                              <span style="font-size: 12px; color: var(--color-neutral-700);">Fläche</span>
+                              <span class="num" style="font-size: 14px;">{{ e.flaeche }}</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding: 7px 0; border-bottom: 1px solid var(--color-divider);">
+                              <span style="font-size: 12px; color: var(--color-neutral-700);">Kaltmiete</span>
+                              <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 14px;">{{ e.miete }}</span>
+                            </div>
+                            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding: 7px 0;">
+                              <span style="font-size: 12px; color: var(--color-neutral-700);">je m²</span>
+                              <span class="num" style="font-size: 14px;">{{ e.proQm }}</span>
+                            </div>
+                          </div>
+                          <button type="button" class="btn btn-ghost" onClick="{{ e.bearbeiten }}" style="align-self: flex-start; padding-inline: 0; font-size: 13px;">Bearbeiten</button>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div class="duo3" style="border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider); margin-top: var(--space-4);">
+                      <sc-for list="{{ dEinheitenSummen }}" as="s" hint-placeholder-count="3">
+                        <div class="kpi" style="padding: var(--space-3) var(--space-4) var(--space-3) 0;">
+                          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-neutral-700); margin-bottom: 6px;">{{ s.label }}</div>
+                          <div class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 20px; letter-spacing: -0.01em;">{{ s.wert }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <sc-if value="{{ dMehrEinheiten }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-top: var(--space-4);">
+                        <button type="button" class="btn btn-primary" onClick="{{ dialogEinheitOeffnen }}">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M12 5v14M5 12h14"></path></svg>
+                          <span>Einheit hinzufügen</span>
+                        </button>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ tabKauf }}" hint-placeholder-val="{{ false }}">
+                  <div class="detail2">
+                    <div>
+                      <h4 style="margin: 0 0 var(--space-3);">Kauf</h4>
+                      <div style="border-top: 1px solid var(--color-divider);">
+                        <sc-for list="{{ dKauf }}" as="r" hint-placeholder-count="4">
+                          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding: 10px 0; border-bottom: 1px solid var(--color-divider);">
+                            <span style="display: flex; align-items: center; gap: var(--space-2); font-size: 13px; color: var(--color-neutral-700);">{{ r.label }}<span class="{{ r.badgeKlasse }}">{{ r.badge }}</span></span>
+                            <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 14px; text-align: right;">{{ r.wert }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 style="margin: 0 0 var(--space-3);">Finanzierung</h4>
+                      <sc-if value="{{ dOhneFin }}" hint-placeholder-val="{{ false }}">
+                        <div style="padding: var(--space-4) var(--space-4) var(--space-4) 0; border-top: 1px solid var(--color-divider); font-size: 13px; color: var(--color-neutral-800); text-wrap: pretty;">Ohne Finanzierung — diese Immobilie ist vollständig mit Eigenkapital gekauft. Es gibt keine Rate, der Cashflow entspricht Kaltmiete minus laufende Kosten.</div>
+                      </sc-if>
+                      <div style="border-top: 1px solid var(--color-divider);">
+                        <sc-for list="{{ dFin }}" as="r" hint-placeholder-count="6">
+                          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding: 10px 0; border-bottom: 1px solid var(--color-divider);">
+                            <span style="display: flex; align-items: center; gap: var(--space-2); font-size: 13px; color: var(--color-neutral-700);">{{ r.label }}<span class="{{ r.badgeKlasse }}">{{ r.badge }}</span></span>
+                            <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 14px; text-align: right;">{{ r.wert }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ tabEa }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <div class="detail2">
+                      <div>
+                        <h4 style="margin: 0 0 var(--space-3);">Einnahmen pro Monat</h4>
+                        <div style="border-top: 1px solid var(--color-divider);">
+                          <sc-for list="{{ dEinnahmen }}" as="r" hint-placeholder-count="1">
+                            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding: 10px 0; border-bottom: 1px solid var(--color-divider);">
+                              <span style="font-size: 13px; color: var(--color-neutral-700);">{{ r.label }}</span>
+                              <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 14px;">{{ r.wert }}</span>
+                            </div>
+                          </sc-for>
+                        </div>
+                        <div style="display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) 0; border-top: 1px solid var(--color-divider); margin-top: var(--space-4);">
+                          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.8" style="flex: none; margin-top: 2px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.01"></path></svg>
+                          <div style="font-size: 13px; color: var(--color-neutral-800); text-wrap: pretty;">Umlagefähige Nebenkosten sind durchlaufende Posten: Deine Mieter zahlen sie, du leitest sie weiter. Sie zählen deshalb nicht zum Cashflow und stehen hier nicht.</div>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 style="margin: 0 0 var(--space-3);">Laufende Kosten pro Monat</h4>
+                        <div style="border-top: 1px solid var(--color-divider);">
+                          <sc-for list="{{ dKosten }}" as="r" hint-placeholder-count="4">
+                            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding: 10px 0; border-bottom: 1px solid var(--color-divider);">
+                              <span style="font-size: 13px; color: var(--color-neutral-700);">{{ r.label }}</span>
+                              <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 14px;">{{ r.wert }}</span>
+                            </div>
+                          </sc-for>
+                          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding: 10px 0;">
+                            <span style="font-family: var(--font-heading); font-weight: 600; font-size: 14px;">Summe</span>
+                            <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 16px;">{{ dKostenSumme }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h4 style="margin: var(--space-8) 0 var(--space-3);">Cashflow pro Monat</h4>
+                    <div style="max-width: 460px; border-top: 1px solid var(--color-divider);">
+                      <sc-for list="{{ dCashflow }}" as="r" hint-placeholder-count="3">
+                        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding: 10px 0; border-bottom: 1px solid var(--color-divider);">
+                          <span style="font-size: 13px; color: var(--color-neutral-700);">{{ r.label }}</span>
+                          <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 14px;">{{ r.wert }}</span>
+                        </div>
+                      </sc-for>
+                      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) 0;">
+                        <span style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">Cashflow</span>
+                        <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 22px; letter-spacing: -0.02em;">{{ dCashflowSumme }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ tabRechnerD }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <p style="font-size: 14px; color: var(--color-neutral-700); margin: 0 0 var(--space-4); max-width: 560px; text-wrap: pretty;">Die Rechner sind mit den Daten dieser Immobilie vorbefüllt. Ergebnisse kannst du direkt hier speichern.</p>
+                    <div class="rgrid">
+                      <sc-for list="{{ dRechner }}" as="r" hint-placeholder-count="4">
+                        <div style="display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4) var(--space-4) var(--space-4) 0; border-top: 1px solid var(--color-divider);">
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 12px; color: var(--color-neutral-700); letter-spacing: 0.08em;">{{ r.nr }}</span>
+                            <span class="tag {{ r.tagKlasse }}">{{ r.tag }}</span>
+                          </div>
+                          <div style="font-family: var(--font-heading); font-weight: 600; font-size: 19px; line-height: 1.15;">{{ r.titel }}</div>
+                          <p style="margin: 0; font-size: 13px; color: var(--color-neutral-800); flex: 1; text-wrap: pretty;">{{ r.text }}</p>
+                          <div class="num" style="font-size: 12px; color: var(--color-neutral-700);">{{ r.prefill }}</div>
+                          <div style="margin-top: var(--space-2);">
+                            <button type="button" class="btn btn-secondary" onClick="{{ r.oeffnen }}" disabled="{{ r.gesperrt }}">{{ r.cta }}</button>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ tabNotizen }}" hint-placeholder-val="{{ false }}">
+                  <div style="max-width: 640px;">
+                    <div class="field">
+                      <label for="notiz">Notizen zu dieser Immobilie</label>
+                      <textarea id="notiz" class="input" value="{{ notizText }}" onChange="{{ onNotiz }}" placeholder="Termine, Absprachen mit Mietern, offene Reparaturen …" style="min-height: 180px;"></textarea>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-3); flex-wrap: wrap;">
+                      <button type="button" class="btn btn-primary" onClick="{{ notizSpeichern }}" disabled="{{ speichert }}">{{ speichernLabel }}</button>
+                      <span style="font-size: 12px; color: var(--color-neutral-700);">{{ notizStand }}</span>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeNeu }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="margin-bottom: var(--space-6);">
+                  <h1 style="font-size: 25px; font-weight: 600; margin: 0 0 var(--space-3);">Immobilie hinzufügen</h1>
+                  <div class="num" style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-neutral-700); margin-bottom: var(--space-2);">{{ wizFortschritt }}</div>
+                  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); max-width: 560px;">
+                    <sc-for list="{{ wizStufen }}" as="s" hint-placeholder-count="3">
+                      <div style="{{ s.stil }}">{{ s.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <sc-if value="{{ wizHatFehler }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) var(--space-4); background: var(--color-error-bg); border: 1px solid var(--color-error-border); margin-bottom: var(--space-6); max-width: 640px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" stroke-width="1.9" style="flex: none; margin-top: 2px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.01"></path></svg>
+                    <div>
+                      <div style="font-family: var(--font-heading); font-weight: 600; font-size: 14px; color: var(--color-error); margin-bottom: 4px;">{{ wizFehlerTitel }}</div>
+                      <ul style="margin: 0; padding-left: 18px; font-size: 13px; color: var(--color-error);">
+                        <sc-for list="{{ wizFehlerListe }}" as="f" hint-placeholder-count="2">
+                          <li>{{ f.text }}</li>
+                        </sc-for>
+                      </ul>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <div class="wizgrid">
+                  <div>
+                    <sc-if value="{{ wizS1 }}" hint-placeholder-val="{{ true }}">
+                      <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                        <div>
+                          <div style="font-size: 12px; color: var(--color-neutral-700); margin-bottom: 6px;">Objektart</div>
+                          <div class="cards3">
+                            <sc-for list="{{ artKarten }}" as="a" hint-placeholder-count="3">
+                              <button type="button" onClick="{{ a.klick }}" style="{{ a.stil }}">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="{{ a.d }}"></path></svg>
+                                <span style="font-family: var(--font-heading); font-weight: 600; font-size: 14px;">{{ a.label }}</span>
+                                <span style="font-size: 12px; color: var(--color-neutral-700);">{{ a.hinweis }}</span>
+                              </button>
+                            </sc-for>
+                          </div>
+                        </div>
+                        <div class="field">
+                          <label for="wz-bez">Bezeichnung</label>
+                          <input id="wz-bez" class="input" type="text" value="{{ wizBez }}" onChange="{{ onWizBez }}" placeholder="z. B. Wohnung Südvorstadt" style="{{ wizBezStil }}">
+                          <sc-if value="{{ wizBezFehler }}" hint-placeholder-val="{{ false }}">
+                            <div style="display: flex; align-items: center; gap: 6px; margin-top: 5px; font-size: 12px; color: var(--color-error);">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.01"></path></svg>
+                              <span>{{ wizBezFehler }}</span>
+                            </div>
+                          </sc-if>
+                        </div>
+                        <div class="adr">
+                          <div class="field">
+                            <label for="wz-str">Straße <span style="color: var(--color-neutral-600);">(optional)</span></label>
+                            <input id="wz-str" class="input" type="text">
+                          </div>
+                          <div class="field">
+                            <label for="wz-nr">Hausnummer <span style="color: var(--color-neutral-600);">(optional)</span></label>
+                            <input id="wz-nr" class="input" type="text">
+                          </div>
+                        </div>
+                        <div class="adr">
+                          <div class="field">
+                            <label for="wz-ort">Ort <span style="color: var(--color-neutral-600);">(optional)</span></label>
+                            <input id="wz-ort" class="input" type="text">
+                          </div>
+                          <div class="field">
+                            <label for="wz-plz">PLZ <span style="color: var(--color-neutral-600);">(optional)</span></label>
+                            <input id="wz-plz" class="input num" type="text" inputmode="numeric">
+                          </div>
+                        </div>
+                        <div class="duo">
+                          <div class="field">
+                            <label for="wz-bj">Baujahr <span style="color: var(--color-neutral-600);">(optional)</span></label>
+                            <input id="wz-bj" class="input num" type="text" inputmode="numeric" style="text-align: right;">
+                          </div>
+                          <div class="field">
+                            <label for="wz-wf">Wohnfläche <span style="color: var(--color-neutral-600);">(optional)</span></label>
+                            <div style="display: flex; align-items: stretch;">
+                              <input id="wz-wf" class="input num" type="text" inputmode="numeric" style="text-align: right; border-right: 0;">
+                              <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">m²</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div style="font-size: 12px; color: var(--color-neutral-700); margin-bottom: 6px;">Foto <span style="color: var(--color-neutral-600);">(optional)</span></div>
+                          <div style="display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center;">
+                            <image-slot id="objektfoto-neu" shape="rounded" radius="10" style="width: 220px; height: 148px;" placeholder="Foto hierher ziehen"></image-slot>
+                            <p style="margin: 0; font-size: 12px; color: var(--color-neutral-700); max-width: 240px; text-wrap: pretty;">Ein Querformat pro Objekt. Es erscheint später auf der Detailseite.</p>
+                          </div>
+                        </div>
+                        <sc-if value="{{ wizIstHaus }}" hint-placeholder-val="{{ false }}">
+                          <div class="field" style="max-width: 260px;">
+                            <label for="wz-gr">Grundstücksfläche <span style="color: var(--color-neutral-600);">(optional)</span></label>
+                            <div style="display: flex; align-items: stretch;">
+                              <input id="wz-gr" class="input num" type="text" inputmode="numeric" style="text-align: right; border-right: 0;">
+                              <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">m²</span>
+                            </div>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{ wizS2 }}" hint-placeholder-val="{{ false }}">
+                      <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                        <div class="duo">
+                          <div class="field">
+                            <label for="wz-kd">Kaufdatum <span style="color: var(--color-neutral-600);">(optional)</span></label>
+                            <input id="wz-kd" class="input num" type="text" placeholder="TT.MM.JJJJ">
+                          </div>
+                          <div class="field">
+                            <label for="wz-kp">Kaufpreis</label>
+                            <div style="display: flex; align-items: stretch;">
+                              <input id="wz-kp" class="input num" type="text" inputmode="numeric" value="{{ wizKp }}" onChange="{{ onWizKp }}" style="{{ wizKpStil }}">
+                              <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">€</span>
+                            </div>
+                            <sc-if value="{{ wizKpFehler }}" hint-placeholder-val="{{ false }}">
+                              <div style="display: flex; align-items: center; gap: 6px; margin-top: 5px; font-size: 12px; color: var(--color-error);">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.01"></path></svg>
+                                <span>{{ wizKpFehler }}</span>
+                              </div>
+                            </sc-if>
+                          </div>
+                        </div>
+                        <div class="field" style="max-width: 300px;">
+                          <label for="wz-nk">Kaufnebenkosten <span style="color: var(--color-neutral-600);">(optional)</span></label>
+                          <div style="display: flex; align-items: stretch;">
+                            <input id="wz-nk" class="input num" type="text" inputmode="numeric" style="flex: 1; min-width: 0; text-align: right; border-right: 0;">
+                            <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">€</span>
+                          </div>
+                          <button type="button" class="btn btn-ghost" onClick="{{ goNebenkosten }}" style="padding-inline: 0; margin-top: 5px; font-size: 13px;">Nicht sicher? Im Rechner berechnen</button>
+                        </div>
+                        <div style="padding-top: var(--space-2); border-top: 1px solid var(--color-divider);">
+                          <label class="radio" style="margin-bottom: var(--space-3);">
+                            <input type="checkbox" checked="{{ wizOhneFin }}" onChange="{{ onWizOhneFin }}">
+                            <span class="dot" style="border-radius: 0;"></span>
+                            <span>Ohne Finanzierung (Eigenkapital)</span>
+                          </label>
+                          <div class="duo">
+                            <div class="field">
+                              <label for="wz-dl">Darlehen</label>
+                              <div style="display: flex; align-items: stretch;">
+                                <input id="wz-dl" class="input num" type="text" inputmode="numeric" value="{{ wizDl }}" onChange="{{ onWizDl }}" disabled="{{ wizOhneFin }}" style="text-align: right; border-right: 0;">
+                                <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">€</span>
+                              </div>
+                            </div>
+                            <div class="field">
+                              <label for="wz-zb">Zinsbindung bis</label>
+                              <input id="wz-zb" class="input num" type="text" placeholder="TT.MM.JJJJ" disabled="{{ wizOhneFin }}">
+                            </div>
+                          </div>
+                          <div class="duo" style="margin-top: var(--space-3);">
+                            <div class="field">
+                              <label for="wz-zi">Zins</label>
+                              <div style="display: flex; align-items: stretch;">
+                                <input id="wz-zi" class="input num" type="number" step="0.1" value="{{ wizZins }}" onChange="{{ onWizZins }}" disabled="{{ wizOhneFin }}" style="text-align: right; border-right: 0;">
+                                <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">%</span>
+                              </div>
+                            </div>
+                            <div class="field">
+                              <label for="wz-ti">Tilgung</label>
+                              <div style="display: flex; align-items: stretch;">
+                                <input id="wz-ti" class="input num" type="number" step="0.1" value="{{ wizTilgung }}" onChange="{{ onWizTilgung }}" disabled="{{ wizOhneFin }}" style="text-align: right; border-right: 0;">
+                                <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">%</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{ wizS3 }}" hint-placeholder-val="{{ false }}">
+                      <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                        <div>
+                          <div style="font-size: 12px; color: var(--color-neutral-700); margin-bottom: 6px;">Nutzung</div>
+                          <div style="display: inline-flex; border: 1px solid var(--color-divider);">
+                            <sc-for list="{{ nutzungen }}" as="n" hint-placeholder-count="3">
+                              <button type="button" onClick="{{ n.klick }}" style="{{ n.stil }}">{{ n.label }}</button>
+                            </sc-for>
+                          </div>
+                        </div>
+
+                        <sc-if value="{{ wizEineMiete }}" hint-placeholder-val="{{ true }}">
+                          <div class="field" style="max-width: 300px;">
+                            <label for="wz-km">Kaltmiete pro Monat</label>
+                            <div style="display: flex; align-items: stretch;">
+                              <input id="wz-km" class="input num" type="text" inputmode="numeric" value="{{ wizKm }}" onChange="{{ onWizKm }}" style="{{ wizKmStil }}">
+                              <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">€</span>
+                            </div>
+                            <sc-if value="{{ wizKmFehler }}" hint-placeholder-val="{{ false }}">
+                              <div style="display: flex; align-items: center; gap: 6px; margin-top: 5px; font-size: 12px; color: var(--color-error);">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.01"></path></svg>
+                                <span>{{ wizKmFehler }}</span>
+                              </div>
+                            </sc-if>
+                          </div>
+                        </sc-if>
+
+                        <sc-if value="{{ wizEinheitenListe }}" hint-placeholder-val="{{ false }}">
+                          <div>
+                            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-2);">
+                              <h4 style="margin: 0; font-size: 17px;">Einheiten</h4>
+                              <span class="num" style="font-size: 12px; color: var(--color-neutral-700);">{{ wizEinheitenStand }}</span>
+                            </div>
+                            <sc-if value="{{ wizKeineEinheiten }}" hint-placeholder-val="{{ true }}">
+                              <div style="padding: var(--space-6) 0; border-top: 1px solid var(--color-divider); text-wrap: pretty;">
+                                <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px; margin-bottom: 4px;">Noch keine Einheit angelegt</div>
+                                <div style="font-size: 13px; color: var(--color-neutral-800);">Leg für jede Wohnung im Haus eine Einheit an — Name, Fläche, Kaltmiete und ob sie vermietet ist. Miete und Leerstand rechnen sich daraus.</div>
+                              </div>
+                            </sc-if>
+                            <sc-if value="{{ wizHatEinheiten }}" hint-placeholder-val="{{ false }}">
+                              <table class="table utable num">
+                                <thead>
+                                  <tr>
+                                    <th>Einheit</th>
+                                    <th style="text-align: right;">Fläche</th>
+                                    <th style="text-align: right;">Kaltmiete</th>
+                                    <th>Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <sc-for list="{{ wizEinheiten }}" as="e" hint-placeholder-count="2">
+                                    <tr>
+                                      <td data-label="Einheit">{{ e.name }}</td>
+                                      <td data-label="Fläche" style="text-align: right;">{{ e.flaeche }}</td>
+                                      <td data-label="Kaltmiete" style="text-align: right;">{{ e.miete }}</td>
+                                      <td data-label="Status"><span class="tag {{ e.tagKlasse }}">{{ e.status }}</span></td>
+                                    </tr>
+                                  </sc-for>
+                                </tbody>
+                              </table>
+                            </sc-if>
+                            <div style="margin-top: var(--space-3);">
+                              <button type="button" class="btn btn-secondary" onClick="{{ dialogEinheitOeffnen }}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M12 5v14M5 12h14"></path></svg>
+                                <span>Einheit hinzufügen</span>
+                              </button>
+                            </div>
+                          </div>
+                        </sc-if>
+
+                        <div style="padding-top: var(--space-2); border-top: 1px solid var(--color-divider);">
+                          <h4 style="margin: 0 0 var(--space-3); font-size: 17px;">Laufende Kosten pro Monat <span style="font-family: var(--font-body); font-weight: 400; font-size: 12px; color: var(--color-neutral-600);">(optional, nur nicht umlagefähige)</span></h4>
+                          <div class="duo3">
+                            <sc-for list="{{ wizKostenFelder }}" as="f" hint-placeholder-count="3">
+                              <div class="field">
+                                <label for="{{ f.id }}">{{ f.label }}</label>
+                                <div style="display: flex; align-items: stretch;">
+                                  <input id="{{ f.id }}" class="input num" type="text" inputmode="numeric" style="text-align: right; border-right: 0;">
+                                  <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">€</span>
+                                </div>
+                              </div>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </div>
+                    </sc-if>
+
+                    <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid var(--color-divider);">
+                      <button type="button" class="btn btn-secondary" onClick="{{ wizZurueck }}" disabled="{{ wizErsterSchritt }}">Zurück</button>
+                      <button type="button" class="btn btn-primary" onClick="{{ wizWeiter }}" disabled="{{ speichert }}">{{ wizWeiterLabel }}</button>
+                      <button type="button" class="btn btn-ghost" onClick="{{ wizAbbrechen }}" style="margin-left: var(--space-2);">Abbrechen</button>
+                    </div>
+                  </div>
+
+                  <sc-if value="{{ wizVorschau }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding: var(--space-4) var(--space-4) var(--space-4) 0; border-top: 1px solid var(--color-divider);">
+                      <h6 style="margin: 0 0 var(--space-3); color: var(--color-neutral-700);">Vorschau</h6>
+                      <div style="border-top: 1px solid var(--color-divider);">
+                        <sc-for list="{{ wizVorschauZeilen }}" as="r" hint-placeholder-count="3">
+                          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding: 9px 0; border-bottom: 1px solid var(--color-divider);">
+                            <span style="font-size: 12px; color: var(--color-neutral-700);">{{ r.label }}</span>
+                            <span class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">{{ r.wert }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                      <div style="font-size: 11px; color: var(--color-neutral-600); margin-top: var(--space-3); text-wrap: pretty;">Rechnet mit, sobald Kaufpreis, Miete und Finanzierung stehen. Keine Steuer- oder Anlageberatung.</div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeBearbeiten }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width: 720px;">
+                <button type="button" onClick="{{ goDetailZurueck }}" style="display: flex; align-items: center; gap: 6px; padding: 0; margin-bottom: var(--space-3); background: transparent; border: 0; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+                  <span>Zurück zur Immobilie</span>
+                </button>
+                <h1 style="font-size: 25px; font-weight: 600; margin: 0 0 var(--space-2);">Immobilie bearbeiten</h1>
+                <p style="font-size: 14px; color: var(--color-neutral-700); margin: 0 0 var(--space-6);">Alle Felder auf einer Seite. Pflicht sind nur Bezeichnung, Kaufpreis und Miete.</p>
+
+                <sc-for list="{{ editAbschnitte }}" as="ab" hint-placeholder-count="3">
+                  <div style="margin-bottom: var(--space-8);">
+                    <h4 style="margin: 0 0 var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-divider);">{{ ab.titel }}</h4>
+                    <div class="duo">
+                      <sc-for list="{{ ab.felder }}" as="f" hint-placeholder-count="4">
+                        <div class="field">
+                          <label for="{{ f.id }}">{{ f.label }}</label>
+                          <sc-if value="{{ f.mitSuffix }}" hint-placeholder-val="{{ true }}">
+                            <div style="display: flex; align-items: stretch;">
+                              <input id="{{ f.id }}" class="input num" type="text" value="{{ f.wert }}" onChange="{{ f.onChange }}" style="text-align: right; border-right: 0;">
+                              <span style="display: grid; place-items: center; min-width: 38px; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">{{ f.suffix }}</span>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ f.ohneSuffix }}" hint-placeholder-val="{{ false }}">
+                            <input id="{{ f.id }}" class="input" type="text" value="{{ f.wert }}" onChange="{{ f.onChange }}">
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+
+                <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; padding-top: var(--space-4); border-top: 1px solid var(--color-divider);">
+                  <button type="button" class="btn btn-primary" onClick="{{ editSpeichern }}" disabled="{{ speichert }}">{{ speichernLabel }}</button>
+                  <button type="button" class="btn btn-ghost" onClick="{{ editAbbrechen }}">Abbrechen</button>
+                </div>
+
+                <div style="margin-top: var(--space-8); padding: var(--space-4); border: 1px solid var(--color-error-border); background: var(--color-error-bg);">
+                  <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px; color: var(--color-error); margin-bottom: 4px;">Immobilie löschen</div>
+                  <p style="font-size: 13px; color: var(--color-error); margin: 0 0 var(--space-3); text-wrap: pretty;">Die Immobilie samt Einheiten, Notizen und Berechnungen wird dauerhaft entfernt.</p>
+                  <button type="button" class="btn btn-secondary" onClick="{{ dialogLoeschenOeffnen }}" style="border-color: var(--color-error); color: var(--color-error);">Immobilie löschen</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeRendite }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <button type="button" onClick="{{ goRechner }}" style="display: flex; align-items: center; gap: 6px; padding: 0; margin-bottom: var(--space-3); background: transparent; border: 0; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+                  <span>Alle Rechner</span>
+                </button>
+                <div style="margin-bottom: var(--space-6);">
+                  <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Rendite</h1>
+                  <p style="margin: 6px 0 0; font-size: 14px; color: var(--color-neutral-700); max-width: 560px; text-wrap: pretty;">Bruttorendite auf den Kaufpreis, Nettorendite auf die Gesamtinvestition und der Kaufpreisfaktor.</p>
+                </div>
+
+                <div class="calcgrid" style="border-top: 1px solid var(--color-divider); padding-top: var(--space-6);">
+                  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <h6 style="margin: 0; color: var(--color-neutral-700);">Eingaben</h6>
+                    <sc-for list="{{ rFelder }}" as="f" hint-placeholder-count="4">
+                      <div class="field">
+                        <label for="{{ f.id }}">{{ f.label }}</label>
+                        <div style="display: flex; align-items: stretch;">
+                          <input id="{{ f.id }}" class="input num" type="text" inputmode="decimal" value="{{ f.wert }}" onChange="{{ f.onChange }}" style="text-align: right; border-right: 0;">
+                          <span style="display: grid; place-items: center; min-width: 38px; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">{{ f.suffix }}</span>
+                        </div>
+                        <sc-if value="{{ f.hinweis }}" hint-placeholder-val="{{ false }}">
+                          <div style="font-size: 12px; color: var(--color-neutral-700); margin-top: 4px;">{{ f.hinweis }}</div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                    <button type="button" class="btn btn-ghost" onClick="{{ goNebenkosten }}" style="padding-inline: 0; align-self: flex-start; font-size: 13px;">Nebenkosten im Rechner 01 ermitteln</button>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <h6 style="margin: 0; color: var(--color-neutral-700);">Ergebnis</h6>
+                    <div style="border-top: 1px solid var(--color-divider); padding: var(--space-4);">
+                      <div class="duo" style="gap: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-divider);">
+                        <div>
+                          <div style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-neutral-700);">Bruttorendite</div>
+                          <div class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 30px; letter-spacing: -0.02em; color: var(--color-accent);">{{ rBrutto }}</div>
+                          <div style="font-size: 12px; color: var(--color-neutral-700);">Jahresmiete auf den Kaufpreis</div>
+                        </div>
+                        <div>
+                          <div style="font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-neutral-700);">Nettorendite</div>
+                          <div class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 30px; letter-spacing: -0.02em;">{{ rNetto }}</div>
+                          <div style="font-size: 12px; color: var(--color-neutral-700);">nach Kosten, auf die Gesamtinvestition</div>
+                        </div>
+                      </div>
+                      <table class="table num" style="margin-top: var(--space-3);">
+                        <tbody>
+                          <sc-for list="{{ rZeilen }}" as="z" hint-placeholder-count="5">
+                            <tr>
+                              <td>{{ z.label }}</td>
+                              <td style="text-align: right; color: var(--color-neutral-700);">{{ z.hinweis }}</td>
+                              <td style="text-align: right; font-family: var(--font-heading); font-weight: 600; white-space: nowrap;">{{ z.wert }}</td>
+                            </tr>
+                          </sc-for>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div style="border-top: 1px solid var(--color-divider); padding: var(--space-4) 0 0;">
+                      <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px; margin-bottom: 4px;">Einordnung</div>
+                      <p style="margin: 0; font-size: 13px; color: var(--color-neutral-800); text-wrap: pretty;">{{ rEinordnung }}</p>
+                    </div>
+                    <p style="margin: var(--space-4) 0 0; font-size: 12px; line-height: 1.5; color: var(--color-neutral-700); max-width: 620px; text-wrap: pretty;">Keine Steuer- oder Anlageberatung. Die Rendite rechnet vor Steuern und ohne Wertentwicklung oder Leerstand.</p>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeFinanzierung }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <button type="button" onClick="{{ goRechner }}" style="display: flex; align-items: center; gap: 6px; padding: 0; margin-bottom: var(--space-3); background: transparent; border: 0; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+                  <span>Alle Rechner</span>
+                </button>
+                <div style="margin-bottom: var(--space-6);">
+                  <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Finanzierung</h1>
+                  <p style="margin: 6px 0 0; font-size: 14px; color: var(--color-neutral-700); max-width: 560px; text-wrap: pretty;">Monatliche Rate, Restschuld am Ende der Zinsbindung und der Tilgungsverlauf Jahr für Jahr.</p>
+                </div>
+
+                <div class="calcgrid" style="border-top: 1px solid var(--color-divider); padding-top: var(--space-6);">
+                  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <h6 style="margin: 0; color: var(--color-neutral-700);">Eingaben</h6>
+                    <sc-for list="{{ fFelder }}" as="f" hint-placeholder-count="6">
+                      <div class="field">
+                        <label for="{{ f.id }}">{{ f.label }}</label>
+                        <div style="display: flex; align-items: stretch;">
+                          <input id="{{ f.id }}" class="input num" type="text" inputmode="decimal" value="{{ f.wert }}" onChange="{{ f.onChange }}" style="text-align: right; border-right: 0;">
+                          <span style="display: grid; place-items: center; min-width: 38px; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">{{ f.suffix }}</span>
+                        </div>
+                        <sc-if value="{{ f.hinweis }}" hint-placeholder-val="{{ false }}">
+                          <div style="font-size: 12px; color: var(--color-neutral-700); margin-top: 4px;">{{ f.hinweis }}</div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <h6 style="margin: 0; color: var(--color-neutral-700);">Ergebnis</h6>
+                    <div style="border-top: 1px solid var(--color-divider); padding: var(--space-4);">
+                      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-divider);">
+                        <div>
+                          <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">Rate pro Monat</div>
+                          <div class="num" style="font-size: 12px; color: var(--color-neutral-700);">{{ fRateHinweis }}</div>
+                        </div>
+                        <div class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 30px; letter-spacing: -0.02em; white-space: nowrap; color: var(--color-accent);">{{ fRate }}</div>
+                      </div>
+                      <table class="table num" style="margin-top: var(--space-3);">
+                        <tbody>
+                          <sc-for list="{{ fZeilen }}" as="z" hint-placeholder-count="6">
+                            <tr>
+                              <td>{{ z.label }}</td>
+                              <td style="text-align: right; color: var(--color-neutral-700);">{{ z.hinweis }}</td>
+                              <td style="text-align: right; font-family: var(--font-heading); font-weight: 600; white-space: nowrap;">{{ z.wert }}</td>
+                            </tr>
+                          </sc-for>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--color-divider);">
+                      <div style="padding: var(--space-3) 0; border-bottom: 1px solid var(--color-divider); font-family: var(--font-heading); font-weight: 600; font-size: 15px;">Tilgungsplan</div>
+                      <div style="max-height: 320px; overflow-y: auto;">
+                        <table class="table num">
+                          <thead>
+                            <tr><th>Jahr</th><th style="text-align: right;">Zins</th><th style="text-align: right;">Tilgung</th><th style="text-align: right;">Restschuld</th></tr>
+                          </thead>
+                          <tbody>
+                            <sc-for list="{{ fPlan }}" as="j" hint-placeholder-count="10">
+                              <tr>
+                                <td style="font-family: var(--font-heading); font-weight: 600;">{{ j.jahr }}</td>
+                                <td style="text-align: right; color: var(--color-neutral-700);">{{ j.zins }}</td>
+                                <td style="text-align: right; color: var(--color-neutral-700);">{{ j.tilgung }}</td>
+                                <td style="text-align: right; font-family: var(--font-heading); font-weight: 600; white-space: nowrap;">{{ j.rest }}</td>
+                              </tr>
+                            </sc-for>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <p style="margin: var(--space-4) 0 0; font-size: 12px; line-height: 1.5; color: var(--color-neutral-700); max-width: 620px; text-wrap: pretty;">Annuitätendarlehen, jährliche Verrechnung. Sondertilgungen, Bereitstellungszinsen und ein KfW-Anteil sind nicht berücksichtigt.</p>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ zeigeCashflow }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <button type="button" onClick="{{ goRechner }}" style="display: flex; align-items: center; gap: 6px; padding: 0; margin-bottom: var(--space-3); background: transparent; border: 0; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text); cursor: pointer;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+                  <span>Alle Rechner</span>
+                </button>
+                <div style="margin-bottom: var(--space-6);">
+                  <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Cashflow</h1>
+                  <p style="margin: 6px 0 0; font-size: 14px; color: var(--color-neutral-700); max-width: 560px; text-wrap: pretty;">Was nach Rate und laufenden Kosten übrig bleibt — pro Monat und aufs Jahr gerechnet.</p>
+                </div>
+
+                <div class="calcgrid" style="border-top: 1px solid var(--color-divider); padding-top: var(--space-6);">
+                  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <h6 style="margin: 0; color: var(--color-neutral-700);">Eingaben — pro Monat</h6>
+                    <sc-for list="{{ cFelder }}" as="f" hint-placeholder-count="5">
+                      <div class="field">
+                        <label for="{{ f.id }}">{{ f.label }}</label>
+                        <div style="display: flex; align-items: stretch;">
+                          <input id="{{ f.id }}" class="input num" type="text" inputmode="decimal" value="{{ f.wert }}" onChange="{{ f.onChange }}" style="text-align: right; border-right: 0;">
+                          <span style="display: grid; place-items: center; min-width: 38px; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">{{ f.suffix }}</span>
+                        </div>
+                        <sc-if value="{{ f.hinweis }}" hint-placeholder-val="{{ false }}">
+                          <div style="font-size: 12px; color: var(--color-neutral-700); margin-top: 4px;">{{ f.hinweis }}</div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                    <button type="button" class="btn btn-ghost" onClick="{{ cRateUebernehmen }}" style="padding-inline: 0; align-self: flex-start; font-size: 13px;">{{ cRateUebernehmenLabel }}</button>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <h6 style="margin: 0; color: var(--color-neutral-700);">Ergebnis</h6>
+                    <div style="border-top: 1px solid var(--color-divider); padding: var(--space-4);">
+                      <table class="table num">
+                        <tbody>
+                          <sc-for list="{{ cZeilen }}" as="z" hint-placeholder-count="5">
+                            <tr>
+                              <td>{{ z.label }}</td>
+                              <td style="text-align: right; color: var(--color-neutral-700);">{{ z.hinweis }}</td>
+                              <td style="text-align: right; font-family: var(--font-heading); font-weight: 600; white-space: nowrap;">{{ z.wert }}</td>
+                            </tr>
+                          </sc-for>
+                        </tbody>
+                      </table>
+                      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-2) 0;">
+                        <div>
+                          <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">Cashflow pro Monat</div>
+                          <div class="num" style="font-size: 12px; color: var(--color-neutral-700);">{{ cJahrText }}</div>
+                        </div>
+                        <div class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 30px; letter-spacing: -0.02em; white-space: nowrap; color: {{ cFarbe }};">{{ cSumme }}</div>
+                      </div>
+                      <div style="margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-divider); display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3);">
+                        <div>
+                          <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">Davon Tilgung</div>
+                          <div style="font-size: 12px; color: var(--color-neutral-700);">steckt in der Rate, baut Vermögen auf</div>
+                        </div>
+                        <div class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 22px; white-space: nowrap;">{{ cTilgung }}</div>
+                      </div>
+                    </div>
+                    <div style="border-top: 1px solid var(--color-divider); padding: var(--space-4) 0 0;">
+                      <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px; margin-bottom: 4px;">Einordnung</div>
+                      <p style="margin: 0; font-size: 13px; color: var(--color-neutral-800); text-wrap: pretty;">{{ cEinordnung }}</p>
+                    </div>
+                    <p style="margin: var(--space-4) 0 0; font-size: 12px; line-height: 1.5; color: var(--color-neutral-700); max-width: 620px; text-wrap: pretty;">Vor Steuern. Abschreibung, Werbungskosten und dein persönlicher Steuersatz sind nicht eingerechnet.</p>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isEinstellungen }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width: 620px;">
+                <div style="margin-bottom: var(--space-6);">
+                  <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Einstellungen</h1>
+                  <p style="margin: 6px 0 0; font-size: 14px; color: var(--color-neutral-700); max-width: 520px; text-wrap: pretty;">Profil, Passwort und Tarif. Änderungen gelten sofort für alle Geräte.</p>
+                </div>
+
+                <section style="border-top: 1px solid var(--color-divider); padding-top: var(--space-6); margin-bottom: var(--space-6);">
+                  <h2 style="font-size: 19px; margin: 0 0 var(--space-4);">Profil</h2>
+                  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <div class="field">
+                      <label for="setName">Name</label>
+                      <input id="setName" class="input" type="text" value="{{ setName }}" onChange="{{ onSetName }}">
+                    </div>
+                    <div class="field">
+                      <label for="setMail">E-Mail-Adresse</label>
+                      <input id="setMail" class="input" type="email" value="{{ setMail }}" onChange="{{ onSetMail }}">
+                      <div style="font-size: 12px; color: var(--color-neutral-700); margin-top: 4px;">Eine neue Adresse musst du per Link bestätigen.</div>
+                    </div>
+                    <div>
+                      <button type="button" class="btn btn-primary" onClick="{{ profilSpeichern }}" disabled="{{ profilAus }}">{{ speichernLabel }}</button>
+                    </div>
+                  </div>
+                </section>
+
+                <section style="border-top: 1px solid var(--color-divider); padding-top: var(--space-6); margin-bottom: var(--space-6);">
+                  <h2 style="font-size: 19px; margin: 0 0 var(--space-4);">Passwort ändern</h2>
+                  <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                    <div class="field">
+                      <label for="pwAlt">Aktuelles Passwort</label>
+                      <input id="pwAlt" class="input" type="password" value="{{ pwAlt }}" onChange="{{ onPwAlt }}">
+                    </div>
+                    <div class="field">
+                      <label for="pwNeu">Neues Passwort</label>
+                      <input id="pwNeu" class="input" type="password" value="{{ pwNeu }}" onChange="{{ onPwNeu }}" style="{{ pwNeuStil }}">
+                      <div style="font-size: 12px; color: {{ pwRegelFarbe }}; margin-top: 4px;">{{ pwRegelText }}</div>
+                    </div>
+                    <div class="field">
+                      <label for="pwWdh">Neues Passwort wiederholen</label>
+                      <input id="pwWdh" class="input" type="password" value="{{ pwWdh }}" onChange="{{ onPwWdh }}" style="{{ pwWdhStil }}">
+                      <sc-if value="{{ pwUngleich }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size: 12px; color: var(--color-error); margin-top: 4px;">Die beiden Eingaben stimmen nicht überein.</div>
+                      </sc-if>
+                    </div>
+                    <div>
+                      <button type="button" class="btn btn-primary" onClick="{{ pwAendern }}" disabled="{{ pwAus }}">Passwort ändern</button>
+                    </div>
+                  </div>
+                </section>
+
+                <section style="border-top: 1px solid var(--color-divider); padding-top: var(--space-6); margin-bottom: var(--space-6);">
+                  <h2 style="font-size: 19px; margin: 0 0 var(--space-4);">Tarif</h2>
+                  <div style="border-top: 1px solid var(--color-divider); padding: var(--space-4) 0 0; display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-start; justify-content: space-between;">
+                    <div style="max-width: 320px;">
+                      <span class="tag tag-neutral">Aktiv</span>
+                      <div style="font-family: var(--font-heading); font-weight: 600; font-size: 19px; margin-top: 8px;">Kostenlos</div>
+                      <p style="margin: 4px 0 0; font-size: 13px; color: var(--color-neutral-800); text-wrap: pretty;">Bis zu 5 Immobilien, alle Rechner, Export als CSV. Du nutzt 3 von 5 Plätzen.</p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
+                      <button type="button" class="btn btn-secondary" disabled="{{ true }}">Tarife vergleichen</button>
+                      <span style="font-size: 12px; color: var(--color-neutral-700);">Bezahltarife folgen 2027.</span>
+                    </div>
+                  </div>
+                </section>
+
+                <section style="border-top: 1px solid var(--color-divider); padding-top: var(--space-6);">
+                  <h2 style="font-size: 19px; margin: 0 0 var(--space-3);">Konto</h2>
+                  <p style="margin: 0 0 var(--space-4); font-size: 13px; color: var(--color-neutral-800); max-width: 460px; text-wrap: pretty;">Beim Abmelden bleiben alle Daten erhalten. Zum Löschen des Kontos schreib uns an loeschen@example.de — wir bestätigen innerhalb von 14 Tagen.</p>
+                  <button type="button" class="btn btn-secondary" onClick="{{ abmelden }}">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 4H6v16h8"></path><path d="M11 12h9M17 8l4 4-4 4"></path></svg>
+                    <span>Abmelden</span>
+                  </button>
+                </section>
+              </div>
+            </sc-if>
+
+          </div>
+
+          <div style="padding: var(--space-4) var(--space-6); border-top: 1px solid var(--color-divider); font-size: 11px; color: var(--color-neutral-600);">Alle Berechnungen ohne Gewähr. Keine Steuer- oder Anlageberatung.</div>
+
+          <nav class="bottomnav" style="grid-template-columns: repeat(3, 1fr); position: sticky; bottom: 0; background: var(--color-bg); border-top: 1px solid var(--color-divider); z-index: 5;">
+            <button type="button" onClick="{{ goUebersicht }}" style="{{ mobUebersicht }}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 21V4h9v17"></path><path d="M14 9h5v12"></path><path d="M8 8h3M8 12h3M8 16h3"></path><path d="M3 21h18"></path></svg>
+              <span>Übersicht</span>
+            </button>
+            <button type="button" onClick="{{ goRechner }}" style="{{ mobRechner }}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="5" y="3" width="14" height="18"></rect><path d="M8 7h8M8 12h2M12 12h2M8 16h2M12 16h2"></path></svg>
+              <span>Rechner</span>
+            </button>
+            <button type="button" onClick="{{ goEinstellungen }}" style="{{ mobEinstellungen }}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 7h18M3 17h18"></path><circle cx="9" cy="7" r="2.4"></circle><circle cx="15" cy="17" r="2.4"></circle></svg>
+              <span>Einstellungen</span>
+            </button>
+          </nav>
+
+        </main>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ zeigeAuth }}" hint-placeholder-val="{{ false }}">
+        <div style="min-height: 100%; display: flex; flex-direction: column; background: var(--color-bg);">
+          <div style="flex: 1; display: flex; justify-content: center; padding: var(--space-8) var(--space-4);">
+            <div style="width: 100%; max-width: 400px;">
+              <div style="font-family: var(--font-heading); font-weight: 600; font-size: 20px; letter-spacing: -0.02em; margin-bottom: var(--space-8);">Immobilien<span style="font-weight: 400;">verwaltung</span></div>
+
+              <sc-if value="{{ authUmschalter }}" hint-placeholder-val="{{ true }}">
+                <div style="display: flex; gap: var(--space-4); border-bottom: 1px solid var(--color-divider); margin-bottom: var(--space-6);">
+                  <button type="button" onClick="{{ setAnmelden }}" style="{{ authTabAn }}">Anmelden</button>
+                  <button type="button" onClick="{{ setRegistrieren }}" style="{{ authTabReg }}">Registrieren</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ authFehler }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3); margin-bottom: var(--space-4); background: var(--color-error-bg); border: 1px solid var(--color-error-border);">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" stroke-width="1.9" style="flex: none; margin-top: 1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16v.01"></path></svg>
+                  <div style="font-size: 13px; color: var(--color-error);">E-Mail oder Passwort stimmt nicht. Bitte prüf deine Eingabe und versuch es erneut.</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ authAnmelden }}" hint-placeholder-val="{{ true }}">
+                <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                  <div class="field">
+                    <label for="lo-mail">E-Mail</label>
+                    <input id="lo-mail" class="input" type="email" autocomplete="email" placeholder="du@beispiel.de">
+                  </div>
+                  <div class="field">
+                    <label for="lo-pw">Passwort</label>
+                    <div style="display: flex; align-items: stretch;">
+                      <input id="lo-pw" class="input" type="{{ pwTyp }}" autocomplete="current-password" style="border-right: 0;">
+                      <button type="button" onClick="{{ togglePw }}" style="padding: 0 10px; background: var(--color-neutral-200); border: 1px solid var(--color-divider); font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 12px; cursor: pointer; white-space: nowrap;">{{ pwLabel }}</button>
+                    </div>
+                  </div>
+                  <div>
+                    <button type="button" class="btn btn-ghost" onClick="{{ setVergessen }}" style="padding-inline: 0;">Passwort vergessen?</button>
+                  </div>
+                  <button type="button" class="btn btn-primary btn-block" onClick="{{ anmeldenFehler }}" style="margin-top: 0;">Anmelden</button>
+                  <button type="button" class="btn btn-secondary btn-block" onClick="{{ anmeldenOk }}" style="margin-top: 0;">Als Marco K. anmelden (Demo)</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ authRegistrieren }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                  <div class="field">
+                    <label for="rg-name">Name</label>
+                    <input id="rg-name" class="input" type="text" autocomplete="name">
+                  </div>
+                  <div class="field">
+                    <label for="rg-mail">E-Mail</label>
+                    <input id="rg-mail" class="input" type="email" autocomplete="email" placeholder="du@beispiel.de">
+                  </div>
+                  <div class="field">
+                    <label for="rg-pw">Passwort</label>
+                    <div style="display: flex; align-items: stretch;">
+                      <input id="rg-pw" class="input" type="{{ pwTyp }}" autocomplete="new-password" style="border-right: 0;">
+                      <button type="button" onClick="{{ togglePw }}" style="padding: 0 10px; background: var(--color-neutral-200); border: 1px solid var(--color-divider); font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 12px; cursor: pointer; white-space: nowrap;">{{ pwLabel }}</button>
+                    </div>
+                    <div style="font-size: 12px; color: var(--color-neutral-700); margin-top: 5px;">Mindestens 8 Zeichen.</div>
+                  </div>
+                  <button type="button" class="btn btn-primary btn-block" onClick="{{ setBestaetigen }}" style="margin-top: 0;">Konto erstellen</button>
+                  <p style="font-size: 12px; color: var(--color-neutral-700); margin: 0; text-wrap: pretty;">Mit dem Anlegen des Kontos stimmst du den <a href="#agb">AGB</a> zu. Wie wir mit deinen Daten umgehen, steht in der <a href="#datenschutz">Datenschutzerklärung</a>.</p>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ authVergessen }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                  <div>
+                    <h2 style="font-size: 25px; margin: 0 0 var(--space-2);">Passwort zurücksetzen</h2>
+                    <p style="font-size: 14px; color: var(--color-neutral-700); margin: 0;">Gib deine E-Mail-Adresse ein. Wir schicken dir einen Link zum Zurücksetzen.</p>
+                  </div>
+                  <div class="field">
+                    <label for="vg-mail">E-Mail</label>
+                    <input id="vg-mail" class="input" type="email" autocomplete="email" placeholder="du@beispiel.de">
+                  </div>
+                  <button type="button" class="btn btn-primary btn-block" onClick="{{ setVergessenOk }}" style="margin-top: 0;">Link senden</button>
+                  <button type="button" class="btn btn-ghost" onClick="{{ setAnmelden }}" style="padding-inline: 0; align-self: flex-start;">Zurück zum Anmelden</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ authVergessenOk }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                  <div style="display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4) 0 0; border-top: 1px solid var(--color-divider);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-700)" stroke-width="1.9" style="flex: none; margin-top: 2px;"><path d="M4 6h16v12H4z"></path><path d="M4 7l8 6 8-6"></path></svg>
+                    <div style="font-size: 13px; color: var(--color-neutral-800); text-wrap: pretty;"><strong style="font-family: var(--font-heading); font-weight: 600;">Prüf dein Postfach.</strong> Falls ein Konto mit dieser Adresse existiert, ist der Link zum Zurücksetzen unterwegs. Er gilt 60 Minuten.</div>
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-block" onClick="{{ setAnmelden }}" style="margin-top: 0;">Zurück zum Anmelden</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ authBestaetigen }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                  <div>
+                    <h2 style="font-size: 25px; margin: 0 0 var(--space-2);">E-Mail bestätigen</h2>
+                    <p style="font-size: 14px; color: var(--color-neutral-700); margin: 0; text-wrap: pretty;">Wir haben eine Nachricht an <strong style="font-family: var(--font-heading); font-weight: 600;">marco.k@example.de</strong> geschickt. Klick auf den Link darin, dann kann es losgehen.</p>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--color-divider);">
+                    <button type="button" class="btn btn-secondary btn-block" onClick="{{ mailErneut }}" style="margin-top: 0;">E-Mail erneut senden</button>
+                    <sc-if value="{{ mailErneutGesendet }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size: 13px; color: var(--color-text);">Neue E-Mail ist unterwegs.</div>
+                    </sc-if>
+                    <button type="button" class="btn btn-ghost" onClick="{{ setAnmelden }}" style="padding-inline: 0; align-self: flex-start;">Andere Adresse verwenden</button>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: center; gap: var(--space-4); padding: var(--space-4) var(--space-4) var(--space-4) 0; border-top: 1px solid var(--color-divider); font-size: 12px;">
+            <a href="#impressum" style="color: var(--color-neutral-700); text-decoration: none;">Impressum</a>
+            <span style="color: var(--color-neutral-400);">·</span>
+            <a href="#datenschutz" style="color: var(--color-neutral-700); text-decoration: none;">Datenschutz</a>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ dialogOffen }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ dialogSchliessen }}" style="position: absolute; inset: 0; display: flex; align-items: flex-start; justify-content: center; padding: 64px var(--space-4) var(--space-4); background: color-mix(in srgb, var(--color-neutral-900) 45%, transparent); z-index: 40;">
+          <div onClick="{{ dialogStop }}" role="dialog" aria-modal="true" style="width: min(440px, 100%); background: var(--color-bg); border: 1px solid var(--color-divider); box-shadow: var(--shadow-lg); display: flex; flex-direction: column;">
+            <div style="padding: var(--space-4); border-bottom: 1px solid var(--color-divider);">
+              <div style="font-family: var(--font-heading); font-weight: 600; font-size: 19px;">{{ dialogTitel }}</div>
+            </div>
+            <div style="padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3);">
+              <sc-if value="{{ dialogText }}" hint-placeholder-val="{{ false }}">
+                <p style="margin: 0; font-size: 14px; color: var(--color-neutral-800); text-wrap: pretty;">{{ dialogText }}</p>
+              </sc-if>
+              <sc-if value="{{ dialogEinheit }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                  <div class="field">
+                    <label for="eh-name">Bezeichnung</label>
+                    <input id="eh-name" class="input" type="text" placeholder="z. B. 3. OG links">
+                  </div>
+                  <div class="duo">
+                    <div class="field">
+                      <label for="eh-flaeche">Fläche</label>
+                      <div style="display: flex; align-items: stretch;">
+                        <input id="eh-flaeche" class="input num" type="text" inputmode="numeric" style="text-align: right; border-right: 0;">
+                        <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">m²</span>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label for="eh-miete">Kaltmiete</label>
+                      <div style="display: flex; align-items: stretch;">
+                        <input id="eh-miete" class="input num" type="text" inputmode="numeric" style="text-align: right; border-right: 0;">
+                        <span style="display: grid; place-items: center; padding: 0 10px; background: transparent; border: 1px solid var(--color-divider); color: var(--color-neutral-700); font-size: 14px;">€</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="eh-status">Status</label>
+                    <select id="eh-status" class="input">
+                      <option value="vermietet">vermietet</option>
+                      <option value="leer">leer</option>
+                    </select>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ dialogLoeschen }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3); background: var(--color-error-bg); border: 1px solid var(--color-error-border);">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--color-error)" stroke-width="1.9" style="flex: none; margin-top: 1px;"><path d="M12 4l9 16H3z"></path><path d="M12 10v4M12 17v.01"></path></svg>
+                  <div style="font-size: 13px; color: var(--color-error);">Einheiten, Notizen und alle gespeicherten Berechnungen dieser Immobilie werden mit gelöscht. Das lässt sich nicht rückgängig machen.</div>
+                </div>
+              </sc-if>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: var(--space-2); padding: var(--space-4) var(--space-4) var(--space-4) 0; border-top: 1px solid var(--color-divider);">
+              <button type="button" class="btn btn-secondary" onClick="{{ dialogSchliessen }}">{{ dialogAbbruchLabel }}</button>
+              <button type="button" class="btn {{ dialogAktionKlasse }}" onClick="{{ dialogAktion }}" style="{{ dialogAktionStyle }}">{{ dialogAktionLabel }}</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Übersicht&quot;,&quot;Übersicht (leer)&quot;,&quot;Rechner&quot;,&quot;Kaufnebenkosten&quot;,&quot;Rendite&quot;,&quot;Finanzierung&quot;,&quot;Cashflow&quot;,&quot;Einstellungen&quot;],&quot;default&quot;:&quot;Übersicht&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototyp&quot;},&quot;mobilStart&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototyp&quot;},&quot;nutzerName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Marco K.&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Inhalt&quot;},&quot;maklerStandard&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Rechner&quot;}}">
+const LAENDER = {
+  "Baden-Württemberg": 5.0, "Bayern": 3.5, "Berlin": 6.0, "Brandenburg": 6.5,
+  "Bremen": 5.5, "Hamburg": 5.5, "Hessen": 6.0, "Mecklenburg-Vorpommern": 6.0,
+  "Niedersachsen": 5.0, "Nordrhein-Westfalen": 6.5, "Rheinland-Pfalz": 5.0,
+  "Saarland": 6.5, "Sachsen": 5.5, "Sachsen-Anhalt": 5.0,
+  "Schleswig-Holstein": 6.5, "Thüringen": 5.0
+};
+
+const OBJEKTE = [
+  {
+    id: "etw", art: "Eigentumswohnung", name: "Wohnung Südvorstadt", ort: "Leipzig",
+    adresse: "Kurt-Eisner-Straße 42 · 04275 Leipzig", land: "Sachsen",
+    flaeche: 58, baujahr: 1998, kaufdatum: "15.03.2021",
+    kaufpreis: 189000, nebenkosten: 20922.30,
+    darlehen: 150000, zins: 3.6, tilgung: 2.0, bindung: "31.03.2031",
+    einzel: true,
+    einheiten: [{ name: "Wohnung", flaeche: 58, miete: 640, status: "vermietet" }],
+    kosten: [
+      { l: "Hausgeld (nicht umlagefähig)", b: 62 }, { l: "Instandhaltungsrücklage", b: 25 },
+      { l: "Grundsteuer", b: 10 }, { l: "Versicherung", b: 8 }
+    ],
+    notiz: ""
+  },
+  {
+    id: "efh", art: "Einfamilienhaus", name: "Haus Kirchröder Straße", ort: "Hannover",
+    adresse: "Kirchröder Straße 118 · 30625 Hannover", land: "Niedersachsen",
+    flaeche: 128, grundstueck: 520, baujahr: 1979, kaufdatum: "02.09.2019",
+    kaufpreis: 385000, nebenkosten: 40694.50,
+    darlehen: 280000, zins: 3.5, tilgung: 2.0, bindung: "30.09.2029",
+    einzel: true,
+    einheiten: [{ name: "Haus", flaeche: 128, miete: 1450, status: "vermietet" }],
+    kosten: [{ l: "Grundsteuer", b: 45 }, { l: "Versicherung", b: 40 }, { l: "Instandhaltung", b: 115 }],
+    notiz: "Dach 2024 neu gedämmt. Gasheizung von 2012 im Blick behalten."
+  },
+  {
+    id: "mfh", art: "Mehrfamilienhaus", name: "Mehrfamilienhaus Nordmarkt", ort: "Dortmund",
+    adresse: "Mallinckrodtstraße 76 · 44145 Dortmund", land: "Nordrhein-Westfalen",
+    flaeche: 412, baujahr: 1962, kaufdatum: "11.06.2023",
+    kaufpreis: 890000, nebenkosten: 107423,
+    darlehen: 620000, zins: 3.8, tilgung: 2.0, bindung: "30.06.2033",
+    einzel: false,
+    einheiten: [
+      { name: "EG links", flaeche: 62, miete: 690, status: "vermietet" },
+      { name: "EG rechts", flaeche: 58, miete: 645, status: "vermietet" },
+      { name: "1. OG links", flaeche: 74, miete: 810, status: "vermietet" },
+      { name: "1. OG rechts", flaeche: 68, miete: 745, status: "vermietet" },
+      { name: "2. OG links", flaeche: 76, miete: 830, status: "vermietet" },
+      { name: "DG", flaeche: 74, miete: 0, soll: 790, status: "leer" }
+    ],
+    kosten: [
+      { l: "Grundsteuer", b: 165 }, { l: "Versicherung", b: 120 },
+      { l: "Instandhaltung", b: 250 }, { l: "Verwaltung / Sonstiges", b: 80 }
+    ],
+    notiz: ""
+  }
+];
+
+const sum = (arr, f) => arr.reduce((s, x) => s + f(x), 0);
+const miete = (o) => sum(o.einheiten, (e) => e.miete);
+const kostenSumme = (o) => sum(o.kosten, (k) => k.b);
+const annuitaet = (o, ohneFin) => (ohneFin ? 0 : o.darlehen * (o.zins + o.tilgung) / 100 / 12);
+const invest = (o) => o.kaufpreis + o.nebenkosten;
+const rendite = (o) => miete(o) * 12 / o.kaufpreis * 100;
+const faktor = (o) => o.kaufpreis / (miete(o) * 12);
+const leerAnzahl = (o) => o.einheiten.filter((e) => e.status === "leer").length;
+
+const nf = (n, d) => Number(n || 0).toLocaleString("de-DE", { minimumFractionDigits: d, maximumFractionDigits: d });
+const eur = (n, d) => nf(n, d === undefined ? 2 : d) + " €";
+const pct = (n, d) => nf(n, d === undefined ? 2 : d) + " %";
+const zahl = (v) => {
+  if (typeof v === "number") return v;
+  const s = String(v == null ? "" : v).replace(/\./g, "").replace(",", ".").replace(/[^0-9.\-]/g, "");
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+};
+const RECHNER_SCREENS = ["rechner", "nebenkosten", "rendite", "finanzierung", "cashflow"];
+
+class Component extends DCLogic {
+  state = {
+    screen: "uebersicht", mode: "desktop", daten: "beispiel", userMenu: false,
+    kaufpreis: 189000, land: "Sachsen", notar: 1.5, grundbuch: 0.5,
+    maklerAn: true, makler: 3.57, zuordnung: "", zugeordnet: "",
+    ladeZustand: "normal", ohneFin: false, meldung: "", speichert: false, dialog: "",
+    detailId: 0, tab: "uebersicht",
+    notizen: { etw: OBJEKTE[0].notiz, efh: OBJEKTE[1].notiz, mfh: OBJEKTE[2].notiz },
+    notizStand: { etw: "", efh: "18.08.2026 um 09:24", mfh: "" },
+    edit: null, editDirty: false,
+    wizSchritt: 1, wizArt: "", wizBez: "", wizKp: "", wizDl: "", wizZins: 3.5,
+    wizTilgung: 2.0, wizOhneFin: false, wizKm: "", wizNutzung: "vermietet",
+    wizEinheiten: [], wizErr: {},
+    authMode: "anmelden", authFehler: false, pwSichtbar: false, mailErneut: false,
+    rKp: "189.000", rNk: "20.922", rMiete: "640", rKosten: "105",
+    fKp: "189.000", fNk: "20.922", fEk: "40.000", fZins: "3,6", fTilgung: "2,0", fJahre: "10",
+    cMiete: "640", cKosten: "62", cRuecklage: "25", cVerwaltung: "18", cRate: "700",
+    setName: "Marco K.", setMail: "marco.k@example.de", profilDirty: false,
+    pwAlt: "", pwNeu: "", pwWdh: ""
+  };
+
+  blRef = React.createRef();
+
+  syncLand() {
+    const el = this.blRef.current;
+    if (el && el.value !== this.state.land) el.value = this.state.land;
+  }
+  componentDidUpdate() { this.syncLand(); }
+
+  componentDidMount() {
+    setTimeout(() => this.syncLand(), 0);
+    const s = this.props.startScreen;
+    const patch = {};
+    if (s === "Rechner") patch.screen = "rechner";
+    if (s === "Kaufnebenkosten") patch.screen = "nebenkosten";
+    if (s === "Rendite") patch.screen = "rendite";
+    if (s === "Finanzierung") patch.screen = "finanzierung";
+    if (s === "Cashflow") patch.screen = "cashflow";
+    if (s === "Einstellungen") patch.screen = "einstellungen";
+    if (s === "Übersicht (leer)") { patch.screen = "uebersicht"; patch.daten = "leer"; }
+    if (this.props.maklerStandard === false) patch.maklerAn = false;
+    if (this.props.mobilStart) patch.mode = "mobil";
+    if (Object.keys(patch).length) this.setState(patch);
+  }
+
+  tab(active) {
+    return "padding: 5px 12px; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 12px; border: 0; cursor: pointer; background: " +
+      (active ? "var(--color-neutral-100)" : "transparent") + "; color: " +
+      (active ? "var(--color-neutral-900)" : "var(--color-neutral-400)") + ";";
+  }
+  navStyle(active) {
+    return "display: flex; align-items: center; gap: 8px; padding: var(--space-3) var(--space-2); background: transparent; border: 0; border-bottom: 2px solid " +
+      (active ? "var(--color-text)" : "transparent") +
+      "; margin-bottom: -1px; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 14px; cursor: pointer; color: " +
+      (active ? "var(--color-text)" : "var(--color-neutral-600)") + ";";
+  }
+  mobStyle(active) {
+    return "display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 58px; padding: 8px 4px; background: transparent; border: 0; border-top: 3px solid " +
+      (active ? "var(--color-text)" : "transparent") +
+      "; font: inherit; font-size: 11px; font-family: var(--font-heading); font-weight: 600; cursor: pointer; color: " +
+      (active ? "var(--color-text)" : "var(--color-neutral-700)") + ";";
+  }
+
+  objekte() {
+    return OBJEKTE.map((o) => {
+      const m = miete(o);
+      const leer = leerAnzahl(o);
+      const cf = m - kostenSumme(o) - annuitaet(o, false);
+      return {
+        name: o.name,
+        meta: o.ort + " · " + o.art,
+        einheitenText: o.einheiten.length + (o.einheiten.length === 1 ? " Einheit" : " Einheiten") + (leer > 0 ? " · " + leer + " leer" : ""),
+        fotoId: "objektfoto-" + o.id,
+        zeilen: [
+          { label: "Wert", wert: eur(o.kaufpreis, 0) },
+          { label: "Miete / Monat", wert: eur(m, 0) },
+          { label: "Rendite", wert: pct(rendite(o), 2) },
+          { label: "Cashflow / Monat", wert: (cf < 0 ? "−" : "") + eur(Math.abs(cf), 0) }
+        ]
+      };
+    });
+  }
+
+  tabStyle(active) {
+    return "padding: var(--space-3) 0; background: transparent; border: 0; border-bottom: 2px solid " +
+      (active ? "var(--color-text)" : "transparent") +
+      "; margin-bottom: -1px; white-space: nowrap; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 14px; cursor: pointer; color: " +
+      (active ? "var(--color-text)" : "var(--color-neutral-600)") + ";";
+  }
+  segStyle(active) {
+    return "padding: 8px 14px; background: " + (active ? "var(--color-text)" : "transparent") +
+      "; color: " + (active ? "#ffffff" : "var(--color-text)") +
+      "; border: 0; font: inherit; font-size: 13px; cursor: pointer;";
+  }
+  kartenStyle(active) {
+    return "display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; padding: var(--space-4); cursor: pointer; background: " +
+      (active ? "var(--color-bg)" : "var(--color-bg)") + "; border: 1px solid " +
+      (active ? "var(--color-text)" : "var(--color-divider)") + "; font: inherit; color: var(--color-text);";
+  }
+  stufeStyle(state) {
+    const done = state === "done", now = state === "now";
+    return "padding: 8px 0 0; border-top: 3px solid " +
+      (done || now ? "var(--color-text)" : "var(--color-divider)") +
+      "; font-family: var(--font-heading); font-weight: 600; font-size: 12px; color: " +
+      (now ? "var(--color-text)" : "var(--color-neutral-600)") + ";";
+  }
+  feldStil(fehler, rechts) {
+    return (rechts ? "text-align: right; border-right: 0;" : "") +
+      (fehler ? " border-color: var(--color-error); background: var(--color-error-bg);" : "");
+  }
+
+  openDetail(i) {
+    this.setState({ screen: "detail", detailId: i, tab: "uebersicht", userMenu: false, dialog: "" });
+  }
+  nach(ms, fn) { setTimeout(fn, ms); }
+
+  detailVals() {
+    const st = this.state;
+    const o = OBJEKTE[st.detailId];
+    const ohneFin = st.ohneFin;
+    const ann = annuitaet(o, ohneFin);
+    const m = miete(o);
+    const kos = kostenSumme(o);
+    const cf = m - ann - kos;
+    const leer = leerAnzahl(o);
+    const badge = (b) => (b ? "tag tag-neutral" : "");
+    const tabs = [
+      ["uebersicht", "Übersicht"], ["einheiten", "Einheiten"], ["kauf", "Kauf und Finanzierung"],
+      ["ea", "Einnahmen und Ausgaben"], ["rechner", "Rechner"], ["notizen", "Notizen"]
+    ];
+    const notiz = st.notizen[o.id] || "";
+    const stand = st.notizStand[o.id];
+
+    const stamm = [
+      { label: "Objektart", wert: o.art },
+      { label: "Adresse", wert: o.adresse },
+      { label: "Baujahr", wert: String(o.baujahr) },
+      { label: o.einzel ? "Wohnfläche" : "Wohnfläche gesamt", wert: nf(o.flaeche, 0) + " m²" }
+    ];
+    if (o.grundstueck) stamm.push({ label: "Grundstücksfläche", wert: nf(o.grundstueck, 0) + " m²" });
+    stamm.push({ label: "Einheiten", wert: o.einheiten.length === 1 ? "1 Einheit" : o.einheiten.length + " Einheiten" });
+    stamm.push({ label: "Nutzung", wert: leer === o.einheiten.length ? "leer" : leer > 0 ? "teilweise vermietet" : "vermietet" });
+
+    const kaufRows = [
+      { label: "Kaufdatum", wert: o.kaufdatum, badge: "", badgeKlasse: "" },
+      { label: "Kaufpreis", wert: eur(o.kaufpreis, 0), badge: "", badgeKlasse: "" },
+      { label: "Kaufnebenkosten", wert: eur(o.nebenkosten), badge: "", badgeKlasse: "" },
+      { label: "Gesamtinvestition", wert: eur(invest(o)), badge: "berechnet", badgeKlasse: badge(true) }
+    ];
+    const finRows = ohneFin
+      ? [{ label: "Eigenkapital", wert: eur(invest(o)), badge: "berechnet", badgeKlasse: badge(true) }]
+      : [
+        { label: "Darlehen", wert: eur(o.darlehen, 0), badge: "", badgeKlasse: "" },
+        { label: "Zins", wert: pct(o.zins, 2), badge: "", badgeKlasse: "" },
+        { label: "Tilgung", wert: pct(o.tilgung, 2), badge: "", badgeKlasse: "" },
+        { label: "Zinsbindung bis", wert: o.bindung, badge: "", badgeKlasse: "" },
+        { label: "Annuität pro Monat", wert: eur(ann), badge: "berechnet", badgeKlasse: badge(true) },
+        { label: "Eigenkapital", wert: eur(invest(o) - o.darlehen), badge: "berechnet", badgeKlasse: badge(true) }
+      ];
+
+    return {
+      dArt: o.art, dName: o.name, dAdresse: o.adresse,
+      detailTabs: tabs.map(([k, label]) => ({
+        label, stil: this.tabStyle(st.tab === k), klick: () => this.setState({ tab: k })
+      })),
+      tabUebersicht: st.tab === "uebersicht", tabEinheiten: st.tab === "einheiten",
+      tabKauf: st.tab === "kauf", tabEa: st.tab === "ea",
+      tabRechnerD: st.tab === "rechner", tabNotizen: st.tab === "notizen",
+      dKpis: [
+        { label: "Kaufpreis", wert: eur(o.kaufpreis, 0), hinweis: "ohne Nebenkosten" },
+        { label: "Kaltmiete / Monat", wert: eur(m, 0), hinweis: o.einzel ? "eine Einheit" : o.einheiten.length + " Einheiten" },
+        { label: "Cashflow / Monat", wert: (cf < 0 ? "−" : "") + eur(Math.abs(cf)), hinweis: ohneFin ? "ohne Finanzierung" : "nach Zins und Tilgung" },
+        { label: "Bruttorendite", wert: pct(rendite(o)), hinweis: "Jahresmiete ÷ Kaufpreis" },
+        { label: "Kaufpreisfaktor", wert: nf(faktor(o), 1), hinweis: "Jahresmieten" }
+      ],
+      dStammdaten: stamm,
+      dFotoId: "objektfoto-" + o.id,
+      dEinheiten: o.einheiten.map((e, i) => ({
+        name: e.name, flaeche: nf(e.flaeche, 0) + " m²",
+        miete: e.status === "leer" ? "— (Soll " + eur(e.soll || 0, 0) + ")" : eur(e.miete, 0),
+        proQm: e.status === "leer" ? "—" : nf(e.miete / e.flaeche, 2) + " €",
+        status: e.status, tagKlasse: e.status === "leer" ? "tag-neutral" : "tag-neutral",
+        bearbeiten: () => this.setState({ dialog: "einheit" })
+      })),
+      dEinheitenSummen: [
+        { label: "Gesamtfläche", wert: nf(sum(o.einheiten, (e) => e.flaeche), 0) + " m²" },
+        { label: "Gesamtmiete / Monat", wert: eur(m, 0) },
+        { label: "Leerstandsquote", wert: pct(leer / o.einheiten.length * 100, 1) }
+      ],
+      dEineEinheit: o.einzel, dMehrEinheiten: !o.einzel,
+      dKauf: kaufRows, dFin: finRows, dOhneFin: ohneFin,
+      dEinnahmen: [{ label: o.einzel ? "Kaltmiete" : "Kaltmiete (Summe der Einheiten)", wert: eur(m, 0) }],
+      dKosten: o.kosten.map((k) => ({ label: k.l, wert: eur(k.b, 0) })),
+      dKostenSumme: eur(kos, 0),
+      dCashflow: [
+        { label: "Kaltmiete", wert: eur(m, 0) },
+        { label: ohneFin ? "Annuität (keine Finanzierung)" : "Annuität (Zins und Tilgung)", wert: ohneFin ? "0 €" : "−" + eur(ann) },
+        { label: "Laufende Kosten", wert: "−" + eur(kos, 0) }
+      ],
+      dCashflowSumme: (cf < 0 ? "−" : "") + eur(Math.abs(cf)),
+      dRechner: [
+        {
+          nr: "01", titel: "Kaufnebenkosten", text: "Grunderwerbsteuer nach Bundesland, Notar, Grundbuch und Makler.",
+          tag: "Bereit", tagKlasse: "tag-neutral", cta: "Rechner öffnen", gesperrt: false,
+          prefill: "Vorbefüllt: " + eur(o.kaufpreis, 0) + " · " + o.land,
+          oeffnen: () => this.setState({ screen: "nebenkosten", kaufpreis: o.kaufpreis, land: o.land, zuordnung: o.name })
+        },
+        {
+          nr: "02", titel: "Rendite", text: "Brutto- und Nettorendite sowie Kaufpreisfaktor aus Miete und Gesamtkosten.",
+          tag: "Bereit", tagKlasse: "tag-neutral", cta: "Rechner öffnen", gesperrt: false,
+          prefill: "Vorbefüllt: " + eur(m, 0) + " Kaltmiete",
+          oeffnen: () => this.setState({ screen: "rendite", rKp: nf(o.kaufpreis, 0), rNk: nf(o.nebenkosten, 0), rMiete: nf(m, 0), rKosten: nf(kos, 0) })
+        },
+        {
+          nr: "03", titel: "Finanzierung", text: "Annuität, Restschuld am Ende der Zinsbindung und Tilgungsplan pro Jahr.",
+          tag: "Bereit", tagKlasse: "tag-neutral", cta: "Rechner öffnen", gesperrt: false,
+          prefill: "Vorbefüllt: " + eur(o.darlehen, 0) + " Darlehen",
+          oeffnen: () => this.setState({ screen: "finanzierung", fKp: nf(o.kaufpreis, 0), fNk: nf(o.nebenkosten, 0), fEk: nf(Math.max(0, o.kaufpreis + o.nebenkosten - o.darlehen), 0), fZins: nf(o.zins, 1), fTilgung: nf(o.tilgung, 1) })
+        },
+        {
+          nr: "04", titel: "Cashflow", text: "Miete minus Rate und laufende Kosten, monatlich und auf das Jahr gerechnet.",
+          tag: "Bereit", tagKlasse: "tag-neutral", cta: "Rechner öffnen", gesperrt: false,
+          prefill: "Vorbefüllt: " + eur(kos, 0) + " laufende Kosten",
+          oeffnen: () => this.setState({ screen: "cashflow", cMiete: nf(m, 0), cKosten: nf(kos, 0), cRuecklage: "0", cVerwaltung: "0", cRate: nf(annuitaet(o, false), 0) })
+        }
+      ],
+      notizText: notiz,
+      onNotiz: (e) => this.setState({ notizen: Object.assign({}, st.notizen, { [o.id]: e.target.value }) }),
+      notizStand: stand ? "Zuletzt gespeichert am " + stand : "Noch nichts gespeichert.",
+      notizSpeichern: () => {
+        this.setState({ speichert: true });
+        this.nach(900, () => this.setState({
+          speichert: false, meldung: "Notiz gespeichert.",
+          notizStand: Object.assign({}, this.state.notizStand, { [o.id]: "19.09.2026 um 14:12" })
+        }));
+      },
+      goBearbeiten: () => this.setState({
+        screen: "bearbeiten", editDirty: false, userMenu: false,
+        edit: {
+          bez: o.name, adresse: o.adresse, baujahr: String(o.baujahr), flaeche: nf(o.flaeche, 0),
+          kaufdatum: o.kaufdatum, kaufpreis: nf(o.kaufpreis, 0), nebenkosten: nf(o.nebenkosten, 2),
+          darlehen: nf(o.darlehen, 0), zins: nf(o.zins, 2), tilgung: nf(o.tilgung, 2),
+          bindung: o.bindung, kaltmiete: nf(m, 0), kosten: nf(kos, 0)
+        }
+      }),
+      goDetailZurueck: () => this.setState({ screen: "detail", dialog: "" })
+    };
+  }
+
+  editVals() {
+    const st = this.state;
+    const e = st.edit || {};
+    const f = (id, label, key, suffix) => ({
+      id, label, wert: e[key] === undefined ? "" : e[key], suffix: suffix || "",
+      mitSuffix: !!suffix, ohneSuffix: !suffix,
+      onChange: (ev) => this.setState({ edit: Object.assign({}, this.state.edit, { [key]: ev.target.value }), editDirty: true })
+    });
+    return {
+      editAbschnitte: [
+        { titel: "Objekt", felder: [f("ed-bez", "Bezeichnung", "bez"), f("ed-adr", "Adresse", "adresse"), f("ed-bj", "Baujahr", "baujahr"), f("ed-wf", "Wohnfläche", "flaeche", "m²")] },
+        { titel: "Kauf und Finanzierung", felder: [f("ed-kd", "Kaufdatum", "kaufdatum"), f("ed-kp", "Kaufpreis", "kaufpreis", "€"), f("ed-nk", "Kaufnebenkosten", "nebenkosten", "€"), f("ed-dl", "Darlehen", "darlehen", "€"), f("ed-zi", "Zins", "zins", "%"), f("ed-ti", "Tilgung", "tilgung", "%"), f("ed-zb", "Zinsbindung bis", "bindung")] },
+        { titel: "Miete und Kosten", felder: [f("ed-km", "Kaltmiete pro Monat", "kaltmiete", "€"), f("ed-ko", "Laufende Kosten pro Monat", "kosten", "€")] }
+      ],
+      editSpeichern: () => {
+        this.setState({ speichert: true });
+        this.nach(900, () => this.setState({ speichert: false, editDirty: false, screen: "detail", meldung: "Änderungen gespeichert." }));
+      },
+      editAbbrechen: () => {
+        if (st.editDirty) this.setState({ dialog: "verlassen" });
+        else this.setState({ screen: "detail", dialog: "" });
+      },
+      dialogLoeschenOeffnen: () => this.setState({ dialog: "loeschen" })
+    };
+  }
+
+  wizVals() {
+    const st = this.state;
+    const z = (v) => Number(String(v).replace(/[^0-9]/g, "")) || 0;
+    const kp = z(st.wizKp), dl = z(st.wizDl), km = z(st.wizKm);
+    const mfh = st.wizArt === "Mehrfamilienhaus";
+    const mieteWiz = mfh ? sum(st.wizEinheiten, (e) => e.miete) : km;
+    const ann = st.wizOhneFin ? 0 : dl * (Number(st.wizZins) + Number(st.wizTilgung)) / 100 / 12;
+    const cf = mieteWiz - ann;
+    const err = st.wizErr;
+    const arten = [
+      { label: "Eigentumswohnung", hinweis: "Genau eine Einheit", d: "M4 21V9l8-5 8 5v12M10 21v-6h4v6" },
+      { label: "Einfamilien-/Doppelhaus", hinweis: "Genau eine Einheit", d: "M4 12l8-7 8 7v9H4z" },
+      { label: "Mehrfamilienhaus", hinweis: "Mehrere Einheiten", d: "M5 21V4h9v17M14 9h5v12M3 21h18" }
+    ];
+    const fehler = [];
+    if (err.art) fehler.push({ text: err.art });
+    if (err.bez) fehler.push({ text: err.bez });
+    if (err.kp) fehler.push({ text: err.kp });
+    if (err.km) fehler.push({ text: err.km });
+
+    const pruefen = () => {
+      const e = {};
+      if (st.wizSchritt === 1) {
+        if (!st.wizArt) e.art = "Wähl eine Objektart.";
+        if (!st.wizBez.trim()) e.bez = "Gib der Immobilie eine Bezeichnung.";
+      }
+      if (st.wizSchritt === 2 && kp <= 0) e.kp = "Trag den Kaufpreis ein — ohne ihn lässt sich keine Rendite rechnen.";
+      if (st.wizSchritt === 3) {
+        if (mfh && st.wizEinheiten.length === 0) e.km = "Leg mindestens eine Einheit an.";
+        if (!mfh && km <= 0) e.km = "Trag die Kaltmiete ein.";
+      }
+      return e;
+    };
+
+    return {
+      wizS1: st.wizSchritt === 1, wizS2: st.wizSchritt === 2, wizS3: st.wizSchritt === 3,
+      wizFortschritt: "Schritt " + st.wizSchritt + " von 3",
+      wizStufen: [
+        { label: "1 · Objekt", stil: this.stufeStyle(st.wizSchritt > 1 ? "done" : st.wizSchritt === 1 ? "now" : "off") },
+        { label: "2 · Kauf und Finanzierung", stil: this.stufeStyle(st.wizSchritt > 2 ? "done" : st.wizSchritt === 2 ? "now" : "off") },
+        { label: "3 · Miete und Kosten", stil: this.stufeStyle(st.wizSchritt === 3 ? "now" : "off") }
+      ],
+      artKarten: arten.map((a) => ({
+        label: a.label, hinweis: a.hinweis, d: a.d,
+        stil: this.kartenStyle(st.wizArt === a.label),
+        klick: () => this.setState({ wizArt: a.label, wizErr: Object.assign({}, st.wizErr, { art: "" }) })
+      })),
+      wizIstHaus: st.wizArt === "Einfamilien-/Doppelhaus",
+      wizBez: st.wizBez, onWizBez: (e) => this.setState({ wizBez: e.target.value }),
+      wizBezFehler: err.bez || "", wizBezStil: this.feldStil(!!err.bez, false),
+      wizKp: st.wizKp, onWizKp: (e) => this.setState({ wizKp: nf(z(e.target.value), 0) }),
+      wizKpFehler: err.kp || "", wizKpStil: this.feldStil(!!err.kp, true),
+      wizKm: st.wizKm, onWizKm: (e) => this.setState({ wizKm: nf(z(e.target.value), 0) }),
+      wizKmFehler: err.km || "", wizKmStil: this.feldStil(!!err.km, true),
+      wizDl: st.wizDl, onWizDl: (e) => this.setState({ wizDl: nf(z(e.target.value), 0) }),
+      wizZins: st.wizZins, onWizZins: (e) => this.setState({ wizZins: e.target.value }),
+      wizTilgung: st.wizTilgung, onWizTilgung: (e) => this.setState({ wizTilgung: e.target.value }),
+      wizOhneFin: st.wizOhneFin, onWizOhneFin: (e) => this.setState({ wizOhneFin: e.target.checked }),
+      nutzungen: ["vermietet", "selbstgenutzt", "leer"].map((n) => ({
+        label: n, stil: this.segStyle(st.wizNutzung === n), klick: () => this.setState({ wizNutzung: n })
+      })),
+      wizEineMiete: !mfh, wizEinheitenListe: mfh,
+      wizEinheiten: st.wizEinheiten.map((e) => ({
+        name: e.name, flaeche: nf(e.flaeche, 0) + " m²", miete: eur(e.miete, 0),
+        status: e.status, tagKlasse: e.status === "leer" ? "tag-accent" : "tag-neutral"
+      })),
+      wizKeineEinheiten: mfh && st.wizEinheiten.length === 0,
+      wizHatEinheiten: st.wizEinheiten.length > 0,
+      wizEinheitenStand: st.wizEinheiten.length + " angelegt · " + eur(mieteWiz, 0) + " Kaltmiete",
+      wizKostenFelder: (st.wizArt === "Eigentumswohnung"
+        ? [["wk-hg", "Hausgeld (nicht umlagefähig)"], ["wk-ru", "Instandhaltungsrücklage"], ["wk-gs", "Grundsteuer"], ["wk-ve", "Versicherung"]]
+        : [["wk-gs", "Grundsteuer"], ["wk-ve", "Versicherung"], ["wk-in", "Instandhaltung"]]
+      ).map(([id, label]) => ({ id, label })),
+      wizHatFehler: fehler.length > 0,
+      wizFehlerTitel: fehler.length === 1 ? "Ein Feld fehlt noch" : "Es fehlen noch " + fehler.length + " Angaben",
+      wizFehlerListe: fehler,
+      wizErsterSchritt: st.wizSchritt === 1,
+      wizWeiterLabel: st.speichert ? "Speichert …" : st.wizSchritt === 3 ? "Speichern" : "Weiter",
+      wizZurueck: () => this.setState({ wizSchritt: Math.max(1, st.wizSchritt - 1), wizErr: {} }),
+      wizWeiter: () => {
+        const e = pruefen();
+        if (Object.keys(e).filter((k) => e[k]).length) { this.setState({ wizErr: e }); return; }
+        if (st.wizSchritt < 3) { this.setState({ wizSchritt: st.wizSchritt + 1, wizErr: {} }); return; }
+        this.setState({ speichert: true });
+        this.nach(900, () => {
+          const idx = OBJEKTE.findIndex((o) => o.art === st.wizArt);
+          this.setState({
+            speichert: false, screen: "detail", tab: "uebersicht",
+            detailId: idx < 0 ? 0 : idx,
+            meldung: "„" + (st.wizBez || "Neue Immobilie") + "“ ist angelegt. Kennzahlen sind berechnet."
+          });
+        });
+      },
+      wizAbbrechen: () => {
+        if (st.wizArt || st.wizBez || st.wizKp) this.setState({ dialog: "verlassen" });
+        else this.setState({ screen: "uebersicht" });
+      },
+      wizVorschau: st.wizSchritt >= 2,
+      wizVorschauZeilen: [
+        { label: "Bruttorendite", wert: kp > 0 && mieteWiz > 0 ? pct(mieteWiz * 12 / kp * 100) : "—" },
+        { label: "Annuität / Monat", wert: st.wizOhneFin ? "0 €" : dl > 0 ? eur(ann) : "—" },
+        { label: "Cashflow / Monat", wert: mieteWiz > 0 ? (cf < 0 ? "−" : "") + eur(Math.abs(cf)) : "—" }
+      ],
+      goNebenkosten: () => this.setState({ screen: "nebenkosten" })
+    };
+  }
+
+  authVals() {
+    const st = this.state;
+    const authTab = (active) => "padding: var(--space-3) 0; background: transparent; border: 0; border-bottom: 2px solid " +
+      (active ? "var(--color-text)" : "transparent") + "; margin-bottom: -1px; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 15px; cursor: pointer; color: " +
+      (active ? "var(--color-text)" : "var(--color-neutral-600)") + ";";
+    return {
+      zeigeAuth: st.screen === "auth",
+      zeigeApp: st.screen !== "auth",
+      authUmschalter: st.authMode === "anmelden" || st.authMode === "registrieren",
+      authTabAn: authTab(st.authMode === "anmelden"),
+      authTabReg: authTab(st.authMode === "registrieren"),
+      authAnmelden: st.authMode === "anmelden",
+      authRegistrieren: st.authMode === "registrieren",
+      authVergessen: st.authMode === "vergessen",
+      authVergessenOk: st.authMode === "vergessenOk",
+      authBestaetigen: st.authMode === "bestaetigen",
+      authFehler: st.authFehler,
+      setAnmelden: () => this.setState({ authMode: "anmelden", authFehler: false, mailErneut: false }),
+      setRegistrieren: () => this.setState({ authMode: "registrieren", authFehler: false }),
+      setVergessen: () => this.setState({ authMode: "vergessen", authFehler: false }),
+      setVergessenOk: () => this.setState({ authMode: "vergessenOk" }),
+      setBestaetigen: () => this.setState({ authMode: "bestaetigen" }),
+      mailErneut: () => this.setState({ mailErneut: true }),
+      mailErneutGesendet: st.mailErneut,
+      anmeldenFehler: () => this.setState({ authFehler: true }),
+      anmeldenOk: () => this.setState({ screen: "uebersicht", authFehler: false, meldung: "Angemeldet. Willkommen zurück." }),
+      pwTyp: st.pwSichtbar ? "text" : "password",
+      pwLabel: st.pwSichtbar ? "Verbergen" : "Anzeigen",
+      togglePw: () => this.setState({ pwSichtbar: !st.pwSichtbar }),
+      goAuth: () => this.setState({ screen: "auth", authMode: "anmelden", userMenu: false, meldung: "" })
+    };
+  }
+
+  dialogVals() {
+    const st = this.state;
+    const o = OBJEKTE[st.detailId];
+    const zu = () => this.setState({ dialog: "" });
+    const base = {
+      dialogOffen: !!st.dialog, dialogSchliessen: zu,
+      dialogStop: (e) => e.stopPropagation(),
+      dialogEinheit: st.dialog === "einheit", dialogLoeschen: st.dialog === "loeschen",
+      dialogEinheitOeffnen: () => this.setState({ dialog: "einheit" })
+    };
+    if (st.dialog === "einheit") {
+      return Object.assign(base, {
+        dialogTitel: "Einheit hinzufügen", dialogText: "",
+        dialogAbbruchLabel: "Abbrechen", dialogAktionLabel: "Einheit speichern",
+        dialogAktionKlasse: "btn-primary", dialogAktionStyle: "",
+        dialogAktion: () => {
+          const n = this.state.wizEinheiten.length;
+          this.setState({
+            dialog: "",
+            wizEinheiten: this.state.wizEinheiten.concat([{ name: n === 0 ? "EG links" : (n + 1) + ". Einheit", flaeche: 68, miete: 745, status: "vermietet" }]),
+            meldung: this.state.screen === "detail" ? "Einheit gespeichert. Gesamtmiete und Leerstandsquote sind aktualisiert." : ""
+          });
+        }
+      });
+    }
+    if (st.dialog === "loeschen") {
+      return Object.assign(base, {
+        dialogTitel: "Immobilie löschen?",
+        dialogText: "„" + o.name + "“ wird dauerhaft gelöscht.",
+        dialogAbbruchLabel: "Abbrechen", dialogAktionLabel: "Endgültig löschen",
+        dialogAktionKlasse: "btn-secondary",
+        dialogAktionStyle: "border-color: var(--color-error); color: var(--color-error);",
+        dialogAktion: () => this.setState({ dialog: "", screen: "uebersicht", meldung: "„" + o.name + "“ wurde gelöscht." })
+      });
+    }
+    if (st.dialog === "verlassen") {
+      return Object.assign(base, {
+        dialogTitel: "Änderungen verwerfen?",
+        dialogText: "Du hast Angaben gemacht, die noch nicht gespeichert sind. Verlässt du die Seite, sind sie weg.",
+        dialogAbbruchLabel: "Weiter bearbeiten", dialogAktionLabel: "Verwerfen",
+        dialogAktionKlasse: "btn-secondary",
+        dialogAktionStyle: "border-color: var(--color-error); color: var(--color-error);",
+        dialogAktion: () => this.setState({
+          dialog: "", screen: st.screen === "neu" ? "uebersicht" : "detail",
+          editDirty: false, wizSchritt: 1, wizArt: "", wizBez: "", wizKp: "", wizKm: "", wizEinheiten: [], wizErr: {}
+        })
+      });
+    }
+    return Object.assign(base, {
+      dialogTitel: "", dialogText: "", dialogAbbruchLabel: "Abbrechen",
+      dialogAktionLabel: "OK", dialogAktionKlasse: "btn-primary", dialogAktionStyle: "", dialogAktion: zu
+    });
+  }
+
+  feld(k, id, label, suffix, hinweis) {
+    return { id, label, suffix, hinweis: hinweis || "", wert: this.state[k], onChange: (e) => this.setState({ [k]: e.target.value }) };
+  }
+
+  finanz() {
+    const st = this.state;
+    const kp = zahl(st.fKp), nk = zahl(st.fNk), ek = zahl(st.fEk);
+    const zins = zahl(st.fZins), tilgung = zahl(st.fTilgung);
+    const jahre = Math.max(1, Math.min(40, Math.round(zahl(st.fJahre)) || 1));
+    const gesamt = kp + nk;
+    const darlehen = Math.max(0, gesamt - ek);
+    const rateJahr = darlehen * (zins + tilgung) / 100;
+    const i = zins / 100;
+    let rest = darlehen, zinsSumme = 0;
+    const plan = [];
+    for (let j = 1; j <= jahre && rest > 0.01; j++) {
+      const zJ = rest * i;
+      let tJ = rateJahr - zJ;
+      if (tJ > rest) tJ = rest;
+      if (tJ < 0) tJ = 0;
+      rest = rest - tJ;
+      zinsSumme += zJ;
+      plan.push({ jahr: String(2026 + j - 1), zins: eur(zJ, 0), tilgung: eur(tJ, 0), rest: eur(rest, 0) });
+    }
+    return { kp, nk, ek, zins, tilgung, jahre, gesamt, darlehen, rateJahr, rateMonat: rateJahr / 12, rest, zinsSumme, plan };
+  }
+
+  calcVals() {
+    const st = this.state;
+    const kp = zahl(st.rKp), nk = zahl(st.rNk);
+    const jMiete = zahl(st.rMiete) * 12, jKosten = zahl(st.rKosten) * 12;
+    const gesamt = kp + nk;
+    const brutto = kp > 0 ? jMiete / kp * 100 : 0;
+    const netto = gesamt > 0 ? (jMiete - jKosten) / gesamt * 100 : 0;
+    const fakt = jMiete > 0 ? kp / jMiete : 0;
+
+    const f = this.finanz();
+    const zinsM1 = f.darlehen * f.zins / 100 / 12;
+
+    const miete = zahl(st.cMiete), kosten = zahl(st.cKosten), ruecklage = zahl(st.cRuecklage);
+    const verwaltung = zahl(st.cVerwaltung), rate = zahl(st.cRate);
+    const cf = miete - kosten - ruecklage - verwaltung - rate;
+    const tilgAnteil = Math.max(0, rate - f.darlehen * f.zins / 100 / 12);
+
+    return {
+      zeigeRendite: st.screen === "rendite" && st.ladeZustand === "normal",
+      zeigeFinanzierung: st.screen === "finanzierung" && st.ladeZustand === "normal",
+      zeigeCashflow: st.screen === "cashflow" && st.ladeZustand === "normal",
+
+      rFelder: [
+        this.feld("rKp", "rKp", "Kaufpreis", "€"),
+        this.feld("rNk", "rNk", "Kaufnebenkosten", "€", "Grunderwerbsteuer, Notar, Grundbuch, Makler"),
+        this.feld("rMiete", "rMiete", "Kaltmiete pro Monat", "€"),
+        this.feld("rKosten", "rKosten", "Nicht umlagefähige Kosten pro Monat", "€", "Hausgeld-Anteil, Rücklage, Verwaltung, Versicherung")
+      ],
+      rBrutto: pct(brutto),
+      rNetto: pct(netto),
+      rZeilen: [
+        { label: "Jahreskaltmiete", hinweis: nf(zahl(st.rMiete), 0) + " € × 12", wert: eur(jMiete, 0) },
+        { label: "Laufende Kosten pro Jahr", hinweis: nf(zahl(st.rKosten), 0) + " € × 12", wert: "−" + eur(jKosten, 0) },
+        { label: "Gesamtinvestition", hinweis: "Kaufpreis + Nebenkosten", wert: eur(gesamt, 0) },
+        { label: "Kaufpreisfaktor", hinweis: "Kaufpreis ÷ Jahresmiete", wert: jMiete > 0 ? nf(fakt, 1) : "—" }
+      ],
+      rEinordnung: jMiete <= 0
+        ? "Trag eine Kaltmiete ein — ohne Mieteinnahme lässt sich keine Rendite rechnen."
+        : "Beim Faktor " + nf(fakt, 1) + " ist der Kaufpreis nach rund " + nf(fakt, 0) + " Jahren Kaltmiete wieder eingespielt. Zwischen Brutto- und Nettorendite liegen " + nf(Math.abs(brutto - netto), 2) + " Prozentpunkte — das sind die Nebenkosten beim Kauf und die laufenden Kosten.",
+
+      fFelder: [
+        this.feld("fKp", "fKp", "Kaufpreis", "€"),
+        this.feld("fNk", "fNk", "Kaufnebenkosten", "€"),
+        this.feld("fEk", "fEk", "Eigenkapital", "€", "Banken erwarten meist mindestens die Nebenkosten"),
+        this.feld("fZins", "fZins", "Sollzins", "%"),
+        this.feld("fTilgung", "fTilgung", "Anfängliche Tilgung", "%"),
+        this.feld("fJahre", "fJahre", "Zinsbindung", "Jahre")
+      ],
+      fRate: eur(f.rateMonat, 0),
+      fRateHinweis: pct(f.zins, 2) + " Zins + " + pct(f.tilgung, 2) + " Tilgung",
+      fZeilen: [
+        { label: "Gesamtinvestition", hinweis: "Kaufpreis + Nebenkosten", wert: eur(f.gesamt, 0) },
+        { label: "Darlehen", hinweis: "nach Eigenkapital", wert: eur(f.darlehen, 0) },
+        { label: "Beleihungsauslauf", hinweis: "Darlehen ÷ Kaufpreis", wert: f.kp > 0 ? pct(f.darlehen / f.kp * 100, 1) : "—" },
+        { label: "Zinsanteil im 1. Monat", hinweis: "", wert: eur(zinsM1, 0) },
+        { label: "Tilgungsanteil im 1. Monat", hinweis: "", wert: eur(Math.max(0, f.rateMonat - zinsM1), 0) },
+        { label: "Restschuld nach " + f.jahre + " Jahren", hinweis: "Ende der Zinsbindung", wert: eur(f.rest, 0) },
+        { label: "Zinsen in der Zinsbindung", hinweis: "Summe", wert: eur(f.zinsSumme, 0) }
+      ],
+      fPlan: f.plan,
+
+      cFelder: [
+        this.feld("cMiete", "cMiete", "Kaltmiete", "€"),
+        this.feld("cKosten", "cKosten", "Nicht umlagefähige Kosten", "€"),
+        this.feld("cRuecklage", "cRuecklage", "Instandhaltungsrücklage", "€"),
+        this.feld("cVerwaltung", "cVerwaltung", "Verwaltung und Sonstiges", "€"),
+        this.feld("cRate", "cRate", "Rate für das Darlehen", "€", "Zins und Tilgung zusammen")
+      ],
+      cRateUebernehmenLabel: "Rate aus Rechner 03 übernehmen (" + eur(f.rateMonat, 0) + ")",
+      cRateUebernehmen: () => this.setState({ cRate: nf(f.rateMonat, 0) }),
+      cZeilen: [
+        { label: "Kaltmiete", hinweis: "Einnahme", wert: eur(miete, 0) },
+        { label: "Nicht umlagefähige Kosten", hinweis: "", wert: "−" + eur(kosten, 0) },
+        { label: "Instandhaltungsrücklage", hinweis: "", wert: "−" + eur(ruecklage, 0) },
+        { label: "Verwaltung und Sonstiges", hinweis: "", wert: "−" + eur(verwaltung, 0) },
+        { label: "Rate", hinweis: "Zins und Tilgung", wert: "−" + eur(rate, 0) }
+      ],
+      cSumme: (cf < 0 ? "−" : "") + eur(Math.abs(cf), 0),
+      cFarbe: cf < 0 ? "var(--color-error)" : "var(--color-accent)",
+      cJahrText: (cf < 0 ? "−" : "") + eur(Math.abs(cf) * 12, 0) + " im Jahr",
+      cTilgung: eur(tilgAnteil, 0),
+      cEinordnung: cf >= 0
+        ? "Die Immobilie trägt sich selbst: " + eur(cf, 0) + " bleiben pro Monat übrig, " + eur(cf * 12, 0) + " im Jahr. Zusätzlich tilgst du rechnerisch " + eur(tilgAnteil, 0) + " pro Monat."
+        : "Du legst " + eur(Math.abs(cf), 0) + " pro Monat dazu, " + eur(Math.abs(cf) * 12, 0) + " im Jahr. Davon sind " + eur(tilgAnteil, 0) + " Tilgung — dieser Teil ist keine Ausgabe, sondern Entschuldung."
+    };
+  }
+
+  setVals() {
+    const st = this.state;
+    const pwOk = st.pwNeu.length >= 10 && /[0-9]/.test(st.pwNeu);
+    const pwBeruehrt = st.pwNeu.length > 0;
+    const gleich = st.pwWdh.length === 0 || st.pwNeu === st.pwWdh;
+    const fehlerRand = "border-color: var(--color-error);";
+    return {
+      setName: st.setName, setMail: st.setMail,
+      onSetName: (e) => this.setState({ setName: e.target.value, profilDirty: true }),
+      onSetMail: (e) => this.setState({ setMail: e.target.value, profilDirty: true }),
+      profilAus: !st.profilDirty || st.speichert,
+      profilSpeichern: () => {
+        this.setState({ speichert: true });
+        this.nach(900, () => this.setState({ speichert: false, profilDirty: false, meldung: "Profil gespeichert." }));
+      },
+      pwAlt: st.pwAlt, pwNeu: st.pwNeu, pwWdh: st.pwWdh,
+      onPwAlt: (e) => this.setState({ pwAlt: e.target.value }),
+      onPwNeu: (e) => this.setState({ pwNeu: e.target.value }),
+      onPwWdh: (e) => this.setState({ pwWdh: e.target.value }),
+      pwNeuStil: pwBeruehrt && !pwOk ? fehlerRand : "",
+      pwWdhStil: gleich ? "" : fehlerRand,
+      pwRegelText: pwBeruehrt && !pwOk ? "Zu kurz: mindestens 10 Zeichen und eine Ziffer." : "Mindestens 10 Zeichen, davon eine Ziffer.",
+      pwRegelFarbe: pwBeruehrt && !pwOk ? "var(--color-error)" : "var(--color-neutral-700)",
+      pwUngleich: !gleich,
+      pwAus: !(st.pwAlt.length > 0 && pwOk && st.pwNeu === st.pwWdh),
+      pwAendern: () => this.setState({ pwAlt: "", pwNeu: "", pwWdh: "", meldung: "Passwort geändert. Auf anderen Geräten bleibst du angemeldet." })
+    };
+  }
+
+  renderVals() {
+    const st = this.state;
+    const mobil = st.mode === "mobil";
+    const leer = st.daten === "leer";
+    const p = Number(st.kaufpreis) || 0;
+    const grestSatz = LAENDER[st.land] || 0;
+    const grest = p * grestSatz / 100;
+    const notar = p * (Number(st.notar) || 0) / 100;
+    const grundbuch = p * (Number(st.grundbuch) || 0) / 100;
+    const maklerSatz = st.maklerAn ? (Number(st.makler) || 0) : 0;
+    const makler = p * maklerSatz / 100;
+    const summe = grest + notar + grundbuch + makler;
+
+    const posten = [
+      { label: "Grunderwerbsteuer", satz: pct(grestSatz, 1), betrag: eur(grest) },
+      { label: "Notar", satz: pct(Number(st.notar) || 0, 1), betrag: eur(notar) },
+      { label: "Grundbuch", satz: pct(Number(st.grundbuch) || 0, 1), betrag: eur(grundbuch) },
+      { label: st.maklerAn ? "Maklerprovision" : "Maklerprovision (nicht einberechnet)", satz: st.maklerAn ? pct(maklerSatz) : "—", betrag: eur(makler) }
+    ];
+
+    const setS = (k) => () => this.setState({ screen: k, userMenu: false, dialog: "" });
+    const num = (k) => (e) => this.setState({ [k]: e.target.value });
+
+    return Object.assign({}, this.detailVals(), this.editVals(), this.wizVals(), this.authVals(), this.dialogVals(), this.calcVals(), this.setVals(), {
+      nutzerName: this.props.nutzerName ?? "Marco K.",
+      nutzerMail: "marco.k@example.de",
+      initialen: "MK",
+      crumb: st.screen === "rendite" ? "Rechner / Rendite" : st.screen === "finanzierung" ? "Rechner / Finanzierung" : st.screen === "cashflow" ? "Rechner / Cashflow" : st.screen === "nebenkosten" ? "Rechner / Kaufnebenkosten" : st.screen === "rechner" ? "Rechner" : st.screen === "einstellungen" ? "Einstellungen" : st.screen === "detail" ? "Übersicht / " + OBJEKTE[st.detailId].name : st.screen === "neu" ? "Übersicht / Immobilie hinzufügen" : st.screen === "bearbeiten" ? "Übersicht / Bearbeiten" : "Übersicht",
+
+      frameWidth: mobil ? "390px" : "100%",
+      frameHeight: mobil ? "820px" : "auto",
+      frameOverflow: mobil ? "auto" : "visible",
+      framePad: mobil ? "var(--space-8) var(--space-4)" : "0",
+
+      tabDesktop: this.tab(!mobil), tabMobil: this.tab(mobil),
+      tabBeispiel: this.tab(!leer), tabLeer: this.tab(leer),
+      setDesktop: () => this.setState({ mode: "desktop" }),
+      setMobil: () => this.setState({ mode: "mobil" }),
+      setDatenBeispiel: () => this.setState({ daten: "beispiel" }),
+      setDatenLeer: () => this.setState({ daten: "leer", screen: "uebersicht" }),
+
+      navUebersicht: this.navStyle(["uebersicht", "detail", "neu", "bearbeiten"].indexOf(st.screen) >= 0),
+      navRechner: this.navStyle(RECHNER_SCREENS.indexOf(st.screen) >= 0),
+      navEinstellungen: this.navStyle(st.screen === "einstellungen"),
+      mobUebersicht: this.mobStyle(["uebersicht", "detail", "neu", "bearbeiten"].indexOf(st.screen) >= 0),
+      mobRechner: this.mobStyle(RECHNER_SCREENS.indexOf(st.screen) >= 0),
+      mobEinstellungen: this.mobStyle(st.screen === "einstellungen"),
+      goUebersicht: setS("uebersicht"), goRechner: setS("rechner"), goEinstellungen: setS("einstellungen"),
+      toggleUserMenu: () => this.setState({ userMenu: !st.userMenu }),
+      userMenuOffen: st.userMenu,
+      abmelden: () => this.setState({ screen: "auth", authMode: "anmelden", userMenu: false, meldung: "" }),
+      goNeu: () => this.setState({ screen: "neu", wizSchritt: 1, wizErr: {}, userMenu: false, dialog: "" }),
+      meldung: st.meldung,
+      meldungZu: () => this.setState({ meldung: "" }),
+      speichert: st.speichert,
+      speichernLabel: st.speichert ? "Speichert …" : "Speichern",
+      fuenf: [1, 2, 3, 4, 5], drei: [1, 2, 3],
+      setZNormal: () => this.setState({ ladeZustand: "normal" }),
+      setZLaden: () => this.setState({ ladeZustand: "laden" }),
+      setZFehler: () => this.setState({ ladeZustand: "fehler" }),
+      tabZNormal: this.tab(st.ladeZustand === "normal"),
+      tabZLaden: this.tab(st.ladeZustand === "laden"),
+      tabZFehler: this.tab(st.ladeZustand === "fehler"),
+      toggleOhneFin: () => this.setState({ ohneFin: !st.ohneFin }),
+      tabOhneFin: this.tab(st.ohneFin),
+      tabAuth: this.tab(st.screen === "auth"),
+      zeigeLaden: st.ladeZustand === "laden" && st.screen !== "auth",
+      zeigeLadefehler: st.ladeZustand === "fehler" && st.screen !== "auth",
+      noop: () => {},
+
+      zeigeUebersicht: st.screen === "uebersicht" && !leer && st.ladeZustand === "normal",
+      zeigeLeer: st.screen === "uebersicht" && leer && st.ladeZustand === "normal",
+      zeigeRechner: st.screen === "rechner" && st.ladeZustand === "normal",
+      zeigeNebenkosten: st.screen === "nebenkosten" && st.ladeZustand === "normal",
+      isEinstellungen: st.screen === "einstellungen" && st.ladeZustand === "normal",
+      zeigeDetail: st.screen === "detail" && st.ladeZustand === "normal",
+      zeigeNeu: st.screen === "neu" && st.ladeZustand === "normal",
+      zeigeBearbeiten: st.screen === "bearbeiten" && st.ladeZustand === "normal",
+
+      kpis: (() => {
+        const wert = OBJEKTE.reduce((s, o) => s + o.kaufpreis, 0);
+        const mi = OBJEKTE.reduce((s, o) => s + miete(o), 0);
+        const cf = OBJEKTE.reduce((s, o) => s + miete(o) - kostenSumme(o) - annuitaet(o, false), 0);
+        const einh = OBJEKTE.reduce((s, o) => s + o.einheiten.length, 0);
+        return [
+          { label: "Objekte / Einheiten", wert: OBJEKTE.length + " / " + einh },
+          { label: "Gesamtwert", wert: eur(wert, 0) },
+          { label: "Monatsmiete", wert: eur(mi, 0) },
+          { label: "Cashflow / Monat", wert: (cf < 0 ? "−" : "") + eur(Math.abs(cf), 0) },
+          { label: "Ø Rendite", wert: pct(mi * 12 / wert * 100, 2) }
+        ];
+      })(),
+      objekte: this.objekte().map((o, i) => Object.assign({}, o, { oeffnen: () => this.openDetail(i) })),
+      schritte: [
+        { nr: "01", text: "Objektart, Adresse und Wohnfläche eintragen" },
+        { nr: "02", text: "Kaufpreis, Nebenkosten und Finanzierung ergänzen" },
+        { nr: "03", text: "Miete und laufende Kosten — fertig, Kennzahlen rechnen sich selbst" }
+      ],
+
+      rechnerListe: [
+        { nr: "01", titel: "Kaufnebenkosten", text: "Grunderwerbsteuer nach Bundesland, Notar, Grundbuch und Makler.", tag: "Bereit", tagKlasse: "tag-neutral", cta: "Rechner öffnen", oeffnen: setS("nebenkosten"), gesperrt: false },
+        { nr: "02", titel: "Rendite", text: "Brutto- und Nettorendite sowie Kaufpreisfaktor aus Miete und Gesamtkosten.", tag: "Bereit", tagKlasse: "tag-neutral", cta: "Rechner öffnen", oeffnen: setS("rendite"), gesperrt: false },
+        { nr: "03", titel: "Finanzierung", text: "Annuität, Restschuld am Ende der Zinsbindung und Tilgungsplan pro Jahr.", tag: "Bereit", tagKlasse: "tag-neutral", cta: "Rechner öffnen", oeffnen: setS("finanzierung"), gesperrt: false },
+        { nr: "04", titel: "Cashflow", text: "Miete minus Rate und laufende Kosten, monatlich und auf das Jahr gerechnet.", tag: "Bereit", tagKlasse: "tag-neutral", cta: "Rechner öffnen", oeffnen: setS("cashflow"), gesperrt: false }
+      ],
+
+      kaufpreisText: nf(p, 0),
+      land: st.land,
+      blRef: this.blRef,
+      laender: Object.keys(LAENDER).map((n) => ({ name: n, label: n + " · " + pct(LAENDER[n], 1) })),
+      notar: st.notar, grundbuch: st.grundbuch, makler: st.makler,
+      maklerAn: st.maklerAn, maklerAus: !st.maklerAn,
+      onKaufpreis: (e) => this.setState({ kaufpreis: Number(String(e.target.value).replace(/[^0-9]/g, "")) || 0 }),
+      onLand: (e) => this.setState({ land: e.target.value }),
+      onNotar: num("notar"), onGrundbuch: num("grundbuch"), onMakler: num("makler"),
+      onMaklerAn: (e) => this.setState({ maklerAn: e.target.checked }),
+
+      posten,
+      nebenkostenSumme: eur(summe),
+      anteilText: p > 0 ? nf(summe / p * 100, 2) + " % vom Kaufpreis" : "—",
+      gesamtInvest: eur(p + summe),
+
+      zuordnung: st.zuordnung,
+      onZuordnung: (e) => this.setState({ zuordnung: e.target.value }),
+      zuordnenAus: !st.zuordnung,
+      zuordnen: () => this.setState({ zugeordnet: st.zuordnung }),
+      zugeordnet: !!st.zugeordnet,
+      zugeordnetText: "Gespeichert: " + eur(summe) + " Kaufnebenkosten bei „" + st.zugeordnet + "“."
+    });
+  }
+}
+
+</script>
+</body>
+</html>
