@@ -23,7 +23,13 @@ Dokumente und weitere Rechner.
   /rechner/kaufnebenkosten, /einstellungen
 - Datenbankänderungen nur als Migrationsdateien im Repository (supabase/migrations), nie per Hand
   im Dashboard
-- Befehle zum Starten, Testen und Prüfen: werden in Meilenstein 1 hier ergänzt
+- Befehle zum Starten, Bauen und Prüfen (im Projektordner ausführen):
+  - `npm run dev` — startet die App lokal zur Entwicklung unter http://localhost:3000
+  - `npm run build` — erstellt den Produktions-Build (muss vor jedem Livegang fehlerfrei laufen)
+  - `npm run start` — startet den zuvor erstellten Produktions-Build lokal
+  - `npm run lint` — prüft den Code automatisch auf Fehler und Stilprobleme (ESLint)
+  - Automatische Tests für die Rechner (`npm test` o. ä.) werden in Meilenstein 4 ergänzt, sobald
+    die ersten Rechner entstehen.
 
 ## Design
 - Verbindliche Quelle: docs/design/ (jeweils der neueste Ordner "runde-N" mit README.md,
