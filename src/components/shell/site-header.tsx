@@ -16,7 +16,7 @@ export function SiteHeader() {
           href="/uebersicht"
           className="whitespace-nowrap text-base tracking-[-0.02em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          <span className="font-extrabold">Immobilien</span>
+          <span className="font-semibold">Immobilien</span>
           <span className="font-normal">verwaltung</span>
         </Link>
 
@@ -29,8 +29,8 @@ export function SiteHeader() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "-mb-px flex items-center gap-1.5 border-b-2 border-transparent px-2 py-3 text-sm font-extrabold text-neutral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-                  isActive && "border-primary text-foreground"
+                  "-mb-px flex items-center gap-1.5 border-b-2 border-transparent px-2 py-3 text-sm font-semibold text-neutral-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                  isActive && "border-foreground text-foreground"
                 )}
               >
                 <Icon className="size-4.25" />

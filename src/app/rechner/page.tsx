@@ -1,10 +1,10 @@
 export default function RechnerPage() {
   return (
     <div className="px-6 py-8">
-      <p className="text-xs font-extrabold tracking-[0.08em] text-primary uppercase">
+      <p className="text-xs font-semibold tracking-[0.08em] text-neutral-700 uppercase">
         Werkzeuge
       </p>
-      <h1 className="mt-1 text-[34px] leading-[1.12] font-extrabold tracking-[-0.015em]">
+      <h1 className="mt-1 text-[25px] leading-[1.12] font-semibold tracking-[-0.015em]">
         Rechner
       </h1>
       <p className="mt-4 max-w-[560px] text-sm text-neutral-700">

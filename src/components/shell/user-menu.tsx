@@ -27,7 +27,7 @@ export function UserMenu() {
           type="button"
           className="flex items-center gap-2 border border-border px-2 py-1.5 text-[0.8125rem] hover:bg-[rgba(32,30,29,0.07)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          <span className="flex size-6.5 items-center justify-center bg-neutral-900 text-[0.6875rem] font-extrabold text-neutral-100">
+          <span className="flex size-6.5 items-center justify-center bg-neutral-900 text-[0.6875rem] font-semibold text-neutral-100">
             {PLACEHOLDER_USER.initials}
           </span>
           <span className="hidden whitespace-nowrap md:inline">
@@ -46,10 +46,10 @@ export function UserMenu() {
           <span className="block text-neutral-600">{PLACEHOLDER_USER.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="mx-0 my-0 bg-border" />
-        <DropdownMenuItem className="rounded-none px-3 py-2 text-[0.8125rem] focus:bg-accent-100 focus:text-accent-800">
+        <DropdownMenuItem className="rounded-none px-3 py-2 text-[0.8125rem] focus:bg-neutral-100 focus:text-foreground">
           Profil
         </DropdownMenuItem>
-        <DropdownMenuItem className="rounded-none px-3 py-2 text-[0.8125rem] text-accent-700 focus:bg-accent-100 focus:text-accent-700">
+        <DropdownMenuItem className="rounded-none px-3 py-2 text-[0.8125rem] text-foreground focus:bg-neutral-100 focus:text-foreground">
           <LogOut className="size-4" />
           Abmelden
         </DropdownMenuItem>

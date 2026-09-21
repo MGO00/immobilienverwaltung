@@ -21,8 +21,8 @@ export function MobileNav() {
             key={link.href}
             href={link.href}
             className={cn(
-              "flex min-h-14.5 flex-col items-center justify-center gap-1 border-t-[3px] border-transparent text-[0.6875rem] font-extrabold text-neutral-700 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary",
-              isActive && "border-primary text-accent-800"
+              "flex min-h-14.5 flex-col items-center justify-center gap-1 border-t-[3px] border-transparent text-[0.6875rem] font-semibold text-neutral-700 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary",
+              isActive && "border-foreground text-foreground"
             )}
           >
             <Icon className="size-5" />

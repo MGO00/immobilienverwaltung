@@ -5,8 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design-Tokens „Modernist" (Petrol-Variante), siehe docs/design/runde-1/README.md.
- * Werte sind verbindlich aus dem Design übernommen, nicht frei gewählt.
+ * Design-Tokens „Modernist" (Petrol-Variante), siehe docs/design/ (aktuell runde-2,
+ * bei Lücken ergänzt aus runde-1). Werte sind verbindlich aus dem Design
+ * übernommen, nicht frei gewählt.
  */
 @theme inline {
   --font-sans: var(--font-archivo);
@@ -27,6 +28,12 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  /* Fehlerfarbe aus Runde 2: eigener Name neben "destructive", damit Fehlertexte
+     und -boxen (z. B. Ladefehler, Formularvalidierung) sich selbsterklärend
+     lesen. Gleicher Wert wie destructive, nicht zusätzlich pflegen. */
+  --color-error: var(--destructive);
+  --color-error-bg: var(--error-bg);
+  --color-error-border: var(--error-border);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -99,9 +106,12 @@
   --input: rgba(32, 30, 29, 0.15);
   --ring: #14756b;
 
-  /* Noch kein Fehlerrot im Design festgelegt (Formularvalidierung ist laut
-     Runde-1-README noch offen) – bis dahin der neutrale shadcn-Standard. */
-  --destructive: oklch(0.577 0.245 27.325);
+  /* Fehlerfarbe aus Runde 2 (6,5:1 Kontrast auf Weiß). Nur für echte Fehler
+     (Formularvalidierung, Ladefehler) – negative Zahlen bleiben neutral mit
+     Minuszeichen, nie rot. */
+  --destructive: #b3261e;
+  --error-bg: #fdf3f2;
+  --error-border: #f0c9c5;
 
   /* Radius ist überall 0 – Absicht, kein Versehen */
   --radius: 0rem;
