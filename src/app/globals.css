@@ -1,26 +1,113 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design-Tokens „Modernist" (Petrol-Variante), siehe docs/design/runde-1/README.md.
+ * Werte sind verbindlich aus dem Design übernommen, nicht frei gewählt.
+ */
+@theme inline {
+  --font-sans: var(--font-archivo);
+  --font-heading: var(--font-archivo);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Petrol-Rampe (ersetzt die rote Rampe des Modernist-Systems) */
+  --color-accent-100: #eaf5f3;
+  --color-accent-200: #cfe8e4;
+  --color-accent-300: #a3d3cc;
+  --color-accent-400: #5fb3a8;
+  --color-accent-500: #1f8b7e;
+  --color-accent-600: #0f6058;
+  --color-accent-700: #0a4a44;
+  --color-accent-800: #083831;
+  --color-accent-900: #062a25;
+
+  /* Neutral-Rampe (unverändert aus dem Modernist-System) */
+  --color-neutral-100: #f8f4f4;
+  --color-neutral-200: #eae7e7;
+  --color-neutral-300: #d7d3d3;
+  --color-neutral-400: #bab6b6;
+  --color-neutral-500: #9b9797;
+  --color-neutral-600: #7d7979;
+  --color-neutral-700: #605d5d;
+  --color-neutral-800: #444141;
+  --color-neutral-900: #2d2b2b;
+
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
+
+  --shadow-lg: 0 12px 32px rgba(45, 43, 43, 0.22);
+}
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #201e1d;
+  --card: #ffffff;
+  --card-foreground: #201e1d;
+  --popover: #ffffff;
+  --popover-foreground: #201e1d;
+
+  /* Primär = Markenfarbe Petrol (in der README „Akzent" genannt) */
+  --primary: #14756b;
+  --primary-foreground: #ffffff;
+
+  /* Sekundär = neutrale Fläche, z. B. Tag „neutral" */
+  --secondary: #f8f4f4;
+  --secondary-foreground: #444141;
+
+  /* Muted = Fläche „surface", z. B. Rechner-Karten, Ergebnisbox, Inputs */
+  --muted: #f8f4f4;
+  --muted-foreground: #605d5d;
+
+  /* Accent (shadcn-Bedeutung: dezente Hover-/Auswahlfläche) = Petrol-100 */
+  --accent: #eaf5f3;
+  --accent-foreground: #083831;
+
+  --border: rgba(32, 30, 29, 0.15);
+  --input: rgba(32, 30, 29, 0.15);
+  --ring: #14756b;
+
+  /* Noch kein Fehlerrot im Design festgelegt (Formularvalidierung ist laut
+     Runde-1-README noch offen) – bis dahin der neutrale shadcn-Standard. */
+  --destructive: oklch(0.577 0.245 27.325);
+
+  /* Radius ist überall 0 – Absicht, kein Versehen */
+  --radius: 0rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
