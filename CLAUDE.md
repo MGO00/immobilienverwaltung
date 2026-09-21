@@ -32,16 +32,27 @@ Dokumente und weitere Rechner.
     die ersten Rechner entstehen.
 
 ## Design
-- Verbindliche Quelle: docs/design/ (jeweils der neueste Ordner "runde-N" mit README.md,
-  styles.css, Prototyp und Screenshots). Die Dateien sind Referenz, kein Produktionscode:
-  nachbauen, nicht kopieren. Die Prototyp-Leiste (schwarzer Balken oben) gehört nicht zum Produkt.
-- Tokens, Komponenten und Abstände exakt aus der README übernehmen (Petrol-Akzent #14756b, Schrift
-  Archivo, Radius 0, 1px-Linien, keine Schatten außer am Nutzermenü).
+- Quelle: docs/design/. Die neueste Runde (aktuell runde-2) gilt bei Widersprüchen. Was in der
+  neuesten README fehlt (Komponenten-Zuordnung zu shadcn/ui, Tailwind-Mapping, Routen, Fokus-Stil),
+  gilt aus runde-1 weiter.
+- Bei Widersprüchen zwischen README und Prototyp (Immobilienverwaltung.dc.html) gilt der Prototyp.
+  Bekannte Fälle in runde-2: Die Navigation ist eine obere Leiste am Desktop und eine untere Leiste
+  mobil (nicht, wie in der README steht, eine Sidebar). Der Assistent hat die Schritte 1 Objekt,
+  2 Kauf und Finanzierung, 3 Miete und Kosten.
+- Die Design-Dateien sind Referenz, kein Produktionscode: nachbauen, nicht kopieren. Die
+  Prototyp-Leiste (schwarzer Balken oben) gehört nicht zum Produkt.
+- Konkrete Werte (Farben, Größen, Radien, Abstände) stehen in der README der neuesten Runde und
+  werden hier nicht dupliziert. Wichtigste Merkmale: weißer Grund, 1px-Linien, Petrol-Akzent
+  sparsam (primäre Aktion, Links, Hauptzahl), Schrift Archivo mit Überschriften in 600, Karten mit
+  10px Radius, Status-Pillen 999px, Schatten nur für Popover und Dialog, eigener Fehler-Token.
 - Zahlen mit tabellarischen Ziffern. Ansprache "Du". Deutsche Formate: 1.234,56 €, TT.MM.JJJJ,
-  58 m², Minuszeichen "−". Negative Werte nicht rot.
-- Screens, die noch nicht designt sind, nicht frei erfinden: vorhandene Muster nutzen, die
-  einfachere Lösung wählen und die Abweichung melden.
-- Barrierefreiheit: Fokusring 2px #14756b, Kontrast mindestens 4,5:1, Fehler nie nur über Farbe.
+  58 m², Minuszeichen "−".
+- Negative Werte werden überall neutral mit Minuszeichen dargestellt, nie rot. Die Fehlerfarbe ist
+  nur für Fehler da. Die rote Darstellung des negativen Cashflows in Rechner 04 im Prototyp NICHT
+  übernehmen.
+- Screens, die noch nicht designt sind, nicht frei erfinden: vorhandene Muster nutzen und
+  Abweichungen melden.
+- Barrierefreiheit: sichtbarer Fokusring, Kontrast mindestens 4,5:1, Fehler nie nur über Farbe.
 
 ## Umfang der Basisvariante
 Im Umfang:
@@ -51,6 +62,12 @@ Im Umfang:
 - Detailseite mit Tabs: Übersicht, Einheiten, Kauf und Finanzierung, Einnahmen und Ausgaben,
   Rechner, Notizen
 - Rechner: Kaufnebenkosten, Rendite, Finanzierung mit Tilgungsplan, Cashflow
+- Objektfotos: Der Foto-Bereich wird im Layout gebaut (Objektkarte 132px hoch, Detailseite
+  280×188px, Assistent 220×148px), zeigt aber zunächst nur einen ruhigen Platzhalter (Icon auf
+  heller Fläche, ohne Drag-and-drop-Text). Der echte Upload kommt als eigener Schritt nach
+  Meilenstein 3 und wird vorher mit dem Auftraggeber geklärt (Dateispeicher mit Zugriffsregeln,
+  Größen- und Formatlimits, Zuschnitt).
+- Einstellungen: Profil, Passwort ändern, Tarif (Platzhalter), Konto (Abmelden).
 
 Ausdrücklich NICHT im Umfang (nicht vorbauen): Mieterverwaltung, Mietverträge,
 Nebenkostenabrechnung, Dokumentenablage, Abos und Zahlungen, mehrere Nutzer pro Konto, andere
@@ -73,16 +90,26 @@ Länder als Deutschland.
   Bremen: 5,5 % (die README aus Runde 1 nennt noch 5,0 %). Vor der Veröffentlichung alle Sätze
   gegen eine amtliche Quelle prüfen.
 - Formeln:
-  - Jahreskaltmiete = Kaltmiete × 12
+  - Jahreskaltmiete = Summe der Kaltmieten der vermieteten Einheiten × 12 (leere Einheiten zählen
+    mit 0)
   - Bruttorendite = Jahreskaltmiete ÷ Kaufpreis
+  - Nettorendite = (Jahreskaltmiete − laufende Kosten pro Jahr) ÷ Gesamtinvestition × 100
   - Kaufpreisfaktor = Kaufpreis ÷ Jahreskaltmiete
+  - Darlehen = Gesamtinvestition − Eigenkapital (nie negativ)
+  - Beleihungsauslauf = Darlehen ÷ Kaufpreis × 100
   - Annuität pro Monat = Darlehen × (Zins % + Tilgung %) ÷ 12
   - Cashflow pro Monat = Kaltmiete − Annuität − laufende Kosten
   - Ø Rendite (Portfolio) = Summe der Jahresmieten ÷ Summe der Kaufpreise
   - Leerstandsquote = leere Einheiten ÷ Einheiten
   - Kaufnebenkosten = Kaufpreis × (Grunderwerbsteuer % + Notar % + Grundbuch % + Makler %)
   - Gesamtinvestition = Kaufpreis + Kaufnebenkosten
-  - Nettorendite: Definition wird beim Rechner "Rendite" gemeinsam festgelegt
+- Tilgungsplan (Rechner Finanzierung): wird MONATLICH gerechnet (banküblich), nicht jährlich wie im
+  Prototyp. Das Startjahr kommt aus dem Datum, nicht fest verdrahtet. Ein automatischer Test
+  vergleicht das Ergebnis mit einem nachvollziehbaren Referenzwert.
+- Die Fußnote im Rechner Rendite lautet: "… ohne Berücksichtigung künftigen Leerstands" (statt
+  "ohne Leerstand").
+- Laufende Kosten sind eine Postenliste. Wie sie im Rechner Cashflow auf "nicht umlagefähig",
+  "Rücklage" und "Verwaltung und Sonstiges" verteilt werden, wird im Datenmodell-Vorschlag geklärt.
 - Geldbeträge in der Datenbank als numeric, nie als Fließkommazahl. In Berechnungen
   Rundungsfehler vermeiden (z. B. in Cent rechnen) und die Rundung zentral festlegen.
 - Wo Rechner Ergebnisse zeigen, steht der Hinweis "Keine Steuer- oder Anlageberatung".
