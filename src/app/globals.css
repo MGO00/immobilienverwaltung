@@ -62,6 +62,13 @@
   --radius-4xl: var(--radius);
 
   --shadow-lg: 0 12px 32px rgba(45, 43, 43, 0.22);
+
+  /* Breakpoints exakt aus der README: Navigation wechselt bei 860px,
+     Kennzahlenband bei 1180px von 3 auf 5 Spalten. Ersetzt die
+     Tailwind-Standardwerte (768px / 1280px), da im Projekt nur diese
+     beiden Schwellen vorkommen. */
+  --breakpoint-md: 860px;
+  --breakpoint-xl: 1180px;
 }
 
 :root {
