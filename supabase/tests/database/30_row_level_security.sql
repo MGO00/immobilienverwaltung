@@ -1,7 +1,9 @@
 -- Test: Zugriffsregeln (RLS). Nutzer A sieht/ändert nie Daten von Nutzer B --
 -- auch nicht über unit, running_cost_item oder note.
 begin;
-create extension if not exists pgtap;
+-- Im "extensions"-Schema fehlt der Verbindung auf dem echten Projekt das
+-- Leserecht; "public" funktioniert dort wie lokal gleichermaßen.
+create extension if not exists pgtap with schema public;
 
 select plan(8);
 

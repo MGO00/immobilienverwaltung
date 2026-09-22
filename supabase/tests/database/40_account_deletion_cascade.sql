@@ -1,7 +1,9 @@
 -- Test: Löschen des letzten Mitglieds eines Kontos entfernt das Konto und
 -- alle zugehörigen Daten. Bei mehreren Mitgliedern bleibt das Konto erhalten.
 begin;
-create extension if not exists pgtap;
+-- Im "extensions"-Schema fehlt der Verbindung auf dem echten Projekt das
+-- Leserecht; "public" funktioniert dort wie lokal gleichermaßen.
+create extension if not exists pgtap with schema public;
 
 select plan(7);
 

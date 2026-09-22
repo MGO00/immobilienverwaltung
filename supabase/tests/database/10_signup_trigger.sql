@@ -1,6 +1,8 @@
 -- Test: Registrierung legt automatisch Konto, Mitgliedschaft und Profil an.
 begin;
-create extension if not exists pgtap;
+-- Im "extensions"-Schema fehlt der Verbindung auf dem echten Projekt das
+-- Leserecht; "public" funktioniert dort wie lokal gleichermaßen.
+create extension if not exists pgtap with schema public;
 
 select plan(4);
 
