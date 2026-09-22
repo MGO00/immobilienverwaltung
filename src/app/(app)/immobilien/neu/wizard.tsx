@@ -1,0 +1,762 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { AlertCircle, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { EinheitDialog, type EinheitFormWert } from "@/components/immobilie/einheit-dialog";
+import { StatusPille } from "@/components/immobilie/status-pille";
+import { formatCurrency } from "@/lib/format";
+import { BUNDESLAENDER, bundeslandLabel } from "@/lib/constants/steuersaetze";
+import { laufendeKostenFelder, LAUFENDE_KOSTEN_LABEL } from "@/lib/constants/laufende-kosten";
+import { annuitaetMonat, bruttorendite, cashflowMonat } from "@/lib/calculators/immobilie";
+import type { EinheitStatus, ObjektArt } from "@/lib/validation/immobilie";
+import { erstelleImmobilie } from "./actions";
+
+type ObjektArtOption = { wert: ObjektArt; label: string; hinweis: string };
+
+const OBJEKTARTEN: ObjektArtOption[] = [
+  { wert: "eigentumswohnung", label: "Eigentumswohnung", hinweis: "Genau eine Einheit" },
+  { wert: "einfamilienhaus", label: "Einfamilien-/Doppelhaus", hinweis: "Genau eine Einheit" },
+  { wert: "mehrfamilienhaus", label: "Mehrfamilienhaus", hinweis: "Mehrere Einheiten" },
+];
+
+type WizardState = {
+  art: ObjektArt | null;
+  bezeichnung: string;
+  strasseHausnummer: string;
+  plz: string;
+  ort: string;
+  bundesland: string;
+  baujahr: string;
+  wohnflaecheQm: string;
+  grundstuecksflaecheQm: string;
+  kaufdatum: string;
+  kaufpreis: string;
+  kaufnebenkostenBetrag: string;
+  ohneFinanzierung: boolean;
+  darlehenBetrag: string;
+  sollzinsProzent: string;
+  tilgungProzent: string;
+  zinsbindungBis: string;
+  status: EinheitStatus;
+  kaltmieteMonat: string;
+  einheiten: EinheitFormWert[];
+  laufendeKosten: Record<string, string>;
+};
+
+const LEER: WizardState = {
+  art: null,
+  bezeichnung: "",
+  strasseHausnummer: "",
+  plz: "",
+  ort: "",
+  bundesland: "",
+  baujahr: "",
+  wohnflaecheQm: "",
+  grundstuecksflaecheQm: "",
+  kaufdatum: "",
+  kaufpreis: "",
+  kaufnebenkostenBetrag: "",
+  ohneFinanzierung: false,
+  darlehenBetrag: "",
+  sollzinsProzent: "3.5",
+  tilgungProzent: "2.0",
+  zinsbindungBis: "",
+  status: "leer",
+  kaltmieteMonat: "",
+  einheiten: [],
+  laufendeKosten: {},
+};
+
+function zuZahl(wert: string): number | null {
+  if (wert.trim() === "") return null;
+  const zahl = Number(wert.replace(",", "."));
+  return Number.isFinite(zahl) ? zahl : null;
+}
+
+const SCHRITT_LABEL = ["1 · Objekt", "2 · Kauf und Finanzierung", "3 · Miete und Kosten"];
+
+export function ImmobilienAssistent() {
+  const router = useRouter();
+  const [schritt, setSchritt] = useState<1 | 2 | 3>(1);
+  const [state, setState] = useState<WizardState>(LEER);
+  const [fehler, setFehler] = useState<Record<string, string>>({});
+  const [einheitDialogOffen, setEinheitDialogOffen] = useState(false);
+  const [bearbeiteteEinheit, setBearbeiteteEinheit] = useState<number | null>(null);
+  const [verwerfenOffen, setVerwerfenOffen] = useState(false);
+  const [speichernFehler, setSpeichernFehler] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  const istMfh = state.art === "mehrfamilienhaus";
+  const istHaus = state.art === "einfamilienhaus";
+
+  function pruefeSchritt(nr: 1 | 2 | 3): Record<string, string> {
+    const neueFehler: Record<string, string> = {};
+    if (nr === 1) {
+      if (!state.art) neueFehler.art = "Wähl eine Objektart.";
+      if (!state.bezeichnung.trim()) neueFehler.bezeichnung = "Gib der Immobilie eine Bezeichnung.";
+    }
+    if (nr === 2) {
+      const kaufpreis = zuZahl(state.kaufpreis);
+      if (!kaufpreis || kaufpreis <= 0) {
+        neueFehler.kaufpreis = "Trag den Kaufpreis ein — ohne ihn lässt sich keine Rendite rechnen.";
+      }
+    }
+    if (nr === 3) {
+      if (istMfh) {
+        if (state.einheiten.length === 0) neueFehler.einheiten = "Leg mindestens eine Einheit an.";
+      } else {
+        const kaltmiete = zuZahl(state.kaltmieteMonat);
+        if (!kaltmiete || kaltmiete <= 0) neueFehler.kaltmieteMonat = "Trag die Kaltmiete ein.";
+      }
+    }
+    return neueFehler;
+  }
+
+  function weiter() {
+    const neueFehler = pruefeSchritt(schritt);
+    setFehler(neueFehler);
+    if (Object.keys(neueFehler).length > 0) return;
+
+    if (schritt < 3) {
+      setSchritt((s) => (s + 1) as 1 | 2 | 3);
+      return;
+    }
+
+    setSpeichernFehler(null);
+    startTransition(async () => {
+      const laufendeKosten: Record<string, number> = {};
+      for (const [typ, wert] of Object.entries(state.laufendeKosten)) {
+        const zahl = zuZahl(wert);
+        if (zahl && zahl > 0) laufendeKosten[typ] = zahl;
+      }
+
+      const ergebnis = await erstelleImmobilie({
+        art: state.art!,
+        bezeichnung: state.bezeichnung.trim(),
+        strasseHausnummer: state.strasseHausnummer.trim() || null,
+        plz: state.plz.trim() || null,
+        ort: state.ort.trim() || null,
+        bundesland: state.bundesland || null,
+        baujahr: zuZahl(state.baujahr),
+        grundstuecksflaecheQm: istHaus ? zuZahl(state.grundstuecksflaecheQm) : null,
+        wohnflaecheQm: !istMfh ? zuZahl(state.wohnflaecheQm) : null,
+        kaufdatum: state.kaufdatum || null,
+        kaufpreis: zuZahl(state.kaufpreis) ?? 0,
+        kaufnebenkostenBetrag: zuZahl(state.kaufnebenkostenBetrag),
+        ohneFinanzierung: state.ohneFinanzierung,
+        darlehenBetrag: zuZahl(state.darlehenBetrag),
+        sollzinsProzent: zuZahl(state.sollzinsProzent),
+        tilgungProzent: zuZahl(state.tilgungProzent),
+        zinsbindungBis: state.zinsbindungBis || null,
+        kaltmieteMonat: !istMfh ? zuZahl(state.kaltmieteMonat) : null,
+        status: !istMfh ? state.status : null,
+        einheiten: istMfh
+          ? state.einheiten.map((e) => ({
+              name: e.name,
+              flaecheQm: zuZahl(e.flaecheQm),
+              kaltmieteMonat: zuZahl(e.kaltmieteMonat) ?? 0,
+              status: e.status,
+            }))
+          : [],
+        laufendeKosten,
+      });
+
+      if (ergebnis?.error) {
+        setSpeichernFehler(ergebnis.error);
+      }
+    });
+  }
+
+  function zurueck() {
+    if (schritt > 1) setSchritt((s) => (s - 1) as 1 | 2 | 3);
+  }
+
+  function abbrechen() {
+    const hatAngaben = Boolean(state.art || state.bezeichnung.trim() || state.kaufpreis.trim());
+    if (hatAngaben) {
+      setVerwerfenOffen(true);
+    } else {
+      router.push("/uebersicht");
+    }
+  }
+
+  const kaufpreisZahl = zuZahl(state.kaufpreis) ?? 0;
+  const bruttorenditeZahl = bruttorendite(
+    (istMfh
+      ? state.einheiten
+          .filter((e) => e.status === "vermietet")
+          .reduce((s, e) => s + (zuZahl(e.kaltmieteMonat) ?? 0), 0)
+      : state.status === "vermietet"
+        ? (zuZahl(state.kaltmieteMonat) ?? 0)
+        : 0) * 12,
+    kaufpreisZahl,
+  );
+  const annuitaetZahl = state.ohneFinanzierung
+    ? null
+    : annuitaetMonat(zuZahl(state.darlehenBetrag), zuZahl(state.sollzinsProzent), zuZahl(state.tilgungProzent));
+  const kaltmieteFuerCashflow = istMfh
+    ? state.einheiten
+        .filter((e) => e.status === "vermietet")
+        .reduce((s, e) => s + (zuZahl(e.kaltmieteMonat) ?? 0), 0)
+    : state.status === "vermietet"
+      ? (zuZahl(state.kaltmieteMonat) ?? 0)
+      : 0;
+  const laufendeKostenSumme = Object.values(state.laufendeKosten).reduce(
+    (s, wert) => s + (zuZahl(wert) ?? 0),
+    0,
+  );
+  const cashflowZahl = cashflowMonat(kaltmieteFuerCashflow, annuitaetZahl, laufendeKostenSumme);
+
+  const kostenFelder = state.art ? laufendeKostenFelder(state.art) : [];
+
+  return (
+    <div className="px-6 py-8">
+      <h1 className="text-[25px] leading-[1.12] font-semibold tracking-[-0.015em]">
+        Immobilie hinzufügen
+      </h1>
+      <p className="mt-1 text-sm text-neutral-600">Schritt {schritt} von 3</p>
+
+      <div className="mt-6 grid grid-cols-3 gap-4">
+        {SCHRITT_LABEL.map((label, i) => {
+          const nr = (i + 1) as 1 | 2 | 3;
+          const erledigtOderAktuell = nr <= schritt;
+          return (
+            <div
+              key={label}
+              className={`border-t-[3px] pt-2 text-sm font-semibold ${
+                erledigtOderAktuell ? "border-foreground" : "border-border"
+              } ${nr === schritt ? "text-foreground" : "text-neutral-600"}`}
+            >
+              {label}
+            </div>
+          );
+        })}
+      </div>
+
+      {Object.keys(fehler).length > 0 && (
+        <div className="mt-6 flex items-start gap-2 border border-error-border bg-error-bg p-3">
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-error" />
+          <div className="text-[13px] text-error">
+            <p className="font-semibold">
+              {Object.keys(fehler).length === 1 ? "Ein Feld fehlt noch" : `Es fehlen noch ${Object.keys(fehler).length} Angaben`}
+            </p>
+            <ul className="mt-1 list-disc pl-4">
+              {Object.values(fehler).map((text) => (
+                <li key={text}>{text}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {speichernFehler && (
+        <div className="mt-6 flex items-start gap-2 border border-error-border bg-error-bg p-3">
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-error" />
+          <p className="text-[13px] text-error">{speichernFehler}</p>
+        </div>
+      )}
+
+      <div className="mt-6 grid gap-8 md:grid-cols-[1fr_260px]">
+        <div className="flex flex-col gap-6">
+          {schritt === 1 && (
+            <>
+              <div className="grid grid-cols-3 gap-3">
+                {OBJEKTARTEN.map((option) => (
+                  <button
+                    key={option.wert}
+                    type="button"
+                    onClick={() => setState({ ...state, art: option.wert })}
+                    className={`border p-3 text-left text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                      state.art === option.wert ? "border-foreground" : "border-border"
+                    } ${fehler.art ? "bg-error-bg" : ""}`}
+                  >
+                    <span className="block font-semibold">{option.label}</span>
+                    <span className="mt-1 block text-xs text-neutral-600">{option.hinweis}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="bezeichnung">Bezeichnung</Label>
+                <Input
+                  id="bezeichnung"
+                  value={state.bezeichnung}
+                  onChange={(e) => setState({ ...state, bezeichnung: e.target.value })}
+                  placeholder="z. B. Wohnung Südvorstadt"
+                  aria-invalid={Boolean(fehler.bezeichnung)}
+                />
+              </div>
+
+              <div className="grid grid-cols-[2.2fr_1fr] gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="strasse">Straße und Hausnummer (optional)</Label>
+                  <Input
+                    id="strasse"
+                    value={state.strasseHausnummer}
+                    onChange={(e) => setState({ ...state, strasseHausnummer: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-[2.2fr_1fr] gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="ort">Ort (optional)</Label>
+                  <Input id="ort" value={state.ort} onChange={(e) => setState({ ...state, ort: e.target.value })} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="plz">PLZ (optional)</Label>
+                  <Input id="plz" value={state.plz} onChange={(e) => setState({ ...state, plz: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="bundesland">Bundesland (optional)</Label>
+                <Select
+                  value={state.bundesland}
+                  onValueChange={(value) => setState({ ...state, bundesland: value })}
+                >
+                  <SelectTrigger id="bundesland" className="w-full">
+                    <SelectValue placeholder="Bundesland wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BUNDESLAENDER.map((land) => (
+                      <SelectItem key={land} value={land}>
+                        {bundeslandLabel(land)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-neutral-600">
+                  Wird für die Grunderwerbsteuer im Kaufnebenkosten-Rechner gebraucht.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="baujahr">Baujahr (optional)</Label>
+                  <Input
+                    id="baujahr"
+                    type="number"
+                    value={state.baujahr}
+                    onChange={(e) => setState({ ...state, baujahr: e.target.value })}
+                  />
+                </div>
+                {!istMfh && (
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="wohnflaeche">Wohnfläche (optional)</Label>
+                    <div className="flex items-center gap-1.5">
+                      <Input
+                        id="wohnflaeche"
+                        type="number"
+                        min={0}
+                        value={state.wohnflaecheQm}
+                        onChange={(e) => setState({ ...state, wohnflaecheQm: e.target.value })}
+                      />
+                      <span className="text-sm text-neutral-600">m²</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {istMfh && (
+                <p className="text-xs text-neutral-600">
+                  Die Wohnfläche ergibt sich beim Mehrfamilienhaus automatisch aus der Summe der Einheiten
+                  (Schritt 3).
+                </p>
+              )}
+
+              {istHaus && (
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="grundstuecksflaeche">Grundstücksfläche (optional)</Label>
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      id="grundstuecksflaeche"
+                      type="number"
+                      min={0}
+                      value={state.grundstuecksflaecheQm}
+                      onChange={(e) => setState({ ...state, grundstuecksflaecheQm: e.target.value })}
+                    />
+                    <span className="text-sm text-neutral-600">m²</span>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <p className="mb-1.5 text-sm font-medium">Foto (optional)</p>
+                <div className="flex h-[148px] w-[220px] items-center justify-center bg-neutral-100">
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    className="text-neutral-400"
+                  >
+                    <rect x="3" y="4" width="18" height="16" rx="1" />
+                    <circle cx="8.5" cy="9.5" r="1.5" />
+                    <path d="M21 16l-5-5-4 4-3-3-6 6" />
+                  </svg>
+                </div>
+                <p className="mt-1.5 text-xs text-neutral-600">
+                  Ein Querformat pro Objekt. Der echte Upload kommt in einem späteren Schritt.
+                </p>
+              </div>
+            </>
+          )}
+
+          {schritt === 2 && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="kaufdatum">Kaufdatum (optional)</Label>
+                  <Input
+                    id="kaufdatum"
+                    type="date"
+                    value={state.kaufdatum}
+                    onChange={(e) => setState({ ...state, kaufdatum: e.target.value })}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="kaufpreis">Kaufpreis</Label>
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      id="kaufpreis"
+                      type="number"
+                      min={0}
+                      value={state.kaufpreis}
+                      onChange={(e) => setState({ ...state, kaufpreis: e.target.value })}
+                      aria-invalid={Boolean(fehler.kaufpreis)}
+                    />
+                    <span className="text-sm text-neutral-600">€</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="kaufnebenkosten">Kaufnebenkosten (optional)</Label>
+                <div className="flex items-center gap-1.5">
+                  <Input
+                    id="kaufnebenkosten"
+                    type="number"
+                    min={0}
+                    value={state.kaufnebenkostenBetrag}
+                    onChange={(e) => setState({ ...state, kaufnebenkostenBetrag: e.target.value })}
+                  />
+                  <span className="text-sm text-neutral-600">€</span>
+                </div>
+                <Link
+                  href="/rechner/kaufnebenkosten"
+                  target="_blank"
+                  className="self-start text-xs font-semibold text-primary hover:underline"
+                >
+                  Nicht sicher? Im Rechner berechnen
+                </Link>
+              </div>
+
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={state.ohneFinanzierung}
+                  onCheckedChange={(checked) => setState({ ...state, ohneFinanzierung: checked === true })}
+                />
+                Ohne Finanzierung (Eigenkapital)
+              </label>
+
+              {!state.ohneFinanzierung && (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="darlehen">Darlehen</Label>
+                      <div className="flex items-center gap-1.5">
+                        <Input
+                          id="darlehen"
+                          type="number"
+                          min={0}
+                          value={state.darlehenBetrag}
+                          onChange={(e) => setState({ ...state, darlehenBetrag: e.target.value })}
+                        />
+                        <span className="text-sm text-neutral-600">€</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="zinsbindung">Zinsbindung bis</Label>
+                      <Input
+                        id="zinsbindung"
+                        type="date"
+                        value={state.zinsbindungBis}
+                        onChange={(e) => setState({ ...state, zinsbindungBis: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="zins">Zins</Label>
+                      <div className="flex items-center gap-1.5">
+                        <Input
+                          id="zins"
+                          type="number"
+                          step="0.1"
+                          min={0}
+                          value={state.sollzinsProzent}
+                          onChange={(e) => setState({ ...state, sollzinsProzent: e.target.value })}
+                        />
+                        <span className="text-sm text-neutral-600">%</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="tilgung">Tilgung</Label>
+                      <div className="flex items-center gap-1.5">
+                        <Input
+                          id="tilgung"
+                          type="number"
+                          step="0.1"
+                          min={0}
+                          value={state.tilgungProzent}
+                          onChange={(e) => setState({ ...state, tilgungProzent: e.target.value })}
+                        />
+                        <span className="text-sm text-neutral-600">%</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {schritt === 3 && (
+            <>
+              {!istMfh && (
+                <>
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Nutzung</Label>
+                    <div className="inline-flex w-fit border border-border">
+                      {(["vermietet", "selbstgenutzt", "leer"] as EinheitStatus[]).map((wert) => (
+                        <button
+                          key={wert}
+                          type="button"
+                          onClick={() => setState({ ...state, status: wert })}
+                          className={`px-3 py-1.5 text-sm font-semibold first:border-r border-border ${
+                            state.status === wert ? "bg-neutral-900 text-neutral-100" : "text-neutral-700"
+                          }`}
+                        >
+                          {wert}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="kaltmiete">Kaltmiete pro Monat</Label>
+                    <div className="flex items-center gap-1.5">
+                      <Input
+                        id="kaltmiete"
+                        type="number"
+                        min={0}
+                        value={state.kaltmieteMonat}
+                        onChange={(e) => setState({ ...state, kaltmieteMonat: e.target.value })}
+                        aria-invalid={Boolean(fehler.kaltmieteMonat)}
+                      />
+                      <span className="text-sm text-neutral-600">€</span>
+                    </div>
+                    {state.status !== "vermietet" && (
+                      <p className="text-xs text-neutral-600">
+                        Gilt als Soll-Miete und zählt erst zur Jahreskaltmiete, wenn die Einheit vermietet ist.
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {istMfh && (
+                <div>
+                  <div className="flex items-baseline justify-between">
+                    <p className="text-sm font-semibold">
+                      Einheiten — {state.einheiten.length} angelegt ·{" "}
+                      {formatCurrency(state.einheiten.reduce((s, e) => s + (zuZahl(e.kaltmieteMonat) ?? 0), 0))}{" "}
+                      Kaltmiete
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        setBearbeiteteEinheit(null);
+                        setEinheitDialogOffen(true);
+                      }}
+                    >
+                      <Plus className="size-4" />
+                      Einheit hinzufügen
+                    </Button>
+                  </div>
+
+                  {state.einheiten.length === 0 ? (
+                    <p className="mt-3 text-sm text-neutral-600">Noch keine Einheit angelegt.</p>
+                  ) : (
+                    <table className="mt-3 w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left text-neutral-600">
+                          <th className="py-2 font-medium">Einheit</th>
+                          <th className="py-2 font-medium">Fläche</th>
+                          <th className="py-2 font-medium">Kaltmiete</th>
+                          <th className="py-2 font-medium">Status</th>
+                          <th className="py-2" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {state.einheiten.map((e, i) => (
+                          <tr key={i} className="border-b border-border">
+                            <td className="py-2">{e.name}</td>
+                            <td className="py-2 tabular-nums">{e.flaecheQm ? `${e.flaecheQm} m²` : "—"}</td>
+                            <td className="py-2 tabular-nums">{formatCurrency(zuZahl(e.kaltmieteMonat) ?? 0)}</td>
+                            <td className="py-2">
+                              <StatusPille status={e.status} />
+                            </td>
+                            <td className="py-2 text-right">
+                              <button
+                                type="button"
+                                className="text-xs font-semibold text-primary hover:underline"
+                                onClick={() => {
+                                  setBearbeiteteEinheit(i);
+                                  setEinheitDialogOffen(true);
+                                }}
+                              >
+                                Bearbeiten
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                  {fehler.einheiten && <p className="mt-2 text-xs text-error">{fehler.einheiten}</p>}
+                </div>
+              )}
+
+              <div>
+                <p className="mb-2 text-sm font-medium">
+                  Laufende Kosten pro Monat (optional, nur nicht umlagefähige)
+                </p>
+                <div className="grid grid-cols-3 gap-3">
+                  {kostenFelder.map((typ) => (
+                    <div key={typ} className="flex flex-col gap-1.5">
+                      <Label htmlFor={`kosten-${typ}`}>{LAUFENDE_KOSTEN_LABEL[typ]}</Label>
+                      <div className="flex items-center gap-1.5">
+                        <Input
+                          id={`kosten-${typ}`}
+                          type="number"
+                          min={0}
+                          value={state.laufendeKosten[typ] ?? ""}
+                          onChange={(e) =>
+                            setState({
+                              ...state,
+                              laufendeKosten: { ...state.laufendeKosten, [typ]: e.target.value },
+                            })
+                          }
+                        />
+                        <span className="text-sm text-neutral-600">€</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="flex items-center gap-3 border-t border-border pt-6">
+            <Button variant="outline" onClick={zurueck} disabled={schritt === 1}>
+              Zurück
+            </Button>
+            <Button onClick={weiter} disabled={pending}>
+              {pending ? "Speichert …" : schritt === 3 ? "Speichern" : "Weiter"}
+            </Button>
+            <Button variant="ghost" onClick={abbrechen} className="text-primary">
+              Abbrechen
+            </Button>
+          </div>
+        </div>
+
+        {schritt >= 2 && (
+          <div className="h-fit border border-border p-4">
+            <p className="text-sm font-semibold">Vorschau</p>
+            <dl className="mt-3 flex flex-col gap-2 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-neutral-600">Bruttorendite</dt>
+                <dd className="tabular-nums">
+                  {bruttorenditeZahl !== null ? `${(bruttorenditeZahl * 100).toFixed(1)} %` : "—"}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-neutral-600">Annuität / Monat</dt>
+                <dd className="tabular-nums">{annuitaetZahl !== null ? formatCurrency(annuitaetZahl) : "—"}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-neutral-600">Cashflow / Monat</dt>
+                <dd className="tabular-nums">{formatCurrency(cashflowZahl)}</dd>
+              </div>
+            </dl>
+            <p className="mt-3 text-xs text-neutral-600">
+              Rechnet mit, sobald Kaufpreis, Miete und Finanzierung stehen. Keine Steuer- oder Anlageberatung.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <EinheitDialog
+        key={einheitDialogOffen ? `offen-${bearbeiteteEinheit ?? "neu"}` : "geschlossen"}
+        open={einheitDialogOffen}
+        onOpenChange={setEinheitDialogOffen}
+        initial={bearbeiteteEinheit !== null ? state.einheiten[bearbeiteteEinheit] : undefined}
+        onSave={(wert) => {
+          setState((s) => {
+            const einheiten = [...s.einheiten];
+            if (bearbeiteteEinheit !== null) {
+              einheiten[bearbeiteteEinheit] = wert;
+            } else {
+              einheiten.push(wert);
+            }
+            return { ...s, einheiten };
+          });
+        }}
+      />
+
+      <Dialog open={verwerfenOffen} onOpenChange={setVerwerfenOffen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Änderungen verwerfen?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-neutral-700">
+            Du hast Angaben gemacht, die noch nicht gespeichert sind. Verlässt du die Seite, sind sie weg.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setVerwerfenOffen(false)}>
+              Weiter bearbeiten
+            </Button>
+            <Button
+              variant="outline"
+              className="border-error text-error"
+              onClick={() => router.push("/uebersicht")}
+            >
+              Verwerfen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

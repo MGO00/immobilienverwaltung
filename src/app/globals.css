@@ -70,10 +70,13 @@
 
   --shadow-lg: 0 12px 32px rgba(45, 43, 43, 0.22);
 
-  /* Breakpoints exakt aus der README: Navigation wechselt bei 860px,
-     Kennzahlenband bei 1180px von 3 auf 5 Spalten. Ersetzt die
-     Tailwind-Standardwerte (768px / 1280px), da im Projekt nur diese
-     beiden Schwellen vorkommen. */
+  /* Breakpoints aus dem Prototyp-Code (nicht der abweichenden README-Prosa):
+     Navigation wechselt bei 860px. Bei 1180px ändert sich nur der Innenabstand
+     der Kennzahlenkacheln auf der Übersicht (bleiben immer 5 Spalten); erst
+     bei 860px werden sie zu einer horizontal scrollbaren Reihe. Den echten
+     3-auf-2-Spaltenwechsel bei 1180px gibt es nur beim Einheiten-Raster auf
+     der Detailseite. Ersetzt die Tailwind-Standardwerte (768px / 1280px), da
+     im Projekt nur diese beiden Schwellen vorkommen. */
   --breakpoint-md: 860px;
   --breakpoint-xl: 1180px;
 }
