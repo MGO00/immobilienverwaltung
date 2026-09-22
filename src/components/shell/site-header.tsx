@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { navLinks } from "./nav-links";
-import { UserMenu } from "./user-menu";
+import { UserMenu, type SessionUser } from "./user-menu";
 
-export function SiteHeader() {
+export function SiteHeader({ user }: { user: SessionUser | null }) {
   const pathname = usePathname();
 
   return (
@@ -40,7 +40,7 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <UserMenu />
+        <UserMenu user={user} />
       </div>
     </header>
   );
