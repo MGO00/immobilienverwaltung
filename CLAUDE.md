@@ -38,7 +38,10 @@ Dokumente und weitere Rechner.
 - Bei Widersprüchen zwischen README und Prototyp (Immobilienverwaltung.dc.html) gilt der Prototyp.
   Bekannte Fälle in runde-2: Die Navigation ist eine obere Leiste am Desktop und eine untere Leiste
   mobil (nicht, wie in der README steht, eine Sidebar). Der Assistent hat die Schritte 1 Objekt,
-  2 Kauf und Finanzierung, 3 Miete und Kosten.
+  2 Kauf und Finanzierung, 3 Miete und Kosten. Der Bearbeiten-Screen ist im Prototyp vereinfacht
+  (ein Adressfeld, ein Kostenfeld, ein Mietfeld) — die App folgt stattdessen dem Muster des
+  Assistenten: einzelne Adressfelder inkl. Bundesland, einzelne Kostenposten, Kaltmiete bei
+  Wohnung/Haus über die einzige Einheit, beim Mehrfamilienhaus über den Einheiten-Tab.
 - Die Design-Dateien sind Referenz, kein Produktionscode: nachbauen, nicht kopieren. Die
   Prototyp-Leiste (schwarzer Balken oben) gehört nicht zum Produkt.
 - Konkrete Werte (Farben, Größen, Radien, Abstände) stehen in der README der neuesten Runde und
@@ -78,8 +81,17 @@ Länder als Deutschland.
 - Jede Immobilie hat mindestens eine Einheit. Eigentumswohnung und Einfamilienhaus haben genau
   eine, nur beim Mehrfamilienhaus sieht der Nutzer die Einheitenliste.
 - Alle Fachtabellen tragen eine account_id. Später hängen Abos und weitere Nutzer am Konto.
+  unit, running_cost_item und note verweisen zusätzlich über einen verbundenen Fremdschlüssel
+  (property_id, account_id) auf property. Das verhindert auf Datenbankebene, dass ihre account_id
+  von der der zugehörigen Immobilie abweicht — unabhängig vom Zugriffsweg, nicht nur über
+  Zugriffsregeln (RLS) geprüft, die nur den Weg über die normale Anmeldung schützen.
+- Ein Konto ohne Mitglieder wird automatisch mitgelöscht, inklusive aller Immobilien darin —
+  verhindert verwaiste, für niemanden mehr erreichbare Daten (z. B. wenn der einzige Nutzer eines
+  Kontos gelöscht wird).
 - Kennzahlen (Rendite, Cashflow, Annuität, Leerstandsquote, Gesamtwert usw.) werden abgeleitet und
-  nie gespeichert.
+  nie gespeichert. Ausnahme: Kaufnebenkosten werden als fester Betrag gespeichert, nicht berechnet
+  — sie sind eine historische Tatsache zum Kaufzeitpunkt und dürfen sich nicht rückwirkend ändern,
+  wenn sich Steuersätze später ändern.
 - Mieter kommen später als eigene Tabellen an die Einheit, ohne bestehende Tabellen umzubauen.
 
 ## Fachliche Regeln und Rechner
