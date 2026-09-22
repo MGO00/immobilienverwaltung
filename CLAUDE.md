@@ -19,8 +19,12 @@ Dokumente und weitere Rechner.
 - Supabase (Postgres, Auth, Storage) in der EU-Region Frankfurt; Hosting auf Vercel; Stripe erst in
   einer späteren Stufe
 - Code-Bezeichner auf Englisch; Kommentare, Commit-Nachrichten und alle sichtbaren Texte auf Deutsch
-- Routen auf Deutsch: /anmelden, /uebersicht, /immobilien/neu, /immobilien/[id], /rechner,
+- Routen auf Deutsch: /anmelden, /registrieren, /passwort-vergessen, /email-bestaetigen,
+  /passwort-zuruecksetzen, /uebersicht, /immobilien/neu, /immobilien/[id], /rechner,
   /rechner/kaufnebenkosten, /einstellungen
+  (/passwort-zuruecksetzen ist kein eigenes Nav-Ziel, sondern das Ziel des Links aus der
+  Passwort-vergessen-E-Mail; im Prototyp nicht enthalten, aber ohne diesen Screen liefe der
+  Reset-Link ins Leere.)
 - Datenbankänderungen nur als Migrationsdateien im Repository (supabase/migrations), nie per Hand
   im Dashboard
 - Befehle zum Starten, Bauen und Prüfen (im Projektordner ausführen):
@@ -153,6 +157,10 @@ Länder als Deutschland.
 - Impressum, Datenschutzerklärung und AGB. Auftragsverarbeitungsverträge mit Supabase und Vercel.
 - Einmaliger Sicherheitsreview der Zugriffsregeln durch eine Fachperson.
 - Steuersätze und Rechenformeln erneut prüfen.
+- Eigenen Mailversand (SMTP) für Supabase Auth einrichten (z. B. über Resend, Postmark oder
+  SendGrid) und im Supabase-Dashboard unter Authentication > SMTP Settings eintragen. Der
+  eingebaute Mailversand ist auf wenige E-Mails pro Stunde begrenzt und nur für die Entwicklung
+  gedacht, nicht für den echten Betrieb.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
