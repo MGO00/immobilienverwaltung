@@ -17,8 +17,14 @@ export default async function FinanzierungPage({
 }: {
   searchParams: Promise<{ immobilie?: string }>;
 }) {
-  const { immobilie: immobilieId } = await searchParams;
+  const { immobilie: immobilieParam } = await searchParams;
   const supabase = await createClient();
+  // Der Objektbezug gilt nur für angemeldete Nutzer. Zusätzlich zu den
+  // Zugriffsregeln (RLS) wird bei fehlender Anmeldung gar nicht erst abgefragt.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const immobilieId = user ? immobilieParam : undefined;
   const immobilie = immobilieId ? await getImmobilie(supabase, immobilieId) : null;
 
   const vorbefuellung = immobilie
@@ -52,7 +58,7 @@ export default async function FinanzierungPage({
         </p>
       )}
 
-      <FinanzierungFormular vorbefuellung={vorbefuellung} immobilieId={immobilieId ?? null} />
+      <FinanzierungFormular vorbefuellung={vorbefuellung} immobilieId={immobilie?.id ?? null} />
     </div>
   );
 }

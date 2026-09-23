@@ -13,6 +13,19 @@ const PUBLIC_PATHS = [
   "/auth/confirm",
 ];
 
+// Öffentlich erreichbare Rechnerseiten (ohne Login, für Marketing/SEO). Bewusst
+// als exakte Pfade statt mit startsWith: Sonst wäre jede künftige Route unter
+// /rechner (z. B. ein weiterer Rechner) automatisch öffentlich. Die
+// Objektbezüge (?immobilie=...) bleiben trotzdem an die Anmeldung gebunden,
+// siehe die jeweiligen Seiten.
+const PUBLIC_EXACT_PATHS = [
+  "/rechner",
+  "/rechner/kaufnebenkosten",
+  "/rechner/rendite",
+  "/rechner/finanzierung",
+  "/rechner/cashflow",
+];
+
 // Angemeldete Nutzer sollen nicht zurück zu Anmelden/Registrieren können.
 // /passwort-zuruecksetzen bleibt bewusst ausgenommen: Nach Klick auf den
 // Recovery-Link aus der E-Mail setzt Supabase eine temporäre Session, und
@@ -23,7 +36,10 @@ export async function proxy(request: NextRequest) {
   const { response, user } = await updateSession(request);
   const path = request.nextUrl.pathname;
 
-  const isPublicPath = PUBLIC_PATHS.some((publicPath) => path.startsWith(publicPath));
+  const normalizedPath = path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
+  const isPublicPath =
+    PUBLIC_PATHS.some((publicPath) => path.startsWith(publicPath)) ||
+    PUBLIC_EXACT_PATHS.includes(normalizedPath);
 
   if (!user && !isPublicPath) {
     return NextResponse.redirect(new URL("/anmelden", request.url));

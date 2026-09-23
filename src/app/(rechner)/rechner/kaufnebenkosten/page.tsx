@@ -9,8 +9,14 @@ export default async function KaufnebenkostenPage({
 }: {
   searchParams: Promise<{ immobilie?: string }>;
 }) {
-  const { immobilie: immobilieId } = await searchParams;
+  const { immobilie: immobilieParam } = await searchParams;
   const supabase = await createClient();
+  // Der Objektbezug gilt nur für angemeldete Nutzer. Zusätzlich zu den
+  // Zugriffsregeln (RLS) wird bei fehlender Anmeldung gar nicht erst abgefragt.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const immobilieId = user ? immobilieParam : undefined;
   const immobilie = immobilieId ? await getImmobilie(supabase, immobilieId) : null;
 
   return (

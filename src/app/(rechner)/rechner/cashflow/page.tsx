@@ -10,8 +10,14 @@ export default async function CashflowPage({
 }: {
   searchParams: Promise<{ immobilie?: string; rate?: string }>;
 }) {
-  const { immobilie: immobilieId, rate: rateParam } = await searchParams;
+  const { immobilie: immobilieParam, rate: rateParam } = await searchParams;
   const supabase = await createClient();
+  // Der Objektbezug gilt nur für angemeldete Nutzer. Zusätzlich zu den
+  // Zugriffsregeln (RLS) wird bei fehlender Anmeldung gar nicht erst abgefragt.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const immobilieId = user ? immobilieParam : undefined;
 
   let objektName: string | null = null;
   let initial = {
