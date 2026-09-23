@@ -11,7 +11,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label="Hauptnavigation"
-      className="sticky bottom-0 z-40 grid grid-cols-3 border-t border-border bg-background md:hidden"
+      className="sticky bottom-0 z-40 grid grid-cols-4 border-t border-border bg-background md:hidden"
     >
       {navLinks.map((link) => {
         const isActive = pathname.startsWith(link.href);
