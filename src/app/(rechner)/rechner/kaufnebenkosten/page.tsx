@@ -3,6 +3,9 @@ import { ArrowLeft } from "lucide-react";
 import { getImmobilie } from "@/lib/data/immobilie-detail";
 import { createClient } from "@/lib/supabase/server";
 import { KaufnebenkostenFormular } from "./formular";
+import { rechnerMetadata } from "@/lib/seo/rechner";
+
+export const metadata = rechnerMetadata("kaufnebenkosten");
 
 export default async function KaufnebenkostenPage({
   searchParams,

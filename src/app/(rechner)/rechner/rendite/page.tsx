@@ -4,6 +4,9 @@ import { getEinheiten, getImmobilie, getLaufendeKosten } from "@/lib/data/immobi
 import { kaltmieteMonatVermietet } from "@/lib/calculators/immobilie";
 import { createClient } from "@/lib/supabase/server";
 import { RenditeFormular } from "./formular";
+import { rechnerMetadata } from "@/lib/seo/rechner";
+
+export const metadata = rechnerMetadata("rendite");
 
 export default async function RenditePage({
   searchParams,

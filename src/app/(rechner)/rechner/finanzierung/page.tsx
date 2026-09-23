@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { getImmobilie } from "@/lib/data/immobilie-detail";
 import { createClient } from "@/lib/supabase/server";
 import { FinanzierungFormular } from "./formular";
+import { rechnerMetadata } from "@/lib/seo/rechner";
 
 function zinsbindungJahre(kaufdatum: string | null, zinsbindungBis: string | null): string {
   if (!kaufdatum || !zinsbindungBis) return "10";
@@ -11,6 +12,8 @@ function zinsbindungJahre(kaufdatum: string | null, zinsbindungBis: string | nul
   );
   return jahre > 0 ? String(jahre) : "10";
 }
+
+export const metadata = rechnerMetadata("finanzierung");
 
 export default async function FinanzierungPage({
   searchParams,

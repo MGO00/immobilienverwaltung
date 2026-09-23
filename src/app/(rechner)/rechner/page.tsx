@@ -1,4 +1,7 @@
 import { RechnerKarten } from "@/components/rechner/rechner-karten";
+import { rechnerMetadata } from "@/lib/seo/rechner";
+
+export const metadata = rechnerMetadata("uebersicht");
 
 export default function RechnerPage() {
   return (

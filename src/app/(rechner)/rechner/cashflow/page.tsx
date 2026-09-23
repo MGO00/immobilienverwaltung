@@ -4,6 +4,9 @@ import { annuitaetMonat, kaltmieteMonatVermietet } from "@/lib/calculators/immob
 import { getEinheiten, getImmobilie, getLaufendeKosten } from "@/lib/data/immobilie-detail";
 import { createClient } from "@/lib/supabase/server";
 import { CashflowFormular } from "./formular";
+import { rechnerMetadata } from "@/lib/seo/rechner";
+
+export const metadata = rechnerMetadata("cashflow");
 
 export default async function CashflowPage({
   searchParams,
