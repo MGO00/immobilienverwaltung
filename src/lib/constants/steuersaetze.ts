@@ -25,6 +25,14 @@ export const BUNDESLAENDER = Object.keys(GRUNDERWERBSTEUER_PROZENT) as ReadonlyA
   keyof typeof GRUNDERWERBSTEUER_PROZENT
 >;
 
+// Notar-, Grundbuch- und Makler-Erfahrungswerte (keine Gesetzessätze wie die
+// Grunderwerbsteuer, sondern bundesweit übliche Richtwerte für die Vorbefüllung
+// im Kaufnebenkosten-Rechner — im Formular vom Nutzer änderbar).
+// Stand: 2026-09-23. Vor der Veröffentlichung gegen aktuelle Marktwerte prüfen.
+export const NOTAR_PROZENT_STANDARD = 1.5;
+export const GRUNDBUCH_PROZENT_STANDARD = 0.5;
+export const MAKLER_PROZENT_STANDARD = 3.57;
+
 export function bundeslandLabel(bundesland: string): string {
   const satz = GRUNDERWERBSTEUER_PROZENT[bundesland];
   if (satz === undefined) {

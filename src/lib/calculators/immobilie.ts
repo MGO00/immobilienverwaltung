@@ -51,7 +51,7 @@ export function eigenkapital(gesamtinvestitionWert: number, darlehenBetrag: numb
 }
 
 export function beleihungsauslauf(darlehenBetrag: number | null, kaufpreis: number): number | null {
-  if (!darlehenBetrag || kaufpreis <= 0) return null;
+  if (darlehenBetrag === null || kaufpreis <= 0) return null;
   return (darlehenBetrag / kaufpreis) * 100;
 }
 
@@ -60,7 +60,7 @@ export function annuitaetMonat(
   sollzinsProzent: number | null,
   tilgungProzent: number | null,
 ): number | null {
-  if (!darlehenBetrag || sollzinsProzent === null || tilgungProzent === null) return null;
+  if (darlehenBetrag === null || sollzinsProzent === null || tilgungProzent === null) return null;
   return (darlehenBetrag * (sollzinsProzent + tilgungProzent)) / 100 / 12;
 }
 
