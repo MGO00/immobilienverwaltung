@@ -13,12 +13,14 @@ const PUBLIC_PATHS = [
   "/auth/confirm",
 ];
 
-// Öffentlich erreichbare Rechnerseiten (ohne Login, für Marketing/SEO). Bewusst
+// Öffentlich erreichbare Seiten (ohne Login, für Marketing/SEO): die Startseite
+// "/" und die Rechnerseiten. Bewusst
 // als exakte Pfade statt mit startsWith: Sonst wäre jede künftige Route unter
 // /rechner (z. B. ein weiterer Rechner) automatisch öffentlich. Die
 // Objektbezüge (?immobilie=...) bleiben trotzdem an die Anmeldung gebunden,
 // siehe die jeweiligen Seiten.
 const PUBLIC_EXACT_PATHS = [
+  "/",
   "/rechner",
   "/rechner/kaufnebenkosten",
   "/rechner/rendite",
@@ -43,6 +45,12 @@ export async function proxy(request: NextRequest) {
 
   if (!user && !isPublicPath) {
     return NextResponse.redirect(new URL("/anmelden", request.url));
+  }
+
+  // Startseite: nur für Besucher ohne Anmeldung. Angemeldete gehen direkt zur
+  // Übersicht (schon hier im Proxy, damit die Startseite gar nicht erst lädt).
+  if (user && normalizedPath === "/") {
+    return NextResponse.redirect(new URL("/uebersicht", request.url));
   }
 
   if (user && AUTH_ONLY_PATHS.some((authOnlyPath) => path.startsWith(authOnlyPath))) {

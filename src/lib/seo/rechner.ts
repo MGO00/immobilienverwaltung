@@ -47,3 +47,14 @@ const SEITEN: Record<RechnerSeite, { title: string; description: string }> = {
 export function rechnerMetadata(seite: RechnerSeite): Metadata {
   return { title: SEITEN[seite].title, description: SEITEN[seite].description };
 }
+
+// Die öffentliche Startseite folgt demselben Schalter wie die Rechner: noindex, bis das
+// Impressum fertig ist.
+export function startseiteMetadata(): Metadata {
+  return {
+    title: `Immobilien-Rechner und Verwaltung für private Vermieter | ${MARKE}`,
+    description:
+      "Vier kostenlose Rechner für Kaufnebenkosten, Rendite, Finanzierung und Cashflow. Mit Konto speicherst du deine Immobilien und behältst Mieten, Kosten und Darlehen im Blick.",
+    robots: RECHNER_ROBOTS,
+  };
+}
