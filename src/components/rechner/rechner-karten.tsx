@@ -29,11 +29,15 @@ export const RECHNER = [
   },
 ] as const;
 
-export function RechnerKarten({ immobilieId }: { immobilieId?: string }) {
+export function RechnerKarten({ immobilieId, interessentId }: { immobilieId?: string; interessentId?: string }) {
   return (
     <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
       {RECHNER.map((rechner) => {
-        const href = immobilieId ? `/rechner/${rechner.slug}?immobilie=${immobilieId}` : `/rechner/${rechner.slug}`;
+        const href = immobilieId
+          ? `/rechner/${rechner.slug}?immobilie=${immobilieId}`
+          : interessentId
+            ? `/rechner/${rechner.slug}?interessent=${interessentId}`
+            : `/rechner/${rechner.slug}`;
         return (
           <div key={rechner.nr} className="border border-border p-4">
             <div className="flex items-center justify-between">

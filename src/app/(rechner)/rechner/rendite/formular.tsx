@@ -23,9 +23,11 @@ function zuZahl(wert: string): number | null {
 export function RenditeFormular({
   vorbefuellung,
   immobilieId,
+  interessentId = null,
 }: {
   vorbefuellung: Vorbefuellung;
   immobilieId: string | null;
+  interessentId?: string | null;
 }) {
   const [kaufpreis, setKaufpreis] = useState(vorbefuellung ? String(vorbefuellung.kaufpreis) : "");
   const [kaufnebenkosten, setKaufnebenkosten] = useState(
@@ -45,7 +47,11 @@ export function RenditeFormular({
   const netto = nettorendite(jahreskaltmieteWert, kostenZahl * 12, gesamtinvestitionWert);
   const faktor = kaufpreisfaktor(kaufpreisZahl, jahreskaltmieteWert);
 
-  const kaufnebenkostenHref = immobilieId ? `/rechner/kaufnebenkosten?immobilie=${immobilieId}` : "/rechner/kaufnebenkosten";
+  const kaufnebenkostenHref = immobilieId
+    ? `/rechner/kaufnebenkosten?immobilie=${immobilieId}`
+    : interessentId
+      ? `/rechner/kaufnebenkosten?interessent=${interessentId}`
+      : "/rechner/kaufnebenkosten";
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-[0.9fr_1.1fr]">

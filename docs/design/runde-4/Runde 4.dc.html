@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/modernist-6b28d4d7-acc9-4291-a5fa-485299cca693/styles.css">
+<style>
+  html, body { margin: 0; background: #e6e5e3; }
+  a { color: #14756b; }
+  a:hover { color: #0a4a44; }
+</style>
+</helmet>
+
+<section style="padding: 48px; display: flex; flex-direction: column; gap: 24px; font-family: var(--font-body); color: var(--color-text);">
+  <div style="max-width: 720px;">
+    <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-700);">Runde 4 · Schritt 1 von 4</div>
+    <h1 style="font-size: 25px; font-weight: 600; margin: 6px 0 0;">Startseite für Besucher</h1>
+    <p style="margin: 6px 0 0; font-size: 14px; color: var(--color-neutral-700);">Als Nächstes: Ressourcen-Übersicht und Grunderwerbsteuer, dann Glossar, dann Tipps &amp; Tricks.</p>
+  </div>
+  <div style="display: flex; gap: 48px; align-items: flex-start;">
+    <div id="4a" style="display: flex; flex-direction: column; gap: 10px;">
+      <span style="align-self: flex-start; padding: 3px 8px; background: #201e1d; color: #fff; font-size: 12px; font-family: var(--font-heading); font-weight: 600;">4a · Desktop 1280</span>
+      <div style="width: 1280px; background: #fff; box-shadow: var(--shadow-md);">
+        <dc-import name="Website" hint-size="1280px,2600px"></dc-import>
+      </div>
+    </div>
+    <div id="4b" style="display: flex; flex-direction: column; gap: 10px;">
+      <span style="align-self: flex-start; padding: 3px 8px; background: #201e1d; color: #fff; font-size: 12px; font-family: var(--font-heading); font-weight: 600;">4b · Mobil 390</span>
+      <div style="width: 390px; background: #fff; box-shadow: var(--shadow-md);">
+        <dc-import name="Website" hint-size="390px,4200px"></dc-import>
+      </div>
+    </div>
+    <div id="4c" style="display: flex; flex-direction: column; gap: 10px;">
+      <span style="align-self: flex-start; padding: 3px 8px; background: #201e1d; color: #fff; font-size: 12px; font-family: var(--font-heading); font-weight: 600;">4c · Mobil, Menü offen</span>
+      <div style="width: 390px; height: 760px; overflow: hidden; background: #fff; box-shadow: var(--shadow-md);">
+        <dc-import name="Website" menu-offen="{{ true }}" hint-size="390px,760px"></dc-import>
+      </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+</body>
+</html>

@@ -101,7 +101,7 @@ export function InteressentFormular({
     <div className="mx-auto max-w-[720px]">
       <h1 className="text-[25px] leading-[1.12] font-semibold tracking-[-0.015em]">{titel}</h1>
       <p className="mt-1 text-sm text-neutral-600">
-        Eine erste, grobe Einschätzung — nur Kaufpreis und Bezeichnung sind Pflicht.
+        Eine erste, grobe Einschätzung — nur Objektart, Bezeichnung und Kaufpreis sind Pflicht.
       </p>
 
       {fehlerListe.length > 0 && (

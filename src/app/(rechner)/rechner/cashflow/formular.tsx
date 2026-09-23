@@ -24,7 +24,15 @@ function zuZahl(wert: string): number | null {
   return Number.isFinite(zahl) ? zahl : null;
 }
 
-export function CashflowFormular({ initial, darlehenKontext }: { initial: Initial; darlehenKontext: DarlehenKontext }) {
+export function CashflowFormular({
+  initial,
+  darlehenKontext,
+  mitLeerstandFeld,
+}: {
+  initial: Initial;
+  darlehenKontext: DarlehenKontext;
+  mitLeerstandFeld: boolean;
+}) {
   const [kaltmiete, setKaltmiete] = useState(initial.kaltmieteMonat);
   const [kosten, setKosten] = useState(initial.kostenMonat);
   const [ruecklage, setRuecklage] = useState(initial.ruecklageMonat);
@@ -38,9 +46,10 @@ export function CashflowFormular({ initial, darlehenKontext }: { initial: Initia
   const verwaltungZahl = zuZahl(verwaltung) ?? 0;
   const rateZahl = zuZahl(rate) ?? 0;
 
-  // Das Leerstand-Feld gibt es nur ohne Objektbezug; mit Objekt zählen die echten
-  // Einheiten-Ist-Daten, die schon in die vorbefüllte Kaltmiete eingeflossen sind.
-  const mitLeerstandFeld = darlehenKontext === null;
+  // Das Leerstand-Feld gibt es nur ohne Bestandsobjekt (mitLeerstandFeld); mit
+  // Objekt zählen die echten Einheiten-Ist-Daten, die schon in die vorbefüllte
+  // Kaltmiete eingeflossen sind. Getrennt von darlehenKontext, weil auch ein
+  // Interessent Darlehensdaten (für "Davon Tilgung") ohne echte Einheiten hat.
   const leerstandProzent = mitLeerstandFeld ? begrenzeLeerstandProzent(zuZahl(leerstand)) : 0;
   const kaltmieteEffektiv = kaltmieteNachLeerstand(kaltmieteZahl, leerstandProzent);
   const leerstandAbzug = kaltmieteZahl - kaltmieteEffektiv;

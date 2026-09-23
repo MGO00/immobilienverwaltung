@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { annuitaetMonat, kaltmieteMonatVermietet } from "@/lib/calculators/immobilie";
 import { getEinheiten, getImmobilie, getLaufendeKosten } from "@/lib/data/immobilie-detail";
+import { getInteressent } from "@/lib/data/interessenten";
 import { createClient } from "@/lib/supabase/server";
 import { CashflowFormular } from "./formular";
 import { rechnerMetadata } from "@/lib/seo/rechner";
@@ -11,9 +12,9 @@ export const metadata = rechnerMetadata("cashflow");
 export default async function CashflowPage({
   searchParams,
 }: {
-  searchParams: Promise<{ immobilie?: string; rate?: string }>;
+  searchParams: Promise<{ immobilie?: string; interessent?: string; rate?: string }>;
 }) {
-  const { immobilie: immobilieParam, rate: rateParam } = await searchParams;
+  const { immobilie: immobilieParam, interessent: interessentParam, rate: rateParam } = await searchParams;
   const supabase = await createClient();
   // Der Objektbezug gilt nur für angemeldete Nutzer. Zusätzlich zu den
   // Zugriffsregeln (RLS) wird bei fehlender Anmeldung gar nicht erst abgefragt.
@@ -54,10 +55,29 @@ export default async function CashflowPage({
     }
   }
 
+  // Interessent aus der Kaufprüfung: erwartete Miete und geplante Rate vorbefüllen.
+  // Laufende Kosten sind dort nicht erfasst; es gibt keine echten Einheiten, deshalb
+  // bleibt das Leerstand-Feld sichtbar.
+  let interessentId: string | null = null;
+  if (user && !immobilieId && interessentParam) {
+    const interessent = await getInteressent(supabase, interessentParam);
+    if (interessent) {
+      objektName = interessent.bezeichnung;
+      interessentId = interessent.id;
+      const rate = annuitaetMonat(interessent.darlehenBetrag, interessent.sollzinsProzent, interessent.tilgungProzent);
+      initial = {
+        ...initial,
+        kaltmieteMonat: interessent.kaltmieteMonat !== null ? String(interessent.kaltmieteMonat) : "",
+        rateMonat: rate !== null ? String(rate) : "",
+      };
+      darlehenKontext = { darlehenBetrag: interessent.darlehenBetrag, sollzinsProzent: interessent.sollzinsProzent };
+    }
+  }
+
   return (
     <div className="px-6 py-8">
       <Link
-        href={immobilieId && objektName ? `/immobilien/${immobilieId}/rechner` : "/rechner"}
+        href={immobilieId && objektName ? `/immobilien/${immobilieId}/rechner` : interessentId ? `/kaufpruefung/${interessentId}` : "/rechner"}
         className="flex items-center gap-1.5 text-xs font-semibold tracking-[0.06em] text-foreground uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <ArrowLeft className="size-3.5" />
@@ -65,7 +85,11 @@ export default async function CashflowPage({
       </Link>
       <h1 className="mt-3 text-[25px] leading-[1.12] font-semibold tracking-[-0.015em]">Cashflow</h1>
 
-      <CashflowFormular initial={initial} darlehenKontext={darlehenKontext} />
+      <CashflowFormular
+        initial={initial}
+        darlehenKontext={darlehenKontext}
+        mitLeerstandFeld={!immobilieId || objektName === null}
+      />
     </div>
   );
 }

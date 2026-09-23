@@ -39,9 +39,11 @@ function parseDatumInput(wert: string): Date {
 export function FinanzierungFormular({
   vorbefuellung,
   immobilieId,
+  interessentId = null,
 }: {
   vorbefuellung: Vorbefuellung;
   immobilieId: string | null;
+  interessentId?: string | null;
 }) {
   const [kaufpreis, setKaufpreis] = useState(vorbefuellung ? String(vorbefuellung.kaufpreis) : "");
   const [kaufnebenkosten, setKaufnebenkosten] = useState(
@@ -75,7 +77,11 @@ export function FinanzierungFormular({
   const planJaehrlich = tilgungsplanJaehrlich(planMonatlich);
   const zinsenInZinsbindung = planMonatlich.reduce((s, m) => s + m.zinsanteil, 0);
 
-  const cashflowHref = immobilieId ? `/rechner/cashflow?immobilie=${immobilieId}` : `/rechner/cashflow?rate=${rate?.toFixed(2) ?? ""}`;
+  const cashflowHref = immobilieId
+    ? `/rechner/cashflow?immobilie=${immobilieId}`
+    : interessentId
+      ? `/rechner/cashflow?interessent=${interessentId}`
+      : `/rechner/cashflow?rate=${rate?.toFixed(2) ?? ""}`;
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-[0.9fr_1.1fr]">

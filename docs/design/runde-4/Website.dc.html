@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/modernist-6b28d4d7-acc9-4291-a5fa-485299cca693/styles.css">
+<script src="_ds/modernist-6b28d4d7-acc9-4291-a5fa-485299cca693/_ds_bundle.js"></script>
+<style>
+  html, body { margin: 0; }
+  .pub {
+    container-type: inline-size;
+    --color-divider: color-mix(in srgb, #201e1d 15%, transparent);
+    --color-bg: #ffffff;
+    --color-accent: #14756b;
+    --color-accent-100: #eaf5f3; --color-accent-200: #cfe8e4; --color-accent-300: #a3d3cc;
+    --color-accent-400: #5fb3a8; --color-accent-500: #1f8b7e; --color-accent-600: #0f6058;
+    --color-accent-700: #0a4a44; --color-accent-800: #083831; --color-accent-900: #062a25;
+    --color-error: #b3261e;
+    font-family: var(--font-body); color: var(--color-text); background: var(--color-bg);
+  }
+  .pub a { color: var(--color-accent); }
+  .pub a:hover { color: var(--color-accent-700); }
+  .pub .btn-primary, .pub .btn-primary:hover { color: #ffffff; }
+  .pub .num { font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-left: var(--space-6); padding-right: var(--space-6); box-sizing: border-box; }
+  .sec { padding-top: 64px; padding-bottom: 64px; }
+  .navmob { display: none; }
+  .hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 56px; align-items: center; }
+  .hero-h1 { font-size: clamp(30px, 3.4cqi, 42px); line-height: 1.08; letter-spacing: -0.02em; font-weight: 600; margin: 0; text-wrap: balance; }
+  .g4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 56px; }
+  .mail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-8); align-items: end; }
+  .formrow { display: flex; gap: var(--space-2); align-items: stretch; }
+  @container (max-width: 1000px) { .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @container (max-width: 760px) {
+    .navlinks { display: none !important; }
+    .navmob { display: flex; }
+    .wrap { padding-left: var(--space-4); padding-right: var(--space-4); }
+    .sec { padding-top: 44px; padding-bottom: 44px; }
+    .hero, .split, .mail { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
+    .g4 { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+    .hero-h1 { font-size: 30px; }
+    .formrow { flex-direction: column; }
+  }
+</style>
+</helmet>
+
+<div class="pub" style="min-height: 100%;">
+
+  <header style="border-bottom: 1px solid var(--color-divider); background: var(--color-bg); position: sticky; top: 0; z-index: 5;">
+    <div class="wrap" style="display: flex; align-items: center; gap: var(--space-6); min-height: 60px;">
+      <a href="#start" style="margin-right: auto; color: var(--color-text); text-decoration: none; white-space: nowrap; font-family: var(--font-heading); font-weight: 600; font-size: 16px; letter-spacing: -0.02em;">Immobilien<span style="font-weight: 400;">verwaltung</span></a>
+      <nav class="navlinks" style="display: flex; align-items: center; gap: var(--space-6);">
+        <a href="#rechner" style="color: var(--color-text); text-decoration: none; font-size: 14px;">Rechner</a>
+        <a href="#tipps" style="color: var(--color-text); text-decoration: none; font-size: 14px;">Tipps &amp; Tricks</a>
+        <a href="#ressourcen" style="color: var(--color-text); text-decoration: none; font-size: 14px;">Ressourcen</a>
+        <span style="width: 1px; height: 20px; background: var(--color-divider);"></span>
+        <a href="#anmelden" style="color: var(--color-text); text-decoration: none; font-size: 14px;">Anmelden</a>
+        <a href="#registrieren" class="btn btn-primary" style="text-decoration: none;">Registrieren</a>
+      </nav>
+      <div class="navmob" style="align-items: center; gap: var(--space-2);">
+        <a href="#registrieren" class="btn btn-primary" style="text-decoration: none; min-height: 40px; padding: 0 12px; font-size: 13px;">Registrieren</a>
+        <button type="button" onClick="{{ toggleMenu }}" aria-label="Menü" style="width: 44px; height: 44px; display: grid; place-items: center; background: transparent; border: 1px solid var(--color-divider); cursor: pointer; color: var(--color-text);">
+          <sc-if value="{{ menuZu }}" hint-placeholder-val="{{ true }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+          </sc-if>
+          <sc-if value="{{ menuOffen }}" hint-placeholder-val="{{ false }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </sc-if>
+        </button>
+      </div>
+    </div>
+    <sc-if value="{{ menuOffen }}" hint-placeholder-val="{{ false }}">
+      <div class="navmob wrap" style="flex-direction: column; border-top: 1px solid var(--color-divider); padding-bottom: var(--space-4);">
+        <a href="#rechner" style="display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--color-divider); color: var(--color-text); text-decoration: none; font-size: 15px;">Rechner</a>
+        <a href="#tipps" style="display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--color-divider); color: var(--color-text); text-decoration: none; font-size: 15px;">Tipps &amp; Tricks</a>
+        <a href="#ressourcen" style="display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--color-divider); color: var(--color-text); text-decoration: none; font-size: 15px;">Ressourcen</a>
+        <a href="#anmelden" style="display: flex; align-items: center; min-height: 48px; color: var(--color-text); text-decoration: none; font-size: 15px;">Anmelden</a>
+      </div>
+    </sc-if>
+  </header>
+
+  <section class="wrap sec hero">
+    <div>
+      <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-700); margin-bottom: var(--space-3);">Für private Vermieter</div>
+      <h1 class="hero-h1">Rechne deine Immobilie durch, bevor du unterschreibst.</h1>
+      <p style="margin: var(--space-4) 0 0; font-size: 17px; line-height: 1.55; color: var(--color-neutral-800); max-width: 520px; text-wrap: pretty;">Vier kostenlose Rechner für Kaufnebenkosten, Rendite, Finanzierung und Cashflow. Mit Konto speicherst du deine Objekte und behältst Mieten, Kosten und Darlehen an einem Ort im Blick.</p>
+      <div style="display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6);">
+        <a href="#rechner" class="btn btn-primary" style="text-decoration: none; white-space: nowrap;">
+          <span>Rechner kostenlos nutzen</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+        <a href="#registrieren" class="btn btn-secondary" style="text-decoration: none; white-space: nowrap; color: var(--color-text);">Kostenlos registrieren</a>
+      </div>
+      <p style="margin: var(--space-3) 0 0; font-size: 12px; color: var(--color-neutral-700);">Rechner ohne Konto. Konto kostenlos für bis zu 5 Immobilien.</p>
+    </div>
+
+    <figure style="margin: 0; border: 1px solid var(--color-divider); border-radius: 10px; padding: var(--space-6);">
+      <figcaption style="display: flex; justify-content: space-between; gap: var(--space-3); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-700); margin-bottom: var(--space-4);">
+        <span>Beispielrechnung</span><span>Rechner 01</span>
+      </figcaption>
+      <div class="num" style="font-size: 14px;">
+        <div style="display: flex; justify-content: space-between; gap: var(--space-3); padding: 7px 0; border-bottom: 1px solid var(--color-divider);"><span style="color: var(--color-neutral-700);">Kaufpreis</span><span>189.000 €</span></div>
+        <div style="display: flex; justify-content: space-between; gap: var(--space-3); padding: 7px 0; border-bottom: 1px solid var(--color-divider);"><span style="color: var(--color-neutral-700);">Bundesland</span><span>Bayern</span></div>
+        <div style="display: flex; justify-content: space-between; gap: var(--space-3); padding: 7px 0; border-bottom: 1px solid var(--color-divider);"><span>Grunderwerbsteuer <span style="color: var(--color-neutral-700);">3,5 %</span></span><span>6.615 €</span></div>
+        <div style="display: flex; justify-content: space-between; gap: var(--space-3); padding: 7px 0; border-bottom: 1px solid var(--color-divider);"><span>Notar und Grundbuch <span style="color: var(--color-neutral-700);">2,0 %</span></span><span>3.780 €</span></div>
+        <div style="display: flex; justify-content: space-between; gap: var(--space-3); padding: 7px 0; border-bottom: 1px solid var(--color-divider);"><span>Makler <span style="color: var(--color-neutral-700);">3,57 %</span></span><span>6.747 €</span></div>
+      </div>
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-4);">
+        <div>
+          <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">Kaufnebenkosten</div>
+          <div class="num" style="font-size: 12px; color: var(--color-neutral-700);">9,07 % des Kaufpreises</div>
+        </div>
+        <div class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 30px; letter-spacing: -0.02em; color: var(--color-accent); white-space: nowrap;">17.142 €</div>
+      </div>
+    </figure>
+  </section>
+
+  <section id="rechner" class="wrap sec" style="border-top: 1px solid var(--color-divider);">
+    <div style="margin-bottom: var(--space-6); max-width: 620px;">
+      <h2 style="font-size: 21px; font-weight: 600; margin: 0;">Vier Rechner, ohne Anmeldung</h2>
+      <p style="margin: 6px 0 0; font-size: 14px; color: var(--color-neutral-700); text-wrap: pretty;">Jeder Rechner funktioniert für sich. Mit Konto übernimmst du die Werte direkt in eine Immobilie.</p>
+    </div>
+    <div class="g4">
+      <sc-for list="{{ rechner }}" as="r" hint-placeholder-count="4">
+        <a href="{{ r.href }}" style="display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); border: 1px solid var(--color-divider); border-radius: 10px; color: var(--color-text); text-decoration: none;" style-hover="border-color: var(--color-neutral-500); color: var(--color-text);">
+          <span class="num" style="font-size: 12px; color: var(--color-neutral-700);">{{ r.nr }}</span>
+          <span style="font-family: var(--font-heading); font-weight: 600; font-size: 17px;">{{ r.titel }}</span>
+          <span style="font-size: 13px; line-height: 1.5; color: var(--color-neutral-800); flex: 1; text-wrap: pretty;">{{ r.text }}</span>
+          <span style="display: flex; align-items: center; gap: 4px; margin-top: var(--space-2); font-family: var(--font-heading); font-weight: 600; font-size: 13px;">Rechner öffnen
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+          </span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+
+  <section class="wrap sec" style="border-top: 1px solid var(--color-divider);">
+    <div style="margin-bottom: var(--space-6); max-width: 620px;">
+      <h2 style="font-size: 21px; font-weight: 600; margin: 0;">So funktioniert's</h2>
+      <p style="margin: 6px 0 0; font-size: 14px; color: var(--color-neutral-700); text-wrap: pretty;">Aus einer Rechnung wird eine Immobilie, die du laufend pflegst.</p>
+    </div>
+    <ol class="g4" style="list-style: none; margin: 0; padding: 0; gap: var(--space-6);">
+      <sc-for list="{{ schritte }}" as="s" hint-placeholder-count="4">
+        <li style="border-top: 1px solid var(--color-text); padding-top: var(--space-3);">
+          <div class="num" style="font-family: var(--font-heading); font-weight: 600; font-size: 13px; color: var(--color-neutral-700);">{{ s.nr }}</div>
+          <div style="font-family: var(--font-heading); font-weight: 600; font-size: 17px; margin-top: var(--space-2);">{{ s.titel }}</div>
+          <p style="margin: 6px 0 0; font-size: 13px; line-height: 1.55; color: var(--color-neutral-800); text-wrap: pretty;">{{ s.text }}</p>
+        </li>
+      </sc-for>
+    </ol>
+  </section>
+
+  <section class="wrap sec split" style="border-top: 1px solid var(--color-divider);">
+    <div>
+      <h2 style="font-size: 21px; font-weight: 600; margin: 0;">Häufige Fragen</h2>
+      <p style="margin: 6px 0 0; font-size: 14px; color: var(--color-neutral-700); text-wrap: pretty;">Weitere Antworten per E-Mail an hallo@example.de.</p>
+    </div>
+    <div style="border-top: 1px solid var(--color-divider);">
+      <sc-for list="{{ faq }}" as="f" hint-placeholder-count="6">
+        <div style="border-bottom: 1px solid var(--color-divider);">
+          <button type="button" onClick="{{ f.toggle }}" aria-expanded="{{ f.offen }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: 56px; padding: var(--space-3) 0; background: transparent; border: 0; font: inherit; text-align: left; color: var(--color-text); cursor: pointer;">
+            <span style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">{{ f.frage }}</span>
+            <sc-if value="{{ f.zu }}" hint-placeholder-val="{{ true }}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex: none;"><path d="M12 5v14M5 12h14"></path></svg>
+            </sc-if>
+            <sc-if value="{{ f.offen }}" hint-placeholder-val="{{ false }}">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex: none;"><path d="M5 12h14"></path></svg>
+            </sc-if>
+          </button>
+          <sc-if value="{{ f.offen }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 0; padding: 0 var(--space-8) var(--space-4) 0; font-size: 14px; line-height: 1.6; color: var(--color-neutral-800); max-width: 640px; text-wrap: pretty;">{{ f.antwort }}</p>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section class="wrap" style="padding-bottom: 64px;">
+    <div class="mail" style="border: 1px solid var(--color-divider); border-radius: 10px; padding: var(--space-6);">
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-700); margin-bottom: var(--space-2);">E-Mail-Liste</div>
+        <h2 style="font-size: 21px; font-weight: 600; margin: 0;">Neuigkeiten per E-Mail</h2>
+        <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: var(--color-neutral-800); max-width: 440px; text-wrap: pretty;">Einmal im Monat: neue Rechner, Ressourcen und Tipps. Das ist kein Konto — dafür gibt es die Registrierung.</p>
+      </div>
+      <div>
+        <sc-if value="{{ mailFormular }}" hint-placeholder-val="{{ true }}">
+          <div class="field" style="margin: 0;">
+            <label for="nlMail">E-Mail-Adresse</label>
+            <div class="formrow">
+              <input id="nlMail" class="input" type="email" placeholder="name@beispiel.de" value="{{ mail }}" onChange="{{ onMail }}" style="{{ mailInputStil }}">
+              <button type="button" class="btn btn-secondary" onClick="{{ abonnieren }}" style="white-space: nowrap; color: var(--color-text);">Auf dem Laufenden bleiben</button>
+            </div>
+            <sc-if value="{{ mailFehler }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 12px; color: var(--color-error); margin-top: 6px;">Bitte gib eine gültige E-Mail-Adresse ein.</div>
+            </sc-if>
+            <div style="font-size: 12px; color: var(--color-neutral-700); margin-top: 6px;">Abmelden jederzeit über den Link in jeder E-Mail. Details in der <a href="#datenschutz">Datenschutzerklärung</a>.</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ mailOk }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; gap: var(--space-3); align-items: flex-start; border-top: 1px solid var(--color-divider); padding-top: var(--space-4);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" stroke-width="2.1" style="flex: none; margin-top: 2px;"><path d="M20 6L9 17l-5-5"></path></svg>
+            <div>
+              <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">Fast geschafft</div>
+              <p style="margin: 4px 0 0; font-size: 13px; line-height: 1.55; color: var(--color-neutral-800); text-wrap: pretty;">Bitte bestätige deine Adresse über den Link, den wir an {{ mailAnzeige }} geschickt haben.</p>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </section>
+
+  <footer style="border-top: 1px solid var(--color-divider);">
+    <div class="wrap" style="display: flex; justify-content: center; gap: var(--space-4); padding-top: var(--space-4); padding-bottom: var(--space-4); font-size: 12px;">
+      <a href="#impressum" style="color: var(--color-neutral-700); text-decoration: none;">Impressum</a>
+      <span style="color: var(--color-neutral-400);">·</span>
+      <a href="#datenschutz" style="color: var(--color-neutral-700); text-decoration: none;">Datenschutz</a>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;menuOffen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Zustand&quot;},&quot;mailZustand&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Leer&quot;,&quot;Fehler&quot;,&quot;Bestätigt&quot;],&quot;default&quot;:&quot;Leer&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Zustand&quot;}}">
+const RECHNER = [
+  { nr: "01", titel: "Kaufnebenkosten", text: "Grunderwerbsteuer nach Bundesland, Notar, Grundbuch und Makler in Euro.", href: "#rechner-kaufnebenkosten" },
+  { nr: "02", titel: "Rendite", text: "Brutto- und Nettorendite sowie Kaufpreisfaktor aus Miete und Gesamtkosten.", href: "#rechner-rendite" },
+  { nr: "03", titel: "Finanzierung", text: "Annuität, Restschuld am Ende der Zinsbindung und Tilgungsplan pro Jahr.", href: "#rechner-finanzierung" },
+  { nr: "04", titel: "Cashflow", text: "Miete minus Rate und laufende Kosten, monatlich und auf das Jahr gerechnet.", href: "#rechner-cashflow" }
+];
+const SCHRITTE = [
+  { nr: "1", titel: "Rechnen", text: "Probier die Rechner ohne Konto aus. Deine Eingaben bleiben im Browser." },
+  { nr: "2", titel: "Konto anlegen", text: "Kostenlos, mit E-Mail-Adresse. Ergebnisse aus den Rechnern übernimmst du direkt." },
+  { nr: "3", titel: "Immobilie erfassen", text: "In drei Schritten: Objekt, Einheiten, Kauf und Finanzierung. Ein Foto ist optional." },
+  { nr: "4", titel: "Überblick behalten", text: "Miete, Rendite und Cashflow je Objekt und für alle Objekte zusammen auf einer Seite." }
+];
+const FAQ = [
+  { frage: "Ist die App kostenlos?", antwort: "Die Rechner nutzt du ohne Konto und ohne Kosten. Das Konto ist im Tarif „Kostenlos“ für bis zu 5 Immobilien frei. Bezahltarife folgen 2027." },
+  { frage: "Brauche ich ein Konto für die Rechner?", antwort: "Nein. Ohne Konto werden deine Eingaben aber nicht gespeichert. Mit Konto kannst du Ergebnisse einer Immobilie zuordnen." },
+  { frage: "Werden meine Daten sicher gespeichert?", antwort: "[Platzhalter] Angaben zu Serverstandort, Verschlüsselung und Aufbewahrung folgen." },
+  { frage: "Wie genau sind die Ergebnisse?", antwort: "Alle Rechner rechnen vor Steuern. Der Finanzierungsrechner verrechnet jährlich, gegenüber der Rechnung einer Bank weicht das um etwa 1–2 % ab. Die Ergebnisse sind keine Steuer- oder Anlageberatung." },
+  { frage: "Kann ich meine Daten exportieren?", antwort: "Ja, alle Immobilien lassen sich als CSV-Datei exportieren." },
+  { frage: "Wie lösche ich mein Konto?", antwort: "Schreib an loeschen@example.de. Wir bestätigen die Löschung innerhalb von 14 Tagen." }
+];
+const MAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+class Component extends DCLogic {
+  state = { menu: null, faq: 0, mail: "", mailStatus: null };
+
+  renderVals() {
+    const p = this.props, st = this.state;
+    const menu = st.menu === null ? !!p.menuOffen : st.menu;
+    const vorgabe = p.mailZustand === "Fehler" ? "fehler" : p.mailZustand === "Bestätigt" ? "ok" : null;
+    const status = st.mailStatus === null ? vorgabe : st.mailStatus;
+    const mail = st.mail || (status ? "marco.k@example" + (status === "ok" ? ".de" : "") : "");
+    return {
+      menuOffen: menu, menuZu: !menu,
+      toggleMenu: () => this.setState({ menu: !menu }),
+      rechner: RECHNER,
+      schritte: SCHRITTE,
+      faq: FAQ.map((f, i) => ({
+        ...f, offen: st.faq === i, zu: st.faq !== i,
+        toggle: () => this.setState({ faq: st.faq === i ? -1 : i })
+      })),
+      mail,
+      mailAnzeige: mail,
+      onMail: (e) => this.setState({ mail: e.target.value, mailStatus: status === "fehler" ? "leer" : st.mailStatus }),
+      abonnieren: () => this.setState({ mail, mailStatus: MAIL_RE.test(mail.trim()) ? "ok" : "fehler" }),
+      mailFormular: status !== "ok",
+      mailOk: status === "ok",
+      mailFehler: status === "fehler",
+      mailInputStil: status === "fehler" ? "flex: 1; min-width: 0; border-color: var(--color-error);" : "flex: 1; min-width: 0;"
+    };
+  }
+}
+</script>
+</body>
+</html>

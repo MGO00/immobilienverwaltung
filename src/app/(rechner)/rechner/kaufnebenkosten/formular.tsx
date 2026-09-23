@@ -32,9 +32,16 @@ function zuZahl(wert: string): number | null {
   return Number.isFinite(zahl) ? zahl : null;
 }
 
-export function KaufnebenkostenFormular({ immobilie }: { immobilie: ImmobilieVorbefuellung }) {
-  const [kaufpreis, setKaufpreis] = useState(immobilie ? String(immobilie.kaufpreis) : "");
-  const [bundesland, setBundesland] = useState(immobilie?.bundesland ?? "");
+export function KaufnebenkostenFormular({
+  immobilie,
+  interessent = null,
+}: {
+  immobilie: ImmobilieVorbefuellung;
+  interessent?: { kaufpreis: number; bundesland: string | null } | null;
+}) {
+  const vorbefuellung = immobilie ?? interessent;
+  const [kaufpreis, setKaufpreis] = useState(vorbefuellung ? String(vorbefuellung.kaufpreis) : "");
+  const [bundesland, setBundesland] = useState(vorbefuellung?.bundesland ?? "");
   const [notarProzent, setNotarProzent] = useState(String(NOTAR_PROZENT_STANDARD));
   const [grundbuchProzent, setGrundbuchProzent] = useState(String(GRUNDBUCH_PROZENT_STANDARD));
   const [maklerAktiv, setMaklerAktiv] = useState(true);
