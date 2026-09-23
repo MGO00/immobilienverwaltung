@@ -31,6 +31,7 @@ Dokumente und weitere Rechner.
 - Routen auf Deutsch: /anmelden, /registrieren, /passwort-vergessen, /email-bestaetigen,
   /passwort-zuruecksetzen, /uebersicht, /immobilien/neu, /immobilien/[id], /rechner,
   /rechner/kaufnebenkosten, /rechner/rendite, /rechner/finanzierung, /rechner/cashflow,
+  /kaufpruefung, /kaufpruefung/neu, /kaufpruefung/[id], /kaufpruefung/[id]/bearbeiten,
   /einstellungen
   (/passwort-zuruecksetzen ist kein eigenes Nav-Ziel, sondern das Ziel des Links aus der
   Passwort-vergessen-E-Mail; im Prototyp nicht enthalten, aber ohne diesen Screen liefe der
@@ -90,6 +91,27 @@ Dokumente und weitere Rechner.
   Im eigenständigen Cashflow-Rechner (ohne Objektbezug) gibt es ein optionales Feld "Leerstand"
   in Prozent; die Ergebnisliste zeigt weiter die eingegebene Kaltmiete und den Leerstand als eigene
   Differenz-Zeile ("− Leerstand (x %)").
+- Weitere Fälle, Kaufprüfung: Für diesen Bereich gibt es keinen Design-Entwurf (docs/design hat nur
+  runde-1 und runde-2). Die Screens sind aus den vorhandenen Mustern abgeleitet (Übersicht,
+  Objektkarte, Bearbeiten-Formular, Detailseite, Dialoge) und wurden Schritt für Schritt anhand von
+  Screenshots freigegeben. Die Übersicht ist eine einfache Liste mit Status-Reitern (Alle,
+  beobachtet, besichtigt, Angebot abgegeben, gekauft, abgelehnt, jeweils mit Anzahl); die im
+  Briefing zusätzlich genannte Pipeline-Ansicht mit fünf Spalten wurde bewusst nicht gebaut.
+  Gekaufte und abgelehnte Interessenten bleiben in der Liste sichtbar, mit grauerem Namen; gekaufte
+  mit Link "Zur Immobilie im Bestand". Der Anlage-Screen ist ein einstufiges Formular (kein Assistent,
+  keine Einheitenliste auch beim Mehrfamilienhaus, Finanzierung ausklappbar, Status startet immer
+  bei "beobachtet"); Pflicht sind Objektart, Bezeichnung und Kaufpreis. Die Objektart ist beim
+  Interessenten (anders als beim Bestand) nachträglich änderbar. Die Detailseite hat keine Tabs,
+  sondern Abschnitte: Status-Stepper (beobachtet → besichtigt → Angebot abgegeben → gekauft,
+  "abgelehnt" als Sonderfall mit "Wieder aufnehmen"), Stammdaten, ein einfaches Notizfeld (ein
+  Text, nicht die datierte Notizliste des Bestands), Rechner-Karten, Löschen. "gekauft" ist nur über
+  "In Bestand übernehmen" erreichbar (Klick auf den Schritt oder den Button, ab "besichtigt"),
+  nie direkt. Der Übernahme-Dialog zeigt vorab alle übernommenen Felder inkl. Objektart. Die vier
+  Rechner öffnen sich mit ?interessent=<id> vorbefüllt (Kaufpreis, Bundesland, erwartete Miete,
+  Darlehen/Zins/Tilgung; laufende Kosten und Kaufnebenkosten sind dort nicht erfasst). "Davon
+  Tilgung" erscheint im Cashflow-Rechner, sobald Darlehen und Zins bekannt sind; das
+  Leerstand-Feld bleibt beim Interessenten sichtbar (es gibt keine echten Einheiten), nur beim
+  Bestandsobjekt entfällt es.
 - Die Design-Dateien sind Referenz, kein Produktionscode: nachbauen, nicht kopieren. Die
   Prototyp-Leiste (schwarzer Balken oben) gehört nicht zum Produkt.
 - Konkrete Werte (Farben, Größen, Radien, Abstände) stehen in der README der neuesten Runde und
@@ -131,6 +153,12 @@ Im Umfang:
   280×188px — beide nur Anzeige, kein Upload dort. Upload/Ersetzen/Entfernen ausschließlich im
   Bearbeiten-Formular und im letzten Assistenten-Schritt (220×148px), jeweils über die
   wiederverwendbare `FotoUpload`-Komponente.
+- Kaufprüfung (Interessenten): Liste mit Status-Reitern, Interessent hinzufügen/bearbeiten/löschen,
+  Status ändern, Notiz, vorbefüllte Rechner, Übernahme in den Bestand. Basisanalyse ohne mehrere
+  Szenarien und ohne Vergleich (das ist laut Planung ab Plus). Der Zähler "X von 20 aktiven
+  Interessenten" ist rein informativ, es gibt keine Sperre (Konstante AKTIVE_INTERESSENTEN_LIMIT in
+  src/lib/constants/interessent.ts; aktiv = beobachtet, besichtigt, Angebot abgegeben). Die
+  Tarif-Logik dahinter kommt erst mit eigenem Auftrag.
 - Einstellungen: Profil, Passwort ändern, Tarif (Platzhalter), Konto (Abmelden).
 
 Ausdrücklich NICHT im Umfang (nicht vorbauen): Mieterverwaltung, Mietverträge,
@@ -151,8 +179,7 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   Einstellung existiert im Code noch nicht und wird ebenfalls erst mit eigenem Auftrag gebaut.
 - Fünfter Rechner geplant: Mieterhöhung (Kappungsgrenze 20 %/15 % in drei Jahren, Index-/
   Staffelregeln, Pflichthinweis "keine Rechtsberatung"). Noch nicht gebaut.
-- Datenmodell-Erweiterungen, die später anstehen: Statusfeld am Objekt (Bestand/Interessent) für
-  die Kaufprüfung; Darlehen als eigene Tabelle statt Spalten an property (wegen künftiger
+- Datenmodell-Erweiterungen, die später anstehen: Darlehen als eigene Tabelle statt Spalten an property (wegen künftiger
   Anschlussfinanzierung/mehrerer Darlehen); eine transaktionale Buchungstabelle für Einnahmen/
   Ausgaben (könnte running_cost_item später ergänzen oder ablösen). Keine dieser Änderungen jetzt
   vornehmen.
@@ -173,6 +200,20 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   nie gespeichert. Ausnahme: Kaufnebenkosten werden als fester Betrag gespeichert, nicht berechnet
   — sie sind eine historische Tatsache zum Kaufzeitpunkt und dürfen sich nicht rückwirkend ändern,
   wenn sich Steuersätze später ändern.
+- Kaufprüfung: Interessenten liegen in einer eigenen Tabelle `prospect` (mit account_id und RLS wie
+  alle Fachtabellen), nicht als Statusfeld an property. Bewusste Abweichung von der Planungsnotiz
+  "Interessent und Bestand in einer Objektstruktur, Statuswechsel statt Kopie" (docs/planung/...):
+  Bestand, Kennzahlen und alle bestehenden Abfragen bleiben unberührt, und eine grobe Einschätzung
+  braucht keine Einheiten, laufenden Kosten oder Fotos. Ein Interessent hat Status (beobachtet,
+  besichtigt, angebot_abgegeben, gekauft, abgelehnt), Gesamtfläche und erwartete Kaltmiete als je
+  einen Wert, optional geplante Finanzierung, Inserats-Link (Datenbank erlaubt nur http/https) und
+  eine Notiz. "In Bestand übernehmen" ist eine KOPIE: die Datenbankfunktion prospect_to_property()
+  legt in einer Transaktion eine neue Immobilie samt Einheit an (Fläche und erwartete Miete in die
+  Einheit, Status "leer"; beim Mehrfamilienhaus eine "Einheit 1" mit den Gesamtwerten), setzt den
+  Interessenten auf "gekauft" und speichert den Verweis property_id. Sie funktioniert nur ab
+  "besichtigt" und nur einmal je Interessent. Nicht übernommen werden Inserats-Link und Notiz. Wird
+  die Immobilie gelöscht, bleibt der Interessent mit leerem Verweis; wird der Interessent gelöscht,
+  bleibt die Immobilie. Ob später Darlehen/mehrere Szenarien dazukommen, ist offen.
 - Mieter kommen später als eigene Tabellen an die Einheit, ohne bestehende Tabellen umzubauen.
 
 ## Fachliche Regeln und Rechner
@@ -233,7 +274,8 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   (kein startsWith, damit künftige Routen unter /rechner nicht automatisch öffentlich werden).
   ?immobilie=<id> wird nur bei angemeldetem Nutzer ausgewertet — zusätzlich zu den
   Zugriffsregeln (RLS, Rolle anon sieht keine Zeile; belegt durch supabase/tests/database/
-  60_anon_zugriff.sql), damit anonyme Besucher nie eine fremde Immobilie sehen. Server Actions
+  60_anon_zugriff.sql), damit anonyme Besucher nie eine fremde Immobilie sehen. Dasselbe gilt für
+  ?interessent=<id> (Kaufprüfung, Tabelle prospect, Tests in 70_prospect.sql). Server Actions
   (Zod, getUser()) bleiben unverändert: ein anonymer Aufruf von kaufnebenkostenUebernehmen liefert
   "Bitte melde dich erneut an." und schreibt nichts.
 - Daten nur in der EU-Region speichern. Keine Tracking-Dienste ohne Rücksprache.
