@@ -4,6 +4,15 @@ Web-App zur Verwaltung und Bewertung von Immobilien für Privatvermieter und Kap
 Deutschland. Aktueller Stand: Basisvariante (MVP). Später Ausbau um Abomodelle, Mieterverwaltung,
 Dokumente und weitere Rechner.
 
+## Unternehmerischer Rahmen
+- Nebenberufliche Gründung; die Nebentätigkeitsgenehmigung ist noch zu beantragen.
+- Rechtsform voraussichtlich UG oder GmbH (kein Einzelunternehmen); eine vorgeschaltete Holding ist
+  noch offen.
+- Das ist eine Voraussetzung für Meilenstein 5: Impressum und AGB brauchen eine feststehende
+  Rechtsform.
+- Vollständige Gesamtvision (Tarife, Kaufprüfung, Sanierungsplaner, Verwaltung, Marketing/SEO,
+  90-Tage-Plan): docs/planung/funktionsplanung-immobilienverwaltung.md.
+
 ## Zusammenarbeit
 - Der Auftraggeber hat keine Programmierkenntnisse. Erkläre in einfachem Deutsch, was du tust und
   warum, und arbeite in kleinen, nachvollziehbaren Schritten.
@@ -114,7 +123,28 @@ Im Umfang:
 
 Ausdrücklich NICHT im Umfang (nicht vorbauen): Mieterverwaltung, Mietverträge,
 Nebenkostenabrechnung, Dokumentenablage, Abos und Zahlungen, mehrere Nutzer pro Konto, andere
-Länder als Deutschland.
+Länder als Deutschland. Diese Funktionen sind Teil der Gesamtvision (siehe
+docs/planung/funktionsplanung-immobilienverwaltung.md) und folgen dort in einer festgelegten
+Reihenfolge — aber ausdrücklich nicht jetzt und nicht als Vorbereitung. Jede davon wird erst
+gebaut, wenn sie explizit als eigener Auftrag kommt.
+
+## Bekannte künftige Änderungen (noch nicht umsetzen)
+- Öffentliche Rechnerseiten ohne Login sind für SEO/Marketing vorgesehen. Aktuell blockiert
+  src/proxy.ts das (alles außer den fünf Auth-Seiten ist geschützt). Diese Änderung kommt erst mit
+  einem eigenen Auftrag für die öffentlichen Rechnerseiten.
+- Freier Tarif laut aktueller Planung: 5 Objekte (Plus/Pro mit mehr). Tarif-Logik als zentrale
+  Einstellung existiert im Code noch nicht und wird ebenfalls erst mit eigenem Auftrag gebaut.
+- Fünfter Rechner geplant: Mieterhöhung (Kappungsgrenze 20 %/15 % in drei Jahren, Index-/
+  Staffelregeln, Pflichthinweis "keine Rechtsberatung"). Noch nicht gebaut.
+- Datenmodell-Erweiterungen, die später anstehen: Statusfeld am Objekt (Bestand/Interessent) für
+  die Kaufprüfung; Darlehen als eigene Tabelle statt Spalten an property (wegen künftiger
+  Anschlussfinanzierung/mehrerer Darlehen); eine transaktionale Buchungstabelle für Einnahmen/
+  Ausgaben (könnte running_cost_item später ergänzen oder ablösen). Keine dieser Änderungen jetzt
+  vornehmen.
+- Offene Formel-Frage für später: Der künftige eigenständige (öffentliche) Cashflow-Rechner soll
+  vermutlich mit einem geschätzten Leerstand-Prozentsatz rechnen (kein Objektbezug vorhanden),
+  während der objektgebundene Rechner weiterhin die echten Einheiten-Ist-Daten nutzt wie bisher.
+  Wird beim Bau der öffentlichen Rechnerseiten final entschieden.
 
 ## Datenmodell (Grundsätze)
 - Hierarchie: Nutzer → Konto (account) → Immobilie (property) → Einheit (unit).
