@@ -21,7 +21,8 @@ Dokumente und weitere Rechner.
 - Code-Bezeichner auf Englisch; Kommentare, Commit-Nachrichten und alle sichtbaren Texte auf Deutsch
 - Routen auf Deutsch: /anmelden, /registrieren, /passwort-vergessen, /email-bestaetigen,
   /passwort-zuruecksetzen, /uebersicht, /immobilien/neu, /immobilien/[id], /rechner,
-  /rechner/kaufnebenkosten, /einstellungen
+  /rechner/kaufnebenkosten, /rechner/rendite, /rechner/finanzierung, /rechner/cashflow,
+  /einstellungen
   (/passwort-zuruecksetzen ist kein eigenes Nav-Ziel, sondern das Ziel des Links aus der
   Passwort-vergessen-E-Mail; im Prototyp nicht enthalten, aber ohne diesen Screen liefe der
   Reset-Link ins Leere.)
@@ -32,8 +33,8 @@ Dokumente und weitere Rechner.
   - `npm run build` — erstellt den Produktions-Build (muss vor jedem Livegang fehlerfrei laufen)
   - `npm run start` — startet den zuvor erstellten Produktions-Build lokal
   - `npm run lint` — prüft den Code automatisch auf Fehler und Stilprobleme (ESLint)
-  - Automatische Tests für die Rechner (`npm test` o. ä.) werden in Meilenstein 4 ergänzt, sobald
-    die ersten Rechner entstehen.
+  - `npm test` — führt die automatischen Tests aus (Vitest), vor allem für die Rechner in
+    src/lib/calculators/
 
 ## Design
 - Quelle: docs/design/. Die neueste Runde (aktuell runde-2) gilt bei Widersprüchen. Was in der
@@ -46,6 +47,28 @@ Dokumente und weitere Rechner.
   (ein Adressfeld, ein Kostenfeld, ein Mietfeld) — die App folgt stattdessen dem Muster des
   Assistenten: einzelne Adressfelder inkl. Bundesland, einzelne Kostenposten, Kaltmiete bei
   Wohnung/Haus über die einzige Einheit, beim Mehrfamilienhaus über den Einheiten-Tab.
+- Weitere Fälle aus Meilenstein 3: Straße und Hausnummer sind ein einziges Feld (Datenbankspalte
+  strasse_hausnummer), nicht zwei getrennte Felder wie im Prototyp. Der Einheiten-Status hat bei uns
+  drei Werte inkl. selbstgenutzt (der Prototyp-Dialog bietet nur vermietet/leer) — folgt dem
+  beschlossenen Datenmodell. Notizen sind eine Liste mehrerer datierter Einträge (note-Tabelle),
+  nicht das vereinfachte Einzelfeld mit einem Speicherzeitpunkt aus dem Prototyp. Status-Pillen bei
+  Einheiten: "leer" petrolfarben hervorgehoben (tag-accent), "vermietet" und "selbstgenutzt" neutral
+  in Tinte — eigene Festlegung, weil der Prototyp sich hier selbst widerspricht (Detailseite und
+  Assistent-Vorschau behandeln denselben Status unterschiedlich). Der Rechner-Tab auf der
+  Detailseite zeigt ab Meilenstein 3 alle vier Rechner-Karten, aber nur Kaufnebenkosten ist
+  verlinkt; Rendite, Finanzierung und Cashflow sind als "kommt noch" markiert, bis sie in
+  Meilenstein 4 entstehen.
+- Weitere Fälle aus Meilenstein 4: Der Kaufnebenkosten-Rechner kann das Ergebnis bei Objektbezug
+  (?immobilie=<id>) per "Übernehmen"-Button als kaufnebenkosten_betrag am Objekt speichern (im
+  Prototyp die "Zuordnen"-Box) — ohne Objektbezug zeigt er nur das Ergebnis. Die
+  Tilgungsplan-Tabelle im Finanzierungs-Rechner gruppiert nach echten Kalenderjahren statt nach
+  Darlehensjahren; ein Start- oder Endjahr mit weniger als 12 Monaten wird mit der Monatsanzahl
+  gekennzeichnet (z. B. "2026 (7 Monate)"). Ohne Kaufdatum am Objekt gilt das heutige Datum als
+  Start; der eigenständige Rechner hat dafür ein eigenes "Startdatum"-Feld (Default heute). Die
+  Zeile "Davon Tilgung" im Cashflow-Rechner erscheint nur bei Objektbezug, weil sie Darlehen und
+  Zins getrennt von der eingegebenen Rate kennen muss. Brutto- und Nettorendite werden im
+  Rendite-Rechner beide neutral dargestellt (der Prototyp hebt die Bruttorendite farbig hervor) —
+  konsistent mit dem übrigen, durchgehend neutralen Kennzahlen-Stil der App.
 - Die Design-Dateien sind Referenz, kein Produktionscode: nachbauen, nicht kopieren. Die
   Prototyp-Leiste (schwarzer Balken oben) gehört nicht zum Produkt.
 - Konkrete Werte (Farben, Größen, Radien, Abstände) stehen in der README der neuesten Runde und
@@ -111,7 +134,8 @@ Länder als Deutschland.
   - Bruttorendite = Jahreskaltmiete ÷ Kaufpreis
   - Nettorendite = (Jahreskaltmiete − laufende Kosten pro Jahr) ÷ Gesamtinvestition × 100
   - Kaufpreisfaktor = Kaufpreis ÷ Jahreskaltmiete
-  - Darlehen = Gesamtinvestition − Eigenkapital (nie negativ)
+  - Eigenkapital = Gesamtinvestition − Darlehen (Darlehen ist die Eingabe/der gespeicherte Wert,
+    Eigenkapital wird daraus abgeleitet, nie umgekehrt)
   - Beleihungsauslauf = Darlehen ÷ Kaufpreis × 100
   - Annuität pro Monat = Darlehen × (Zins % + Tilgung %) ÷ 12
   - Cashflow pro Monat = Kaltmiete − Annuität − laufende Kosten
@@ -121,11 +145,17 @@ Länder als Deutschland.
   - Gesamtinvestition = Kaufpreis + Kaufnebenkosten
 - Tilgungsplan (Rechner Finanzierung): wird MONATLICH gerechnet (banküblich), nicht jährlich wie im
   Prototyp. Das Startjahr kommt aus dem Datum, nicht fest verdrahtet. Ein automatischer Test
-  vergleicht das Ergebnis mit einem nachvollziehbaren Referenzwert.
+  vergleicht das Ergebnis mit einem nachvollziehbaren Referenzwert. Die Tabelle zeigt die intern
+  monatlich berechneten Werte nach Kalenderjahr aggregiert an (siehe Design, "Weitere Fälle aus
+  Meilenstein 4").
 - Die Fußnote im Rechner Rendite lautet: "… ohne Berücksichtigung künftigen Leerstands" (statt
   "ohne Leerstand").
-- Laufende Kosten sind eine Postenliste. Wie sie im Rechner Cashflow auf "nicht umlagefähig",
-  "Rücklage" und "Verwaltung und Sonstiges" verteilt werden, wird im Datenmodell-Vorschlag geklärt.
+- Laufende Kosten sind eine Postenliste (running_cost_item) mit sechs festen Typen: Hausgeld (nicht
+  umlagefähig), Instandhaltungsrücklage, Grundsteuer, Versicherung, Instandhaltung, Verwaltung und
+  Sonstiges. Der Assistent fragt bei Eigentumswohnung die ersten vier ab, bei Einfamilienhaus und
+  Mehrfamilienhaus Grundsteuer, Versicherung, Instandhaltung und Verwaltung und Sonstiges (der
+  Prototyp-Wizard hat "Verwaltung und Sonstiges" gar nicht, obwohl die Beispieldaten den Posten
+  zeigen — ergänzt für alle Objektarten).
 - Geldbeträge in der Datenbank als numeric, nie als Fließkommazahl. In Berechnungen
   Rundungsfehler vermeiden (z. B. in Cent rechnen) und die Rundung zentral festlegen.
 - Wo Rechner Ergebnisse zeigen, steht der Hinweis "Keine Steuer- oder Anlageberatung".
