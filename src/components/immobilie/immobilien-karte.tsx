@@ -45,7 +45,12 @@ export function ImmobilienKarte({ immobilie }: { immobilie: ImmobilieUebersicht 
 
   return (
     <Link href={`/immobilien/${immobilie.id}`} className="block border border-border">
-      <FotoPlatzhalter hoehe={132} />
+      {immobilie.fotoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={immobilie.fotoUrl} alt="" className="h-[132px] w-full object-cover" />
+      ) : (
+        <FotoPlatzhalter hoehe={132} />
+      )}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
           <span className="font-semibold">{immobilie.bezeichnung}</span>

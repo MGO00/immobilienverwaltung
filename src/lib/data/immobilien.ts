@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { EinheitStatus, ObjektArt } from "@/lib/validation/immobilie";
+import { erzeugeFotoUrl } from "@/lib/supabase/foto";
 
 export type EinheitZeile = {
   id: string;
@@ -21,6 +22,7 @@ export type ImmobilieUebersicht = {
   tilgungProzent: number | null;
   einheiten: EinheitZeile[];
   laufendeKostenMonat: number;
+  fotoUrl: string | null;
 };
 
 // Für Übersicht und Objektkarten: eine Zeile pro Immobilie, inkl. Einheiten
@@ -30,32 +32,35 @@ export async function getImmobilienUebersicht(supabase: SupabaseClient): Promise
   const { data, error } = await supabase
     .from("property")
     .select(
-      "id, art, bezeichnung, ort, kaufpreis, kaufnebenkosten_betrag, darlehen_betrag, sollzins_prozent, tilgung_prozent, unit(id, name, flaeche_qm, kaltmiete_monat, status), running_cost_item(betrag_monat)",
+      "id, art, bezeichnung, ort, kaufpreis, kaufnebenkosten_betrag, darlehen_betrag, sollzins_prozent, tilgung_prozent, foto_pfad, unit(id, name, flaeche_qm, kaltmiete_monat, status), running_cost_item(betrag_monat)",
     )
     .order("bezeichnung");
 
   if (error || !data) return [];
 
-  return data.map((row) => ({
-    id: row.id,
-    art: row.art,
-    bezeichnung: row.bezeichnung,
-    ort: row.ort,
-    kaufpreis: Number(row.kaufpreis),
-    kaufnebenkostenBetrag: row.kaufnebenkosten_betrag === null ? null : Number(row.kaufnebenkosten_betrag),
-    darlehenBetrag: row.darlehen_betrag === null ? null : Number(row.darlehen_betrag),
-    sollzinsProzent: row.sollzins_prozent === null ? null : Number(row.sollzins_prozent),
-    tilgungProzent: row.tilgung_prozent === null ? null : Number(row.tilgung_prozent),
-    einheiten: (row.unit ?? []).map((e) => ({
-      id: e.id,
-      name: e.name,
-      flaecheQm: e.flaeche_qm === null ? null : Number(e.flaeche_qm),
-      kaltmieteMonat: Number(e.kaltmiete_monat),
-      status: e.status,
+  return Promise.all(
+    data.map(async (row) => ({
+      id: row.id,
+      art: row.art,
+      bezeichnung: row.bezeichnung,
+      ort: row.ort,
+      kaufpreis: Number(row.kaufpreis),
+      kaufnebenkostenBetrag: row.kaufnebenkosten_betrag === null ? null : Number(row.kaufnebenkosten_betrag),
+      darlehenBetrag: row.darlehen_betrag === null ? null : Number(row.darlehen_betrag),
+      sollzinsProzent: row.sollzins_prozent === null ? null : Number(row.sollzins_prozent),
+      tilgungProzent: row.tilgung_prozent === null ? null : Number(row.tilgung_prozent),
+      einheiten: (row.unit ?? []).map((e) => ({
+        id: e.id,
+        name: e.name,
+        flaecheQm: e.flaeche_qm === null ? null : Number(e.flaeche_qm),
+        kaltmieteMonat: Number(e.kaltmiete_monat),
+        status: e.status,
+      })),
+      laufendeKostenMonat: (row.running_cost_item ?? []).reduce(
+        (summe: number, k: { betrag_monat: number }) => summe + Number(k.betrag_monat),
+        0,
+      ),
+      fotoUrl: await erzeugeFotoUrl(supabase, row.foto_pfad),
     })),
-    laufendeKostenMonat: (row.running_cost_item ?? []).reduce(
-      (summe: number, k: { betrag_monat: number }) => summe + Number(k.betrag_monat),
-      0,
-    ),
-  }));
+  );
 }

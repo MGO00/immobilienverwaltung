@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { EinheitStatus, ObjektArt } from "@/lib/validation/immobilie";
 import type { LaufendeKostenTyp } from "@/lib/constants/laufende-kosten";
+import { erzeugeFotoUrl } from "@/lib/supabase/foto";
 
 export type ImmobilieDetail = {
   id: string;
@@ -19,6 +20,7 @@ export type ImmobilieDetail = {
   sollzinsProzent: number | null;
   tilgungProzent: number | null;
   zinsbindungBis: string | null;
+  fotoUrl: string | null;
 };
 
 export async function getImmobilie(supabase: SupabaseClient, id: string): Promise<ImmobilieDetail | null> {
@@ -41,6 +43,7 @@ export async function getImmobilie(supabase: SupabaseClient, id: string): Promis
     sollzinsProzent: data.sollzins_prozent === null ? null : Number(data.sollzins_prozent),
     tilgungProzent: data.tilgung_prozent === null ? null : Number(data.tilgung_prozent),
     zinsbindungBis: data.zinsbindung_bis,
+    fotoUrl: await erzeugeFotoUrl(supabase, data.foto_pfad),
   };
 }
 

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { einheitStatusSchema, objektArtSchema } from "@/lib/validation/immobilie";
 import { z } from "zod";
 import { BUNDESLAENDER } from "@/lib/constants/steuersaetze";
+import { FOTO_BUCKET } from "@/lib/supabase/foto";
 
 const bearbeitenSchema = z.object({
   id: z.string().uuid(),
@@ -119,6 +120,16 @@ export async function immobilieLoeschen(propertyId: string): Promise<{ error?: s
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Bitte melde dich erneut an." };
+
+  // Die Datenbank-Kaskade beim Löschen der Immobilie betrifft nur andere
+  // Tabellenzeilen, nicht die Foto-Datei im Storage - die muss hier explizit
+  // entfernt werden. Schlägt das fehl, wird trotzdem gelöscht: eine im
+  // Ausnahmefall verwaiste Datei ist das kleinere Problem als eine blockierte
+  // Löschung.
+  const { data: property } = await supabase.from("property").select("foto_pfad").eq("id", propertyId).maybeSingle();
+  if (property?.foto_pfad) {
+    await supabase.storage.from(FOTO_BUCKET).remove([property.foto_pfad]);
+  }
 
   const { error } = await supabase.from("property").delete().eq("id", propertyId);
   if (error) {

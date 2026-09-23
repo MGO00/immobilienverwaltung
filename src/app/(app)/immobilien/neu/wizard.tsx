@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { EinheitDialog, type EinheitFormWert } from "@/components/immobilie/einheit-dialog";
+import { FotoUpload } from "@/components/immobilie/foto-upload";
 import { StatusPille } from "@/components/immobilie/status-pille";
 import { formatCurrency } from "@/lib/format";
 import { BUNDESLAENDER, bundeslandLabel } from "@/lib/constants/steuersaetze";
@@ -61,6 +62,7 @@ type WizardState = {
   kaltmieteMonat: string;
   einheiten: EinheitFormWert[];
   laufendeKosten: Record<string, string>;
+  foto: File | null;
 };
 
 const LEER: WizardState = {
@@ -85,6 +87,7 @@ const LEER: WizardState = {
   kaltmieteMonat: "",
   einheiten: [],
   laufendeKosten: {},
+  foto: null,
 };
 
 function zuZahl(wert: string): number | null {
@@ -150,36 +153,45 @@ export function ImmobilienAssistent() {
         if (zahl && zahl > 0) laufendeKosten[typ] = zahl;
       }
 
-      const ergebnis = await erstelleImmobilie({
-        art: state.art!,
-        bezeichnung: state.bezeichnung.trim(),
-        strasseHausnummer: state.strasseHausnummer.trim() || null,
-        plz: state.plz.trim() || null,
-        ort: state.ort.trim() || null,
-        bundesland: state.bundesland || null,
-        baujahr: zuZahl(state.baujahr),
-        grundstuecksflaecheQm: istHaus ? zuZahl(state.grundstuecksflaecheQm) : null,
-        wohnflaecheQm: !istMfh ? zuZahl(state.wohnflaecheQm) : null,
-        kaufdatum: state.kaufdatum || null,
-        kaufpreis: zuZahl(state.kaufpreis) ?? 0,
-        kaufnebenkostenBetrag: zuZahl(state.kaufnebenkostenBetrag),
-        ohneFinanzierung: state.ohneFinanzierung,
-        darlehenBetrag: zuZahl(state.darlehenBetrag),
-        sollzinsProzent: zuZahl(state.sollzinsProzent),
-        tilgungProzent: zuZahl(state.tilgungProzent),
-        zinsbindungBis: state.zinsbindungBis || null,
-        kaltmieteMonat: !istMfh ? zuZahl(state.kaltmieteMonat) : null,
-        status: !istMfh ? state.status : null,
-        einheiten: istMfh
-          ? state.einheiten.map((e) => ({
-              name: e.name,
-              flaecheQm: zuZahl(e.flaecheQm),
-              kaltmieteMonat: zuZahl(e.kaltmieteMonat) ?? 0,
-              status: e.status,
-            }))
-          : [],
-        laufendeKosten,
-      });
+      let fotoFormData: FormData | null = null;
+      if (state.foto) {
+        fotoFormData = new FormData();
+        fotoFormData.append("foto", state.foto);
+      }
+
+      const ergebnis = await erstelleImmobilie(
+        {
+          art: state.art!,
+          bezeichnung: state.bezeichnung.trim(),
+          strasseHausnummer: state.strasseHausnummer.trim() || null,
+          plz: state.plz.trim() || null,
+          ort: state.ort.trim() || null,
+          bundesland: state.bundesland || null,
+          baujahr: zuZahl(state.baujahr),
+          grundstuecksflaecheQm: istHaus ? zuZahl(state.grundstuecksflaecheQm) : null,
+          wohnflaecheQm: !istMfh ? zuZahl(state.wohnflaecheQm) : null,
+          kaufdatum: state.kaufdatum || null,
+          kaufpreis: zuZahl(state.kaufpreis) ?? 0,
+          kaufnebenkostenBetrag: zuZahl(state.kaufnebenkostenBetrag),
+          ohneFinanzierung: state.ohneFinanzierung,
+          darlehenBetrag: zuZahl(state.darlehenBetrag),
+          sollzinsProzent: zuZahl(state.sollzinsProzent),
+          tilgungProzent: zuZahl(state.tilgungProzent),
+          zinsbindungBis: state.zinsbindungBis || null,
+          kaltmieteMonat: !istMfh ? zuZahl(state.kaltmieteMonat) : null,
+          status: !istMfh ? state.status : null,
+          einheiten: istMfh
+            ? state.einheiten.map((e) => ({
+                name: e.name,
+                flaecheQm: zuZahl(e.flaecheQm),
+                kaltmieteMonat: zuZahl(e.kaltmieteMonat) ?? 0,
+                status: e.status,
+              }))
+            : [],
+          laufendeKosten,
+        },
+        fotoFormData,
+      );
 
       if (ergebnis?.error) {
         setSpeichernFehler(ergebnis.error);
@@ -399,27 +411,6 @@ export function ImmobilienAssistent() {
                 </div>
               )}
 
-              <div>
-                <p className="mb-1.5 text-sm font-medium">Foto (optional)</p>
-                <div className="flex h-[148px] w-[220px] items-center justify-center bg-neutral-100">
-                  <svg
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    className="text-neutral-400"
-                  >
-                    <rect x="3" y="4" width="18" height="16" rx="1" />
-                    <circle cx="8.5" cy="9.5" r="1.5" />
-                    <path d="M21 16l-5-5-4 4-3-3-6 6" />
-                  </svg>
-                </div>
-                <p className="mt-1.5 text-xs text-neutral-600">
-                  Ein Querformat pro Objekt. Der echte Upload kommt in einem späteren Schritt.
-                </p>
-              </div>
             </>
           )}
 
@@ -674,6 +665,17 @@ export function ImmobilienAssistent() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div>
+                <p className="mb-1.5 text-sm font-medium">Foto (optional)</p>
+                <FotoUpload
+                  modus="aufgeschoben"
+                  hoehe={148}
+                  breite={220}
+                  onAuswahl={(datei) => setState((s) => ({ ...s, foto: datei }))}
+                />
+                <p className="mt-1.5 text-xs text-neutral-600">Ein Querformat pro Objekt.</p>
               </div>
             </>
           )}

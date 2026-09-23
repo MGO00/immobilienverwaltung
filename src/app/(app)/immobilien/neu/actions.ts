@@ -3,11 +3,15 @@
 import { redirect } from "next/navigation";
 import { getCurrentAccountId } from "@/lib/supabase/account";
 import { createClient } from "@/lib/supabase/server";
+import { ladeFotoHoch } from "@/lib/supabase/foto";
 import { immobilieSchema, type ImmobilieEingabe } from "@/lib/validation/immobilie";
 
 export type ErstellenState = { error?: string; fieldErrors?: Record<string, string> };
 
-export async function erstelleImmobilie(eingabe: ImmobilieEingabe): Promise<ErstellenState> {
+export async function erstelleImmobilie(
+  eingabe: ImmobilieEingabe,
+  fotoFormData: FormData | null = null,
+): Promise<ErstellenState> {
   const parsed = immobilieSchema.safeParse(eingabe);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
@@ -106,6 +110,17 @@ export async function erstelleImmobilie(eingabe: ImmobilieEingabe): Promise<Erst
 
   if (kostenZeilen.length > 0) {
     await supabase.from("running_cost_item").insert(kostenZeilen);
+  }
+
+  // Ein Foto ist optional: schlägt der Upload fehl, wird die Immobilie
+  // trotzdem angelegt. Das Foto lässt sich jederzeit über "Bearbeiten"
+  // nachtragen.
+  const foto = fotoFormData?.get("foto");
+  if (foto instanceof File && foto.size > 0) {
+    const { error, pfad } = await ladeFotoHoch(supabase, accountId, property.id, foto);
+    if (!error && pfad) {
+      await supabase.from("property").update({ foto_pfad: pfad }).eq("id", property.id);
+    }
   }
 
   redirect(`/immobilien/${property.id}`);

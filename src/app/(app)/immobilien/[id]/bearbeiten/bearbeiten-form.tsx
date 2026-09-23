@@ -24,6 +24,7 @@ import {
 import { BUNDESLAENDER, bundeslandLabel } from "@/lib/constants/steuersaetze";
 import { laufendeKostenFelder, LAUFENDE_KOSTEN_LABEL } from "@/lib/constants/laufende-kosten";
 import { OBJEKTART_LABEL } from "@/lib/constants/objektart";
+import { FotoUpload } from "@/components/immobilie/foto-upload";
 import type { EinheitZeile, ImmobilieDetail, LaufenderKostenZeile } from "@/lib/data/immobilie-detail";
 import type { EinheitStatus } from "@/lib/validation/immobilie";
 import { immobilieAktualisieren, immobilieLoeschen } from "./actions";
@@ -150,6 +151,11 @@ export function BearbeitenForm({
           <p className="text-[13px] text-error">{fehler}</p>
         </div>
       )}
+
+      <div className="mt-6 flex flex-col gap-4 border-t border-border pt-4">
+        <h4 className="text-sm font-semibold">Foto</h4>
+        <FotoUpload modus="sofort" propertyId={immobilie.id} fotoUrl={immobilie.fotoUrl} hoehe={148} breite={220} />
+      </div>
 
       <div className="mt-6 flex flex-col gap-4 border-t border-border pt-4">
         <h4 className="text-sm font-semibold">Objekt</h4>

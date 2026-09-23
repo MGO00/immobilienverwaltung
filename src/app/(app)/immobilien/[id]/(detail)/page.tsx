@@ -95,20 +95,28 @@ export default async function ImmobilieUebersichtTab({ params }: { params: Promi
       </div>
 
       <div className="grid gap-6 md:grid-cols-[280px_1fr]">
-        <div className="flex h-[188px] w-[280px] items-center justify-center bg-neutral-100">
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            className="text-neutral-400"
-          >
-            <rect x="3" y="4" width="18" height="16" rx="1" />
-            <circle cx="8.5" cy="9.5" r="1.5" />
-            <path d="M21 16l-5-5-4 4-3-3-6 6" />
-          </svg>
+        <div
+          className="flex h-[188px] w-[280px] items-center justify-center overflow-hidden bg-neutral-100"
+          style={{ borderRadius: 10 }}
+        >
+          {immobilie.fotoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={immobilie.fotoUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              className="text-neutral-400"
+            >
+              <rect x="3" y="4" width="18" height="16" rx="1" />
+              <circle cx="8.5" cy="9.5" r="1.5" />
+              <path d="M21 16l-5-5-4 4-3-3-6 6" />
+            </svg>
+          )}
         </div>
         <div>
           <p className="text-sm font-semibold">Stammdaten</p>
