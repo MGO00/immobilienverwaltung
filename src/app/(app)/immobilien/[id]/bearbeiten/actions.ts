@@ -40,6 +40,10 @@ export async function immobilieAktualisieren(eingabe: z.infer<typeof bearbeitenS
   }
   const data = parsed.data;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Bitte melde dich erneut an." };
 
   const { error: propertyError } = await supabase
     .from("property")
@@ -111,6 +115,11 @@ export async function immobilieAktualisieren(eingabe: z.infer<typeof bearbeitenS
 
 export async function immobilieLoeschen(propertyId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Bitte melde dich erneut an." };
+
   const { error } = await supabase.from("property").delete().eq("id", propertyId);
   if (error) {
     return { error: "Die Immobilie konnte nicht gelöscht werden. Bitte versuch es erneut." };

@@ -57,6 +57,11 @@ export async function einheitAendern(eingabe: z.infer<typeof einheitAendernSchem
   const data = parsed.data;
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Bitte melde dich erneut an." };
+
   const { error } = await supabase
     .from("unit")
     .update({
