@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cashflowMonat } from "@/lib/calculators/immobilie";
 import { tilgungsanteilAusRate } from "@/lib/calculators/finanzierung";
-import { formatCurrency } from "@/lib/format";
+import { begrenzeLeerstandProzent, kaltmieteNachLeerstand } from "@/lib/calculators/leerstand";
+import { formatCurrency, formatPercent } from "@/lib/format";
 
 type Initial = {
   kaltmieteMonat: string;
@@ -29,6 +30,7 @@ export function CashflowFormular({ initial, darlehenKontext }: { initial: Initia
   const [ruecklage, setRuecklage] = useState(initial.ruecklageMonat);
   const [verwaltung, setVerwaltung] = useState(initial.verwaltungMonat);
   const [rate, setRate] = useState(initial.rateMonat);
+  const [leerstand, setLeerstand] = useState("");
 
   const kaltmieteZahl = zuZahl(kaltmiete) ?? 0;
   const kostenZahl = zuZahl(kosten) ?? 0;
@@ -36,7 +38,14 @@ export function CashflowFormular({ initial, darlehenKontext }: { initial: Initia
   const verwaltungZahl = zuZahl(verwaltung) ?? 0;
   const rateZahl = zuZahl(rate) ?? 0;
 
-  const cashflow = cashflowMonat(kaltmieteZahl, rateZahl, kostenZahl + ruecklageZahl + verwaltungZahl);
+  // Das Leerstand-Feld gibt es nur ohne Objektbezug; mit Objekt zählen die echten
+  // Einheiten-Ist-Daten, die schon in die vorbefüllte Kaltmiete eingeflossen sind.
+  const mitLeerstandFeld = darlehenKontext === null;
+  const leerstandProzent = mitLeerstandFeld ? begrenzeLeerstandProzent(zuZahl(leerstand)) : 0;
+  const kaltmieteEffektiv = kaltmieteNachLeerstand(kaltmieteZahl, leerstandProzent);
+  const leerstandAbzug = kaltmieteZahl - kaltmieteEffektiv;
+
+  const cashflow = cashflowMonat(kaltmieteEffektiv, rateZahl, kostenZahl + ruecklageZahl + verwaltungZahl);
   const davonTilgung = darlehenKontext
     ? tilgungsanteilAusRate(rateZahl, darlehenKontext.darlehenBetrag, darlehenKontext.sollzinsProzent)
     : null;
@@ -51,6 +60,25 @@ export function CashflowFormular({ initial, darlehenKontext }: { initial: Initia
             <span className="text-sm text-neutral-600">€</span>
           </div>
         </div>
+
+        {mitLeerstandFeld && (
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="leerstand">Leerstand (optional)</Label>
+            <div className="flex items-center gap-1.5">
+              <Input
+                id="leerstand"
+                type="number"
+                min={0}
+                max={100}
+                step="any"
+                value={leerstand}
+                onChange={(e) => setLeerstand(e.target.value)}
+              />
+              <span className="text-sm text-neutral-600">%</span>
+            </div>
+            <p className="text-xs text-neutral-600">Geschätzter Anteil des Jahres ohne Mieteinnahmen. Mindert die Kaltmiete.</p>
+          </div>
+        )}
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kosten">Nicht umlagefähige Kosten</Label>
@@ -94,6 +122,12 @@ export function CashflowFormular({ initial, darlehenKontext }: { initial: Initia
             <span className="text-neutral-600">Kaltmiete</span>
             <span className="tabular-nums">{formatCurrency(kaltmieteZahl, 0)}</span>
           </div>
+          {leerstandAbzug > 0 && (
+            <div className="flex items-center justify-between border-b border-border py-2 text-sm">
+              <span className="text-neutral-600">Leerstand ({formatPercent(leerstandProzent)})</span>
+              <span className="tabular-nums">− {formatCurrency(leerstandAbzug, 0)}</span>
+            </div>
+          )}
           <div className="flex items-center justify-between border-b border-border py-2 text-sm">
             <span className="text-neutral-600">Nicht umlagefähige Kosten</span>
             <span className="tabular-nums">− {formatCurrency(kostenZahl, 0)}</span>
