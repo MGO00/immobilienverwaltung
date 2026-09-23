@@ -80,6 +80,16 @@ Dokumente und weitere Rechner.
   Zins getrennt von der eingegebenen Rate kennen muss. Brutto- und Nettorendite werden im
   Rendite-Rechner beide neutral dargestellt (der Prototyp hebt die Bruttorendite farbig hervor) —
   konsistent mit dem übrigen, durchgehend neutralen Kennzahlen-Stil der App.
+- Weitere Fälle, öffentliche Rechner: Die vier Rechner und /rechner sind ohne Login erreichbar und
+  liegen dafür in einer eigenen Routengruppe `(rechner)` mit session-abhängigem Layout
+  (src/app/(rechner)/layout.tsx). Angemeldete sehen wie überall die normale App-Navigation
+  (AppShell); Besucher ohne Anmeldung einen schlichten Kopfbereich (Logo, "Anmelden" als Textlink,
+  "Registrieren" als hervorgehobener Button) und eine schmale Fußzeile mit Impressum/Datenschutz
+  (Platzhalter-Links bis Meilenstein 5) und dem Hinweis "Keine Steuer- oder Anlageberatung". Das
+  ist im Prototyp nicht designt und folgt den vorhandenen Mustern der Auth-Seiten und der Kopfzeile.
+  Im eigenständigen Cashflow-Rechner (ohne Objektbezug) gibt es ein optionales Feld "Leerstand"
+  in Prozent; die Ergebnisliste zeigt weiter die eingegebene Kaltmiete und den Leerstand als eigene
+  Differenz-Zeile ("− Leerstand (x %)").
 - Die Design-Dateien sind Referenz, kein Produktionscode: nachbauen, nicht kopieren. Die
   Prototyp-Leiste (schwarzer Balken oben) gehört nicht zum Produkt.
 - Konkrete Werte (Farben, Größen, Radien, Abstände) stehen in der README der neuesten Runde und
@@ -131,9 +141,12 @@ Reihenfolge — aber ausdrücklich nicht jetzt und nicht als Vorbereitung. Jede 
 gebaut, wenn sie explizit als eigener Auftrag kommt.
 
 ## Bekannte künftige Änderungen (noch nicht umsetzen)
-- Öffentliche Rechnerseiten ohne Login sind für SEO/Marketing vorgesehen. Aktuell blockiert
-  src/proxy.ts das (alles außer den fünf Auth-Seiten ist geschützt). Diese Änderung kommt erst mit
-  einem eigenen Auftrag für die öffentlichen Rechnerseiten.
+- Öffentliche Rechnerseiten sind seit Kurzem ohne Login erreichbar, aber bewusst noch auf noindex
+  (Konstante `RECHNER_INDEXIERBAR = false` in src/lib/seo/rechner.ts; die deutschen Titel und
+  Beschreibungen stehen dort schon bereit). Freigeschaltet wird erst nach fertigem Impressum
+  (Meilenstein 5) und ausdrücklicher Freigabe, ebenso keine Bewerbung der Seiten vorher. Die
+  Impressumspflicht entsteht schon durch die bloße Erreichbarkeit, nicht erst durch die
+  Indexierung — vor jedem echten Livegang muss das Impressum stehen.
 - Freier Tarif laut aktueller Planung: 5 Objekte (Plus/Pro mit mehr). Tarif-Logik als zentrale
   Einstellung existiert im Code noch nicht und wird ebenfalls erst mit eigenem Auftrag gebaut.
 - Fünfter Rechner geplant: Mieterhöhung (Kappungsgrenze 20 %/15 % in drei Jahren, Index-/
@@ -143,10 +156,6 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   Anschlussfinanzierung/mehrerer Darlehen); eine transaktionale Buchungstabelle für Einnahmen/
   Ausgaben (könnte running_cost_item später ergänzen oder ablösen). Keine dieser Änderungen jetzt
   vornehmen.
-- Offene Formel-Frage für später: Der künftige eigenständige (öffentliche) Cashflow-Rechner soll
-  vermutlich mit einem geschätzten Leerstand-Prozentsatz rechnen (kein Objektbezug vorhanden),
-  während der objektgebundene Rechner weiterhin die echten Einheiten-Ist-Daten nutzt wie bisher.
-  Wird beim Bau der öffentlichen Rechnerseiten final entschieden.
 
 ## Datenmodell (Grundsätze)
 - Hierarchie: Nutzer → Konto (account) → Immobilie (property) → Einheit (unit).
@@ -184,6 +193,11 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   - Beleihungsauslauf = Darlehen ÷ Kaufpreis × 100
   - Annuität pro Monat = Darlehen × (Zins % + Tilgung %) ÷ 12
   - Cashflow pro Monat = Kaltmiete − Annuität − laufende Kosten
+  - Nur im eigenständigen Cashflow-Rechner (ohne Objektbezug): Kaltmiete nach Leerstand =
+    Kaltmiete × (1 − Leerstand % ÷ 100), auf 0–100 % begrenzt. Diese geminderte Kaltmiete geht in die
+    Cashflow-Formel ein (`kaltmieteNachLeerstand()` in src/lib/calculators/leerstand.ts, vor
+    `cashflowMonat()` angewendet). Der objektgebundene Rechner hat kein Leerstand-Feld, er nutzt die
+    echten Einheiten-Ist-Daten (leere Einheiten zählen mit 0).
   - Ø Rendite (Portfolio) = Summe der Jahresmieten ÷ Summe der Kaufpreise
   - Leerstandsquote = leere Einheiten ÷ Einheiten
   - Kaufnebenkosten = Kaufpreis × (Grunderwerbsteuer % + Notar % + Grundbuch % + Makler %)
@@ -204,7 +218,7 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Geldbeträge in der Datenbank als numeric, nie als Fließkommazahl. In Berechnungen
   Rundungsfehler vermeiden (z. B. in Cent rechnen) und die Rundung zentral festlegen: die Funktion
   `rundeCent()` (src/lib/rundung.ts) übernimmt das für die in Meilenstein 4 entstandenen Rechner
-  (kaufnebenkosten.ts, finanzierung.ts). Die älteren Funktionen aus Meilenstein 3
+  (kaufnebenkosten.ts, finanzierung.ts, leerstand.ts). Die älteren Funktionen aus Meilenstein 3
   (immobilie.ts, portfolio.ts) runden bewusst nicht zusätzlich zentral — sie wurden nicht
   rückwirkend angefasst, um bereits getesteten Code nicht zu riskieren.
 - Wo Rechner Ergebnisse zeigen, steht der Hinweis "Keine Steuer- oder Anlageberatung".
@@ -215,6 +229,13 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Geheimnisse (Schlüssel, Passwörter) nie in Code oder Git. .env.local steht in .gitignore. Den
   Service-Role- bzw. Secret-Key nie im Frontend verwenden.
 - Eingaben immer serverseitig validieren (z. B. mit zod).
+- Öffentliche Rechnerseiten: src/proxy.ts gibt genau die fünf Rechner-Pfade als exakte Liste frei
+  (kein startsWith, damit künftige Routen unter /rechner nicht automatisch öffentlich werden).
+  ?immobilie=<id> wird nur bei angemeldetem Nutzer ausgewertet — zusätzlich zu den
+  Zugriffsregeln (RLS, Rolle anon sieht keine Zeile; belegt durch supabase/tests/database/
+  60_anon_zugriff.sql), damit anonyme Besucher nie eine fremde Immobilie sehen. Server Actions
+  (Zod, getUser()) bleiben unverändert: ein anonymer Aufruf von kaufnebenkostenUebernehmen liefert
+  "Bitte melde dich erneut an." und schreibt nichts.
 - Daten nur in der EU-Region speichern. Keine Tracking-Dienste ohne Rücksprache.
 - Im MVP keine personenbezogenen Daten Dritter (Mieter).
 
