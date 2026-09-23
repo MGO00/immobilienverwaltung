@@ -83,6 +83,19 @@ Dokumente und weitere Rechner.
 - Screens, die noch nicht designt sind, nicht frei erfinden: vorhandene Muster nutzen und
   Abweichungen melden.
 - Barrierefreiheit: sichtbarer Fokusring, Kontrast mindestens 4,5:1, Fehler nie nur über Farbe.
+- Weitere Fälle, Foto-Upload: Der Prototyp bietet Upload an drei Stellen (Übersichtskarte,
+  Detailseite, Assistent Schritt 1); die App bewusst nur an einer zentralen Stelle je Kontext —
+  Bearbeiten-Formular für bestehende Immobilien, letzter Assistenten-Schritt ("Miete und Kosten")
+  für neue. Der Foto-Bereich ist deshalb von Schritt 1 (Prototyp-Ort) in Schritt 3 gewandert. Das
+  Bearbeiten-Formular bekommt dafür einen Foto-Abschnitt, den der Prototyp dort gar nicht kennt.
+  Kein Zuschnitt/Pan-Zoom-Editor wie im Prototyp — Bilder werden per `object-fit: cover` in die
+  festen Rahmen eingepasst. Ein "Foto entfernen"-Button ergänzt die im Prototyp nur vorhandenen
+  "Replace"/"Edit"-Aktionen. Format: JPG, PNG, WebP, maximal 8 MB, im Browser automatisch auf
+  maximal 1920px lange Kante verkleinert. Pfad im Bucket: `<account_id>/<property_id>` ohne
+  Dateiendung (Content-Type kommt als Objekt-Metadatum mit, dadurch kann ein Ersetzen mit anderem
+  Format nie ein verwaistes Foto unter der alten Endung hinterlassen). Anzeige über eine
+  serverseitig je Seitenaufruf frisch erzeugte, 1 Stunde gültige signierte URL — kein manueller
+  Schritt im Supabase-Dashboard nötig, Bucket und Zugriffsregeln kommen komplett per Migration.
 
 ## Umfang der Basisvariante
 Im Umfang:
@@ -92,11 +105,11 @@ Im Umfang:
 - Detailseite mit Tabs: Übersicht, Einheiten, Kauf und Finanzierung, Einnahmen und Ausgaben,
   Rechner, Notizen
 - Rechner: Kaufnebenkosten, Rendite, Finanzierung mit Tilgungsplan, Cashflow
-- Objektfotos: Der Foto-Bereich wird im Layout gebaut (Objektkarte 132px hoch, Detailseite
-  280×188px, Assistent 220×148px), zeigt aber zunächst nur einen ruhigen Platzhalter (Icon auf
-  heller Fläche, ohne Drag-and-drop-Text). Der echte Upload kommt als eigener Schritt nach
-  Meilenstein 3 und wird vorher mit dem Auftraggeber geklärt (Dateispeicher mit Zugriffsregeln,
-  Größen- und Formatlimits, Zuschnitt).
+- Objektfotos: ein Foto pro Immobilie, echter Upload über Supabase Storage (privater Bucket
+  `property-photos`, siehe Design-Abschnitt für die Details). Objektkarte 132px hoch, Detailseite
+  280×188px — beide nur Anzeige, kein Upload dort. Upload/Ersetzen/Entfernen ausschließlich im
+  Bearbeiten-Formular und im letzten Assistenten-Schritt (220×148px), jeweils über die
+  wiederverwendbare `FotoUpload`-Komponente.
 - Einstellungen: Profil, Passwort ändern, Tarif (Platzhalter), Konto (Abmelden).
 
 Ausdrücklich NICHT im Umfang (nicht vorbauen): Mieterverwaltung, Mietverträge,
