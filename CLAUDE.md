@@ -44,6 +44,8 @@ Dokumente und weitere Rechner.
   - `npm run lint` — prüft den Code automatisch auf Fehler und Stilprobleme (ESLint)
   - `npm test` — führt die automatischen Tests aus (Vitest), vor allem für die Rechner in
     src/lib/calculators/
+  - `npx supabase test db` — führt die Datenbank-Tests aus (pgTAP, supabase/tests/database/),
+    braucht einen laufenden lokalen Supabase-Stack (`npx supabase start`, benötigt Docker)
 
 ## Design
 - Quelle: docs/design/. Die neueste Runde (aktuell runde-2) gilt bei Widersprüchen. Was in der
@@ -200,7 +202,11 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   Prototyp-Wizard hat "Verwaltung und Sonstiges" gar nicht, obwohl die Beispieldaten den Posten
   zeigen — ergänzt für alle Objektarten).
 - Geldbeträge in der Datenbank als numeric, nie als Fließkommazahl. In Berechnungen
-  Rundungsfehler vermeiden (z. B. in Cent rechnen) und die Rundung zentral festlegen.
+  Rundungsfehler vermeiden (z. B. in Cent rechnen) und die Rundung zentral festlegen: die Funktion
+  `rundeCent()` (src/lib/rundung.ts) übernimmt das für die in Meilenstein 4 entstandenen Rechner
+  (kaufnebenkosten.ts, finanzierung.ts). Die älteren Funktionen aus Meilenstein 3
+  (immobilie.ts, portfolio.ts) runden bewusst nicht zusätzlich zentral — sie wurden nicht
+  rückwirkend angefasst, um bereits getesteten Code nicht zu riskieren.
 - Wo Rechner Ergebnisse zeigen, steht der Hinweis "Keine Steuer- oder Anlageberatung".
 
 ## Sicherheit und Datenschutz
