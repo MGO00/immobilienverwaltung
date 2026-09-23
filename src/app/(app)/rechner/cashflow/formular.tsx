@@ -123,7 +123,8 @@ export function CashflowFormular({ initial, darlehenKontext }: { initial: Initia
         )}
 
         <p className="mt-4 text-xs text-neutral-600">
-          Vor Steuern. Abschreibung, Werbungskosten und dein persönlicher Steuersatz sind nicht eingerechnet.
+          Keine Steuer- oder Anlageberatung. Vor Steuern gerechnet — Abschreibung, Werbungskosten und dein
+          persönlicher Steuersatz sind nicht eingerechnet.
         </p>
       </div>
     </div>
