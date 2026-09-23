@@ -118,3 +118,84 @@ export async function interessentNotizSpeichern(id: string, notiz: string): Prom
   revalidatePath(`/kaufpruefung/${parsedId.data}`);
   return { erfolg: true };
 }
+
+export async function interessentAktualisieren(id: string, eingabe: InteressentEingabe): Promise<InteressentFormState> {
+  const parsedId = idSchema.safeParse(id);
+  const parsed = interessentSchema.safeParse(eingabe);
+  if (!parsedId.success) return { error: "Der Interessent konnte nicht gespeichert werden." };
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) fieldErrors[String(issue.path[0])] = issue.message;
+    return { error: "Bitte prüf deine Eingaben.", fieldErrors };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/anmelden");
+
+  // Status, Notiz und Verweis auf die Immobilie bleiben unberührt (nur die Stammdaten).
+  const { data, error } = await supabase
+    .from("prospect")
+    .update(zuSpalten(parsed.data))
+    .eq("id", parsedId.data)
+    .select("id");
+  if (error || !data || data.length === 0) {
+    return { error: "Der Interessent konnte nicht gespeichert werden. Bitte versuch es erneut." };
+  }
+
+  revalidatePath("/kaufpruefung");
+  revalidatePath(`/kaufpruefung/${parsedId.data}`);
+  redirect(`/kaufpruefung/${parsedId.data}`);
+}
+
+// Löscht nur den Interessenten. Eine daraus entstandene Immobilie im Bestand
+// bleibt bestehen (der Verweis liegt am Interessenten, nicht umgekehrt).
+export async function interessentLoeschen(id: string): Promise<InteressentAktionState> {
+  const parsedId = idSchema.safeParse(id);
+  if (!parsedId.success) return { error: "Der Interessent konnte nicht gelöscht werden." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Bitte melde dich erneut an." };
+
+  const { data, error } = await supabase.from("prospect").delete().eq("id", parsedId.data).select("id");
+  if (error || !data || data.length === 0) {
+    return { error: "Der Interessent konnte nicht gelöscht werden. Bitte versuch es erneut." };
+  }
+
+  revalidatePath("/kaufpruefung");
+  redirect("/kaufpruefung");
+}
+
+// Die eigentliche Übernahme passiert atomar in der Datenbankfunktion
+// prospect_to_property() (Immobilie + Einheit + Status gekauft + Verweis in
+// einer Transaktion). Sie prüft Status und Doppelübernahme selbst und läuft
+// unter den Zugriffsregeln (RLS) des angemeldeten Nutzers.
+export async function interessentInBestandUebernehmen(id: string): Promise<InteressentAktionState> {
+  const parsedId = idSchema.safeParse(id);
+  if (!parsedId.success) return { error: "Die Übernahme ist nicht möglich." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Bitte melde dich erneut an." };
+
+  const { data: neueImmobilieId, error } = await supabase.rpc("prospect_to_property", {
+    p_prospect_id: parsedId.data,
+  });
+  if (error || !neueImmobilieId) {
+    // P0001 = eigene, deutsche Fehlermeldung der Datenbankfunktion.
+    const meldung = error?.code === "P0001" ? error.message : "Die Übernahme ist fehlgeschlagen. Bitte versuch es erneut.";
+    return { error: meldung };
+  }
+
+  revalidatePath("/kaufpruefung");
+  revalidatePath(`/kaufpruefung/${parsedId.data}`);
+  revalidatePath("/uebersicht");
+  redirect(`/immobilien/${neueImmobilieId}`);
+}

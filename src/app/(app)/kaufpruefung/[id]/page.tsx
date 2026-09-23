@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { InteressentStatusPille } from "@/components/kaufpruefung/interessent-status-pille";
 import { NotizFeld } from "@/components/kaufpruefung/notiz-feld";
-import { StatusStepper } from "@/components/kaufpruefung/status-stepper";
+import { InteressentLoeschen } from "@/components/kaufpruefung/interessent-loeschen";
+import { InteressentStatusBereich } from "@/components/kaufpruefung/interessent-status-bereich";
 import { RechnerKarten } from "@/components/rechner/rechner-karten";
 import { OBJEKTART_LABEL } from "@/lib/constants/objektart";
 import { bundeslandLabel } from "@/lib/constants/steuersaetze";
@@ -68,7 +69,7 @@ export default async function InteressentDetailPage({ params }: { params: Promis
           Stand der Prüfung
         </h2>
         <div className="mt-3">
-          <StatusStepper interessentId={interessent.id} status={interessent.status} />
+          <InteressentStatusBereich interessent={interessent} />
         </div>
         {interessent.status === "gekauft" && interessent.propertyId && (
           <p className="mt-3 text-sm">
@@ -152,6 +153,14 @@ export default async function InteressentDetailPage({ params }: { params: Promis
         </p>
         <RechnerKarten interessentId={interessent.id} />
       </section>
+
+      <div className="mt-10 max-w-[720px]">
+        <InteressentLoeschen
+          interessentId={interessent.id}
+          bezeichnung={interessent.bezeichnung}
+          hatImmobilie={interessent.propertyId !== null}
+        />
+      </div>
     </div>
   );
 }
