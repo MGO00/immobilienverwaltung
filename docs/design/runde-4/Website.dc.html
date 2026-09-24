@@ -10,6 +10,7 @@
 <helmet>
 <link rel="stylesheet" href="_ds/modernist-6b28d4d7-acc9-4291-a5fa-485299cca693/styles.css">
 <script src="_ds/modernist-6b28d4d7-acc9-4291-a5fa-485299cca693/_ds_bundle.js"></script>
+<script src="./image-slot.js"></script>
 <style>
   html, body { margin: 0; }
   .pub {
@@ -33,6 +34,9 @@
   .hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 56px; align-items: center; }
   .hero-h1 { font-size: clamp(30px, 3.4cqi, 42px); line-height: 1.08; letter-spacing: -0.02em; font-weight: 600; margin: 0; text-wrap: balance; }
   .g4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+  .g2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+  .g3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+  .gl { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--space-6); }
   .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 56px; }
   .mail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-8); align-items: end; }
   .formrow { display: flex; gap: var(--space-2); align-items: stretch; }
@@ -44,6 +48,8 @@
     .sec { padding-top: 44px; padding-bottom: 44px; }
     .hero, .split, .mail { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); }
     .g4 { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+    .g2, .g3 { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+    .gl { grid-template-columns: 32px minmax(0, 1fr); gap: var(--space-3); }
     .hero-h1 { font-size: 30px; }
     .formrow { flex-direction: column; }
   }
@@ -54,11 +60,11 @@
 
   <header style="border-bottom: 1px solid var(--color-divider); background: var(--color-bg); position: sticky; top: 0; z-index: 5;">
     <div class="wrap" style="display: flex; align-items: center; gap: var(--space-6); min-height: 60px;">
-      <a href="#start" style="margin-right: auto; color: var(--color-text); text-decoration: none; white-space: nowrap; font-family: var(--font-heading); font-weight: 600; font-size: 16px; letter-spacing: -0.02em;">Immobilien<span style="font-weight: 400;">verwaltung</span></a>
+      <a href="#start" onClick="{{ goStart }}" style="margin-right: auto; color: var(--color-text); text-decoration: none; white-space: nowrap; font-family: var(--font-heading); font-weight: 600; font-size: 16px; letter-spacing: -0.02em;">Immobilien<span style="font-weight: 400;">verwaltung</span></a>
       <nav class="navlinks" style="display: flex; align-items: center; gap: var(--space-6);">
         <a href="#rechner" style="color: var(--color-text); text-decoration: none; font-size: 14px;">Rechner</a>
-        <a href="#tipps" style="color: var(--color-text); text-decoration: none; font-size: 14px;">Tipps &amp; Tricks</a>
-        <a href="#ressourcen" style="color: var(--color-text); text-decoration: none; font-size: 14px;">Ressourcen</a>
+        <a href="#tipps" onClick="{{ goTipps }}" aria-current="{{ tippsAktuell }}" style="color: var(--color-text); text-decoration: {{ tippsDeko }}; text-decoration-thickness: 1px; text-underline-offset: 6px; font-size: 14px;">Tipps &amp; Tricks</a>
+        <a href="#ressourcen" onClick="{{ goRessourcen }}" aria-current="{{ resAktuell }}" style="color: var(--color-text); text-decoration: {{ resDeko }}; text-decoration-thickness: 1px; text-underline-offset: 6px; font-size: 14px;">Ressourcen</a>
         <span style="width: 1px; height: 20px; background: var(--color-divider);"></span>
         <a href="#anmelden" style="color: var(--color-text); text-decoration: none; font-size: 14px;">Anmelden</a>
         <a href="#registrieren" class="btn btn-primary" style="text-decoration: none;">Registrieren</a>
@@ -78,13 +84,14 @@
     <sc-if value="{{ menuOffen }}" hint-placeholder-val="{{ false }}">
       <div class="navmob wrap" style="flex-direction: column; border-top: 1px solid var(--color-divider); padding-bottom: var(--space-4);">
         <a href="#rechner" style="display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--color-divider); color: var(--color-text); text-decoration: none; font-size: 15px;">Rechner</a>
-        <a href="#tipps" style="display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--color-divider); color: var(--color-text); text-decoration: none; font-size: 15px;">Tipps &amp; Tricks</a>
-        <a href="#ressourcen" style="display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--color-divider); color: var(--color-text); text-decoration: none; font-size: 15px;">Ressourcen</a>
+        <a href="#tipps" onClick="{{ goTipps }}" style="display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--color-divider); color: var(--color-text); text-decoration: none; font-size: 15px;">Tipps &amp; Tricks</a>
+        <a href="#ressourcen" onClick="{{ goRessourcen }}" style="display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--color-divider); color: var(--color-text); text-decoration: none; font-size: 15px;">Ressourcen</a>
         <a href="#anmelden" style="display: flex; align-items: center; min-height: 48px; color: var(--color-text); text-decoration: none; font-size: 15px;">Anmelden</a>
       </div>
     </sc-if>
   </header>
 
+  <sc-if value="{{ istStart }}" hint-placeholder-val="{{ true }}">
   <section class="wrap sec hero">
     <div>
       <div style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-neutral-700); margin-bottom: var(--space-3);">Für private Vermieter</div>
@@ -215,6 +222,167 @@
     </div>
   </section>
 
+  </sc-if>
+
+  <sc-if value="{{ istRessourcen }}" hint-placeholder-val="{{ false }}">
+    <section class="wrap sec" style="padding-top: 48px;">
+      <div style="max-width: 620px; margin-bottom: var(--space-8);">
+        <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Ressourcen</h1>
+        <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: var(--color-neutral-700); text-wrap: pretty;">Zum Nachschlagen statt zum Rechnen: Steuersätze und Begriffe rund um den Immobilienkauf. Die Rechner arbeiten mit deinen eigenen Zahlen, hier findest du die Grundlagen dazu.</p>
+      </div>
+      <div class="g2">
+        <sc-for list="{{ ressourcen }}" as="r" hint-placeholder-count="2">
+          <a href="{{ r.href }}" onClick="{{ r.oeffnen }}" style="display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-6); border: 1px solid var(--color-divider); border-radius: 10px; color: var(--color-text); text-decoration: none;" style-hover="border-color: var(--color-neutral-500); color: var(--color-text);">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);">
+              <span class="num" style="font-size: 12px; color: var(--color-neutral-700);">{{ r.meta }}</span>
+              <span class="tag tag-neutral" style="border-radius: 999px;">Bereit</span>
+            </div>
+            <span style="font-family: var(--font-heading); font-weight: 600; font-size: 19px; margin-top: var(--space-2);">{{ r.titel }}</span>
+            <span style="font-size: 14px; line-height: 1.55; color: var(--color-neutral-800); flex: 1; max-width: 440px; text-wrap: pretty;">{{ r.text }}</span>
+            <span style="display: flex; align-items: center; gap: 4px; margin-top: var(--space-3); font-family: var(--font-heading); font-weight: 600; font-size: 13px;">{{ r.cta }}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+            </span>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ istGrESt }}" hint-placeholder-val="{{ false }}">
+    <section class="wrap sec" style="padding-top: 40px;">
+      <a href="#ressourcen" onClick="{{ goRessourcen }}" style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: var(--space-4); font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text); text-decoration: none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+        <span>Ressourcen</span>
+      </a>
+      <div class="split">
+        <div>
+          <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Grunderwerbsteuer nach Bundesland</h1>
+          <p style="margin: var(--space-3) 0 0; font-size: 14px; line-height: 1.6; color: var(--color-neutral-800); text-wrap: pretty;">Die Grunderwerbsteuer zahlst du einmalig, wenn du ein Grundstück oder eine Immobilie kaufst. Berechnet wird sie auf den Kaufpreis im notariellen Kaufvertrag. Den Steuersatz legt jedes Bundesland selbst fest, deshalb hängt die Höhe davon ab, wo die Immobilie liegt.</p>
+        </div>
+        <div>
+          <table class="table num" style="width: 100%;">
+            <thead>
+              <tr><th style="text-align: left;">Bundesland</th><th style="text-align: right;">Steuersatz</th></tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ laender }}" as="l" hint-placeholder-count="16">
+                <tr>
+                  <td style="font-size: 14px;">{{ l.name }}</td>
+                  <td style="text-align: right; font-family: var(--font-heading); font-weight: 600; font-size: 14px; white-space: nowrap;">{{ l.satz }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <p style="margin: var(--space-3) 0 0; font-size: 12px; color: var(--color-neutral-700);">Stand: September 2026, Angaben ohne Gewähr</p>
+          <div style="margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--color-divider);">
+            <a href="#rechner-kaufnebenkosten" class="btn btn-primary" style="text-decoration: none;">
+              <span>Jetzt deine Kaufnebenkosten berechnen</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ istGlossar }}" hint-placeholder-val="{{ false }}">
+    <section class="wrap sec" style="padding-top: 40px;">
+      <a href="#ressourcen" onClick="{{ goRessourcen }}" style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: var(--space-4); font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text); text-decoration: none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+        <span>Ressourcen</span>
+      </a>
+      <div style="max-width: 620px; margin-bottom: var(--space-8);">
+        <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Glossar</h1>
+        <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: var(--color-neutral-700); text-wrap: pretty;">Die Begriffe aus den Rechnern, alphabetisch und kurz erklärt.</p>
+      </div>
+      <div style="max-width: 820px; border-top: 1px solid var(--color-divider);">
+        <sc-for list="{{ glossar }}" as="g" hint-placeholder-count="5">
+          <div class="gl" style="padding: var(--space-6) 0; border-bottom: 1px solid var(--color-divider);">
+            <div style="font-family: var(--font-heading); font-weight: 600; font-size: 21px; line-height: 1; color: var(--color-neutral-700);">{{ g.buchstabe }}</div>
+            <dl style="margin: 0; display: flex; flex-direction: column; gap: var(--space-5, 20px);">
+              <sc-for list="{{ g.eintraege }}" as="e" hint-placeholder-count="1">
+                <div id="{{ e.id }}">
+                  <dt style="font-family: var(--font-heading); font-weight: 600; font-size: 16px;">{{ e.begriff }}</dt>
+                  <dd style="margin: 4px 0 0; font-size: 14px; line-height: 1.6; color: var(--color-neutral-800); max-width: 600px; text-wrap: pretty;">{{ e.text }}</dd>
+                  <dd style="margin: 8px 0 0;">
+                    <a href="{{ e.href }}" style="display: inline-flex; align-items: center; gap: 4px; font-size: 13px; text-decoration: none;">{{ e.link }}
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+                    </a>
+                  </dd>
+                </div>
+              </sc-for>
+            </dl>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ istTipps }}" hint-placeholder-val="{{ false }}">
+    <section class="wrap sec" style="padding-top: 48px;">
+      <div style="max-width: 620px; margin-bottom: var(--space-8);">
+        <h1 style="font-size: 25px; font-weight: 600; margin: 0;">Tipps &amp; Tricks</h1>
+        <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: var(--color-neutral-700); text-wrap: pretty;">Die ersten Artikel sind in Vorbereitung.</p>
+      </div>
+      <div class="g2">
+        <sc-for list="{{ tipps }}" as="t" hint-placeholder-count="2">
+          <div style="display: flex; flex-direction: column; border: 1px solid var(--color-divider); border-radius: 10px; overflow: hidden;" style-hover="border-color: var(--color-neutral-500);">
+            <image-slot id="{{ t.bildId }}" shape="rect" style="width: 100%; aspect-ratio: 16 / 9; height: auto;" placeholder="Bild folgt"></image-slot>
+            <a href="#artikel" onClick="{{ t.oeffnen }}" style="display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4) var(--space-4) var(--space-6); color: var(--color-text); text-decoration: none;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);">
+                <span style="font-size: 12px; color: var(--color-neutral-700);">Lesedauer folgt</span>
+                <span style="display: inline-flex; align-items: center; padding: 2px 8px; border: 1px dashed var(--color-neutral-500); border-radius: 999px; font-size: 11px; color: var(--color-neutral-700);">in Vorbereitung</span>
+              </div>
+              <span style="font-family: var(--font-heading); font-weight: 600; font-size: 18px; line-height: 1.25; text-wrap: pretty;">{{ t.titel }}</span>
+              <span style="font-size: 14px; line-height: 1.55; color: var(--color-neutral-700);">[Platzhalter] Teaser-Text folgt.</span>
+            </a>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{ istArtikel }}" hint-placeholder-val="{{ false }}">
+    <article class="wrap sec" style="padding-top: 40px;">
+      <div style="max-width: 680px; margin: 0 auto;">
+        <a href="#tipps" onClick="{{ goTipps }}" style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: var(--space-4); font-family: var(--font-heading); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text); text-decoration: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+          <span>Tipps &amp; Tricks</span>
+        </a>
+        <h1 style="font-size: 25px; font-weight: 600; line-height: 1.2; margin: 0; text-wrap: balance;">[Platzhalter] Die wichtigsten Kennzahlen beim Immobilienkauf</h1>
+        <div class="num" style="display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-3); padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-divider); font-size: 13px; color: var(--color-neutral-700);">
+          <span>TT.MM.JJJJ</span><span style="color: var(--color-neutral-400);">·</span><span>X Min. Lesezeit</span>
+          <span style="display: inline-flex; align-items: center; padding: 2px 8px; border: 1px dashed var(--color-neutral-500); border-radius: 999px; font-size: 11px; margin-left: auto;">in Vorbereitung</span>
+        </div>
+        <image-slot id="artikel-bild" shape="rounded" radius="10" style="display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; margin-top: var(--space-6);" placeholder="Artikelbild folgt"></image-slot>
+        <div style="margin-top: var(--space-6); font-size: 16px; line-height: 1.7; color: var(--color-neutral-900);">
+          <p style="margin: 0 0 var(--space-4); font-size: 18px; line-height: 1.6; text-wrap: pretty;">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+          <p style="margin: 0 0 var(--space-4); text-wrap: pretty;">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+          <h2 style="font-size: 19px; font-weight: 600; margin: var(--space-8) 0 var(--space-3);">[Platzhalter] Zwischenüberschrift</h2>
+          <p style="margin: 0 0 var(--space-4); text-wrap: pretty;">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</p>
+          <ul style="margin: 0 0 var(--space-4); padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+            <li>Lorem ipsum dolor sit amet</li>
+            <li>Consectetur adipiscing elit</li>
+            <li>Sed do eiusmod tempor</li>
+          </ul>
+          <h2 style="font-size: 19px; font-weight: 600; margin: var(--space-8) 0 var(--space-3);">[Platzhalter] Zwischenüberschrift</h2>
+          <p style="margin: 0; text-wrap: pretty;">Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+        </div>
+        <div style="margin-top: 56px; padding-top: var(--space-6); border-top: 1px solid var(--color-divider);">
+          <h2 style="font-size: 17px; font-weight: 600; margin: 0 0 var(--space-4);">Passend dazu</h2>
+          <div class="g3" style="gap: var(--space-3);">
+            <sc-for list="{{ verwandt }}" as="v" hint-placeholder-count="3">
+              <a href="{{ v.href }}" onClick="{{ v.oeffnen }}" style="display: flex; flex-direction: column; gap: 4px; padding: var(--space-3) var(--space-4); border: 1px solid var(--color-divider); border-radius: 10px; color: var(--color-text); text-decoration: none;" style-hover="border-color: var(--color-neutral-500); color: var(--color-text);">
+                <span style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-neutral-700);">{{ v.art }}</span>
+                <span style="font-family: var(--font-heading); font-weight: 600; font-size: 15px;">{{ v.titel }}</span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </article>
+  </sc-if>
+
   <footer style="border-top: 1px solid var(--color-divider);">
     <div class="wrap" style="display: flex; justify-content: center; gap: var(--space-4); padding-top: var(--space-4); padding-bottom: var(--space-4); font-size: 12px;">
       <a href="#impressum" style="color: var(--color-neutral-700); text-decoration: none;">Impressum</a>
@@ -224,7 +392,7 @@
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;menuOffen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Zustand&quot;},&quot;mailZustand&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Leer&quot;,&quot;Fehler&quot;,&quot;Bestätigt&quot;],&quot;default&quot;:&quot;Leer&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Zustand&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;seite&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Start&quot;,&quot;Ressourcen&quot;,&quot;Grunderwerbsteuer&quot;,&quot;Glossar&quot;,&quot;Tipps&quot;,&quot;Artikel&quot;],&quot;default&quot;:&quot;Start&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Zustand&quot;},&quot;menuOffen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Zustand&quot;},&quot;mailZustand&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Leer&quot;,&quot;Fehler&quot;,&quot;Bestätigt&quot;],&quot;default&quot;:&quot;Leer&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Zustand&quot;}}">
 const RECHNER = [
   { nr: "01", titel: "Kaufnebenkosten", text: "Grunderwerbsteuer nach Bundesland, Notar, Grundbuch und Makler in Euro.", href: "#rechner-kaufnebenkosten" },
   { nr: "02", titel: "Rendite", text: "Brutto- und Nettorendite sowie Kaufpreisfaktor aus Miete und Gesamtkosten.", href: "#rechner-rendite" },
@@ -245,10 +413,42 @@ const FAQ = [
   { frage: "Kann ich meine Daten exportieren?", antwort: "Ja, alle Immobilien lassen sich als CSV-Datei exportieren." },
   { frage: "Wie lösche ich mein Konto?", antwort: "Schreib an loeschen@example.de. Wir bestätigen die Löschung innerhalb von 14 Tagen." }
 ];
+const LAENDER = [
+  ["Baden-Württemberg", "5,0 %"], ["Bayern", "3,5 %"], ["Berlin", "6,0 %"], ["Brandenburg", "6,5 %"],
+  ["Bremen", "5,5 %"], ["Hamburg", "5,5 %"], ["Hessen", "6,0 %"], ["Mecklenburg-Vorpommern", "6,0 %"],
+  ["Niedersachsen", "5,0 %"], ["Nordrhein-Westfalen", "6,5 %"], ["Rheinland-Pfalz", "5,0 %"], ["Saarland", "6,5 %"],
+  ["Sachsen", "5,5 %"], ["Sachsen-Anhalt", "5,0 %"], ["Schleswig-Holstein", "6,5 %"], ["Thüringen", "5,0 %"]
+].map(([name, satz]) => ({ name, satz }));
+const GL = [
+  ["Beleihungsauslauf", "Anteil des Kaufpreises, der über ein Darlehen finanziert wird.", "Finanzierung"],
+  ["Bruttorendite", "Jahreskaltmiete geteilt durch den Kaufpreis, ohne Kosten abzuziehen.", "Rendite"],
+  ["Kaufpreisfaktor", "Kaufpreis geteilt durch die Jahreskaltmiete. Er zeigt, wie viele Jahresmieten der Kaufpreis entspricht.", "Rendite"],
+  ["Nettorendite", "Jahreskaltmiete abzüglich laufender Kosten, geteilt durch die Gesamtinvestition.", "Rendite"],
+  ["Nicht umlagefähige Kosten", "Kosten, die der Vermieter trägt und nicht auf die Mieter umlegen kann, z. B. Verwaltung oder Instandhaltungsrücklage.", "Cashflow"],
+  ["Tilgung", "Der Teil der monatlichen Kreditrate, der das Darlehen tatsächlich verringert. Der Rest ist Zins.", "Finanzierung"],
+  ["Zinsbindung", "Der Zeitraum, für den der vereinbarte Zinssatz eines Darlehens fest steht.", "Finanzierung"]
+];
+const NR = { Kaufnebenkosten: "01", Rendite: "02", Finanzierung: "03", Cashflow: "04" };
+const GLOSSAR = (() => {
+  const g = {};
+  GL.forEach(([begriff, text, r]) => {
+    const b = begriff[0];
+    (g[b] = g[b] || []).push({ begriff, text, id: "glossar-" + begriff.toLowerCase().replace(/[^a-zäöü]+/g, "-"), link: "Zum Rechner " + NR[r] + " · " + r, href: "#rechner-" + r.toLowerCase() });
+  });
+  return Object.keys(g).sort().map((buchstabe) => ({ buchstabe, eintraege: g[buchstabe] }));
+})();
+const TIPPS = [
+  "[Platzhalter] Die wichtigsten Kennzahlen beim Immobilienkauf",
+  "[Platzhalter] Kaltmiete, Warmmiete, Nettokaltmiete erklärt"
+];
 const MAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 class Component extends DCLogic {
-  state = { menu: null, faq: 0, mail: "", mailStatus: null };
+  state = { menu: null, faq: 0, mail: "", mailStatus: null, seite: null };
+
+  go(seite) {
+    return (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ seite, menu: false }); };
+  }
 
   renderVals() {
     const p = this.props, st = this.state;
@@ -256,7 +456,35 @@ class Component extends DCLogic {
     const vorgabe = p.mailZustand === "Fehler" ? "fehler" : p.mailZustand === "Bestätigt" ? "ok" : null;
     const status = st.mailStatus === null ? vorgabe : st.mailStatus;
     const mail = st.mail || (status ? "marco.k@example" + (status === "ok" ? ".de" : "") : "");
+    const seite = st.seite || p.seite || "Start";
+    const inRes = seite === "Ressourcen" || seite === "Grunderwerbsteuer" || seite === "Glossar";
+    const inTipps = seite === "Tipps" || seite === "Artikel";
     return {
+      istStart: seite === "Start",
+      istRessourcen: seite === "Ressourcen",
+      istGrESt: seite === "Grunderwerbsteuer",
+      resAktuell: inRes ? "page" : undefined,
+      resDeko: inRes ? "underline" : "none",
+      goStart: this.go("Start"),
+      goRessourcen: this.go("Ressourcen"),
+      goTipps: this.go("Tipps"),
+      istGlossar: seite === "Glossar",
+      istTipps: seite === "Tipps",
+      istArtikel: seite === "Artikel",
+      tippsAktuell: inTipps ? "page" : undefined,
+      tippsDeko: inTipps ? "underline" : "none",
+      glossar: GLOSSAR,
+      tipps: TIPPS.map((titel, i) => ({ titel, bildId: "tipp-bild-" + (i + 1), oeffnen: this.go("Artikel") })),
+      verwandt: [
+        { art: "Rechner 02", titel: "Rendite", href: "#rechner-rendite", oeffnen: undefined },
+        { art: "Rechner 03", titel: "Finanzierung", href: "#rechner-finanzierung", oeffnen: undefined },
+        { art: "Ressource", titel: "Glossar", href: "#ressourcen-glossar", oeffnen: this.go("Glossar") }
+      ],
+      laender: LAENDER,
+      ressourcen: [
+        { meta: "Tabelle · 16 Bundesländer", titel: "Grunderwerbsteuer nach Bundesland", text: "Der aktuelle Steuersatz aller Bundesländer auf einen Blick, mit Stand-Datum.", cta: "Tabelle öffnen", href: "#ressourcen-grunderwerbsteuer", oeffnen: this.go("Grunderwerbsteuer") },
+        { meta: "Glossar · 7 Begriffe", titel: "Glossar", text: "Kennzahlen und Begriffe aus den Rechnern, jeweils in ein bis zwei Sätzen erklärt.", cta: "Glossar öffnen", href: "#ressourcen-glossar", oeffnen: this.go("Glossar") }
+      ],
       menuOffen: menu, menuZu: !menu,
       toggleMenu: () => this.setState({ menu: !menu }),
       rechner: RECHNER,
