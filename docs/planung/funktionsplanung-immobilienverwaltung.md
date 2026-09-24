@@ -164,5 +164,33 @@ Zweigleisig: Web-Analyse-Tool (EU-Hosting/Selbst-Hosting) für öffentliche Seit
 - [ ] Konkrete Speicher- und Interessenten-Limits für Plus/Pro final festlegen
 - [ ] Holding-Frage vor Gründung klären
 
+## 11. Idee: Anonymisierte Marktauswertungen (noch nicht geplant)
+
+Sobald genug Nutzer und Objekte vorhanden sind: aggregierte Kennzahlen aus echten verwalteten
+Immobilien (z. B. Kaufpreis pro m², Kaltmiete pro m², unterteilt nach Region, Baujahr,
+Sanierungsstatus). Anders als übliche Angebotspreis-Statistiken wären das Werte aus tatsächlich
+verwalteten Objekten, ein mögliches Alleinstellungsmerkmal.
+
+Wichtiger rechtlicher Punkt: Pseudonymisiert (nur Name/Konto-ID entfernt) ist nicht dasselbe wie
+anonymisiert im Sinne der DSGVO. Adresse plus genauer Kaufpreis plus genaues Baujahr kann ein
+Objekt und damit den Eigentümer identifizierbar machen, besonders bei seltenen Objekten oder auf
+dem Land. Das wäre ein neuer Verarbeitungszweck, der eine eigene Rechtsgrundlage braucht
+(ausdrückliche, freiwillige Einwilligung empfohlen, kein stillschweigender Standardwert) und in
+der Datenschutzerklärung genannt werden muss.
+
+Grundsätze für eine spätere Umsetzung:
+- Opt-in, standardmäßig aus, mit klarer Erklärung in den Einstellungen
+- Werte erst ab einer Mindestanzahl unterschiedlicher Objekte je Gruppe zeigen (Richtwert ca. 5+,
+  mit Fachperson abstimmen), sonst verrät ein Wert im Grunde ein einzelnes Objekt
+- Gröbere Einteilung: Bundesland oder größere PLZ-Gruppen statt genauer Adresse, Jahrzehnt statt
+  genaues Baujahr
+- Aggregation nur serverseitig berechnet, Rohdaten einzelner Nutzer nie für andere Nutzer sichtbar
+- Frühe Werte klar als "Durchschnitt unserer Nutzer" kennzeichnen, nicht als offizielle
+  Marktzahl, da die Stichprobe anfangs klein und nicht repräsentativ wäre
+
+Einordnung: verwandt mit der Portfolio-Auswertung (Pro-Tarif) oder als eigenes Merkmal später.
+Vor einer Umsetzung: Besprechung mit einer Datenschutz-Fachperson, idealerweise gebündelt mit der
+ohnehin für die Mieterverwaltung vorgesehenen Prüfung.
+
 ---
 *Ausführliche Tabellen, Formeln und Begründungen: Claude-Docs-Dokument "Funktionsplanung Immobilienverwaltung".*
