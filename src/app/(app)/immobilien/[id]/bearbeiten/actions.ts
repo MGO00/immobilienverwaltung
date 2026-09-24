@@ -115,6 +115,10 @@ export async function immobilieAktualisieren(eingabe: z.infer<typeof bearbeitenS
 }
 
 export async function immobilieLoeschen(propertyId: string): Promise<{ error?: string }> {
+  if (!z.string().uuid().safeParse(propertyId).success) {
+    return { error: "Die Immobilie konnte nicht gelöscht werden. Bitte versuch es erneut." };
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

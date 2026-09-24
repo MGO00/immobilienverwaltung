@@ -1,10 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { FOTO_BUCKET, ladeFotoHoch } from "@/lib/supabase/foto";
 
 export type FotoActionState = { error?: string };
+
+// Reihenfolge wie bei allen Server Actions: Zod → getUser() → Zugriff.
+const propertyIdSchema = z.string().uuid();
 
 function revalidiereFotoPfade(propertyId: string) {
   revalidatePath("/uebersicht");
@@ -17,6 +21,7 @@ export async function fotoHochladen(propertyId: string, formData: FormData): Pro
   if (!(file instanceof File) || file.size === 0) {
     return { error: "Bitte wähl ein Foto aus." };
   }
+  if (!propertyIdSchema.safeParse(propertyId).success) return { error: "Immobilie nicht gefunden." };
 
   const supabase = await createClient();
   const {
@@ -48,6 +53,8 @@ export async function fotoHochladen(propertyId: string, formData: FormData): Pro
 }
 
 export async function fotoEntfernen(propertyId: string): Promise<FotoActionState> {
+  if (!propertyIdSchema.safeParse(propertyId).success) return { error: "Immobilie nicht gefunden." };
+
   const supabase = await createClient();
   const {
     data: { user },
