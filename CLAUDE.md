@@ -143,6 +143,13 @@ Dokumente und weitere Rechner.
   der App (laut Handoff). Die E-Mail-Liste erscheint nur, wenn Mailversand und Secret-Key
   eingerichtet sind (siehe Sicherheit); die Bestätigen- und Abmelden-Seiten nutzen den schlichten
   öffentlichen Rahmen (PublicShell), dessen Logo jetzt zur Startseite führt.
+- Weitere Fälle, Navigation und Einstellungen: Die Hauptnavigation hat vier Punkte — Übersicht,
+  Kaufprüfung, Rechner, Einstellungen (src/components/shell/nav-links.ts); "Kaufprüfung" steht
+  zwischen Übersicht und Rechner. Die mobile untere Leiste hat damit vier statt der drei Plätze aus
+  runde-2. Die Einstellungen weichen bewusst von runde-2, Abschnitt 10 ab: echte Kontolöschung mit
+  Passwortbestätigung statt "Hinweis zum Löschen per E-Mail"; die E-Mail-Adresse wird nur angezeigt
+  (Ändern folgt mit dem eigenen Mailversand); kein Button "Tarife vergleichen", stattdessen "Größere
+  Tarife sind in Vorbereitung.".
 - Die Design-Dateien sind Referenz, kein Produktionscode: nachbauen, nicht kopieren. Die
   Prototyp-Leiste (schwarzer Balken oben) gehört nicht zum Produkt.
 - Konkrete Werte (Farben, Größen, Radien, Abstände) stehen in der README der neuesten Runde und
@@ -445,8 +452,13 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   Supabase sieht dabei vermutlich die IP des Servers statt die der Nutzer, sodass sich alle Nutzer
   ein Kontingent teilen. Vor dem Livegang unter echter Last prüfen.
 - Startseite: alle mit [Platzhalter] markierten Texte in src/lib/start/inhalte.ts ersetzen
-  (Datensicherheit, Kontaktadresse), dazu die Impressum-/Datenschutz-Links auf der
-  Startseite, den Rechnerseiten und den Newsletter-Seiten (bisher `#impressum`/`#datenschutz`).
+  (Datensicherheit, Kontaktadresse). Außerdem alle Platzhalter-Links (bisher `#impressum`,
+  `#datenschutz`, `#agb`) durch echte Seiten ersetzen: Fußzeile der Startseite (src/app/page.tsx),
+  der Rechnerseiten und Newsletter-Seiten (src/components/shell/public-shell.tsx) und der
+  Anmelde-/Registrierungsseiten (src/app/(auth)/layout.tsx); der Datenschutz-Link in der Karte der
+  E-Mail-Liste (src/components/start/newsletter-karte.tsx); bei der Registrierung die Links "AGB" und
+  "Datenschutzerklärung" im Hinweistext unter dem Formular (src/app/(auth)/registrieren/
+  sign-up-form.tsx; eine AGB-Checkbox gibt es bewusst nicht).
 - E-Mail-Liste einschalten erst, wenn die Datenschutzerklärung die Adress-Erhebung beschreibt:
   dann `SUPABASE_SECRET_KEY` und Mailversand (Anbieter mit eigener Domain, `SMTP_*`, `MAIL_FROM`)
   in .env.local und Vercel eintragen. Einwilligungstexte je Version im Repository ablegen (z. B.
