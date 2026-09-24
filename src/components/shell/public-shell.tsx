@@ -9,7 +9,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-border bg-background px-6">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between">
           <Link
-            href="/rechner"
+            href="/"
             className="whitespace-nowrap text-base tracking-[-0.02em] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             <span className="font-semibold">Immobilien</span>

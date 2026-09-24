@@ -26,6 +26,9 @@ const PUBLIC_EXACT_PATHS = [
   "/rechner/rendite",
   "/rechner/finanzierung",
   "/rechner/cashflow",
+  // Link-Seiten aus der Bestätigungsmail der E-Mail-Liste (Besucher ohne Konto).
+  "/newsletter/bestaetigen",
+  "/newsletter/abmelden",
 ];
 
 // Angemeldete Nutzer sollen nicht zurück zu Anmelden/Registrieren können.

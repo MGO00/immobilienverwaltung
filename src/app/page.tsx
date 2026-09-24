@@ -3,7 +3,9 @@ import { ArrowRight } from "lucide-react";
 import { Abschnitt, AbschnittKopf } from "@/components/start/abschnitt";
 import { FaqListe } from "@/components/start/faq-liste";
 import { Hero } from "@/components/start/hero";
+import { NewsletterKarte } from "@/components/start/newsletter-karte";
 import { StartHeader } from "@/components/start/start-header";
+import { newsletterKonfiguriert } from "@/lib/newsletter/konfiguration";
 import { startseiteMetadata } from "@/lib/seo/rechner";
 import { START_FAQ, START_FAQ_KONTAKT, START_RECHNER, START_SCHRITTE } from "@/lib/start/inhalte";
 
@@ -65,6 +67,13 @@ export default function StartPage() {
             <FaqListe fragen={START_FAQ} />
           </div>
         </Abschnitt>
+
+        {/* Nur mit eingerichtetem Mailversand und Secret-Key (siehe .env.example). */}
+        {newsletterKonfiguriert() && (
+          <Abschnitt ohneLinie>
+            <NewsletterKarte />
+          </Abschnitt>
+        )}
       </main>
 
       <footer className="border-t border-border">
