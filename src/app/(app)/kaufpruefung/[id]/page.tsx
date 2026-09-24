@@ -13,6 +13,8 @@ import { bundeslandLabel } from "@/lib/constants/steuersaetze";
 import { getInteressent } from "@/lib/data/interessenten";
 import { formatArea, formatCurrency, formatPercent } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
+import { limitMeldung } from "@/lib/constants/tarife";
+import { getTarifStatus } from "@/lib/data/tarif";
 
 function Zeile({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -26,7 +28,7 @@ function Zeile({ label, children }: { label: string; children: React.ReactNode }
 export default async function InteressentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const interessent = await getInteressent(supabase, id);
+  const [interessent, tarifStatus] = await Promise.all([getInteressent(supabase, id), getTarifStatus(supabase)]);
   if (!interessent) notFound();
 
   const adresse = [interessent.strasseHausnummer, [interessent.plz, interessent.ort].filter(Boolean).join(" ")]
@@ -69,7 +71,13 @@ export default async function InteressentDetailPage({ params }: { params: Promis
           Stand der Prüfung
         </h2>
         <div className="mt-3">
-          <InteressentStatusBereich interessent={interessent} />
+          <InteressentStatusBereich
+            interessent={interessent}
+            objektLimitMeldung={tarifStatus.immobilien.erreicht ? limitMeldung(tarifStatus.tarif, "immobilien") : null}
+            interessentenLimitMeldung={
+              tarifStatus.aktiveInteressenten.erreicht ? limitMeldung(tarifStatus.tarif, "aktiveInteressenten") : null
+            }
+          />
         </div>
         {interessent.status === "gekauft" && interessent.propertyId && (
           <p className="mt-3 text-sm">

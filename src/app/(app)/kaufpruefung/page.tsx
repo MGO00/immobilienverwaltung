@@ -3,12 +3,14 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InteressentZeile } from "@/components/kaufpruefung/interessent-zeile";
 import {
-  AKTIVE_INTERESSENTEN_LIMIT,
   INTERESSENT_STATUS,
   INTERESSENT_STATUS_LABEL,
   type InteressentStatus,
 } from "@/lib/constants/interessent";
 import { getInteressenten } from "@/lib/data/interessenten";
+import { getTarif } from "@/lib/data/tarif";
+import { LimitHinweis } from "@/components/tarif/limit-hinweis";
+import { grenzeFuer, limitErreicht, limitMeldung } from "@/lib/constants/tarife";
 import { formatDate } from "@/lib/format";
 import { zaehleAktive, zaehleNachStatus } from "@/lib/interessent-regeln";
 import { createClient } from "@/lib/supabase/server";
@@ -23,7 +25,10 @@ export default async function KaufpruefungPage({
   const filter = INTERESSENT_STATUS.find((s) => s === statusParam) ?? null;
 
   const supabase = await createClient();
-  const alle = await getInteressenten(supabase);
+  const [alle, tarif] = await Promise.all([getInteressenten(supabase), getTarif(supabase)]);
+  const aktive = zaehleAktive(alle);
+  const grenze = grenzeFuer(tarif, "aktiveInteressenten");
+  const limitErreichtJetzt = limitErreicht(aktive, grenze);
   const proStatus = zaehleNachStatus(alle);
   const angezeigt = filter ? alle.filter((i) => i.status === filter) : alle;
 
@@ -42,16 +47,30 @@ export default async function KaufpruefungPage({
       <p className="text-xs font-semibold tracking-[0.06em] text-neutral-600 uppercase">Stand: {formatDate(new Date())}</p>
       <div className="mt-1 flex items-center justify-between gap-4">
         <h1 className="text-[25px] leading-[1.12] font-semibold tracking-[-0.015em]">Kaufprüfung</h1>
-        <Button asChild>
-          <Link href="/kaufpruefung/neu">
+        {limitErreichtJetzt ? (
+          <Button disabled aria-describedby="interessenten-limit">
             <Plus className="size-4" />
             Interessent hinzufügen
-          </Link>
-        </Button>
+          </Button>
+        ) : (
+          <Button asChild>
+            <Link href="/kaufpruefung/neu">
+              <Plus className="size-4" />
+              Interessent hinzufügen
+            </Link>
+          </Button>
+        )}
       </div>
-      <p className="mt-2 text-sm text-neutral-600 tabular-nums">
-        {zaehleAktive(alle)} von {AKTIVE_INTERESSENTEN_LIMIT} aktiven Interessenten
-      </p>
+      {grenze !== null && (
+        <p className="mt-2 text-sm text-neutral-600 tabular-nums">
+          {aktive} von {grenze} aktiven Interessenten
+        </p>
+      )}
+      {limitErreichtJetzt && (
+        <div className="mt-3">
+          <LimitHinweis id="interessenten-limit" text={limitMeldung(tarif, "aktiveInteressenten")} />
+        </div>
+      )}
 
       {alle.length === 0 ? (
         <div className="mt-8 max-w-[560px]">

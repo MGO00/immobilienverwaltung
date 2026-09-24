@@ -1,6 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { DB_FEHLER_IMMOBILIEN_LIMIT, limitMeldung } from "@/lib/constants/tarife";
+import { getTarifStatus } from "@/lib/data/tarif";
 import { getCurrentAccountId } from "@/lib/supabase/account";
 import { createClient } from "@/lib/supabase/server";
 import { ladeFotoHoch } from "@/lib/supabase/foto";
@@ -35,6 +37,13 @@ export async function erstelleImmobilie(
     return { error: "Kein Konto gefunden. Bitte melde dich erneut an." };
   }
 
+  // Tarifgrenze vorab prüfen (klare Meldung). Die Datenbank prüft beim Einfügen
+  // noch einmal verbindlich, auch bei zwei gleichzeitigen Tabs.
+  const tarifStatus = await getTarifStatus(supabase);
+  if (tarifStatus.immobilien.erreicht) {
+    return { error: limitMeldung(tarifStatus.tarif, "immobilien") };
+  }
+
   const { data: property, error: propertyError } = await supabase
     .from("property")
     .insert({
@@ -58,6 +67,9 @@ export async function erstelleImmobilie(
     .select("id")
     .single();
 
+  if (propertyError?.code === DB_FEHLER_IMMOBILIEN_LIMIT) {
+    return { error: limitMeldung(tarifStatus.tarif, "immobilien") };
+  }
   if (propertyError || !property) {
     return { error: "Die Immobilie konnte nicht gespeichert werden. Bitte versuch es erneut." };
   }

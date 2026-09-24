@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { AlertCircle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LimitHinweis } from "@/components/tarif/limit-hinweis";
 import { INTERESSENT_STATUS_LABEL, type InteressentStatus } from "@/lib/constants/interessent";
 import { kannStatusSetzen } from "@/lib/interessent-regeln";
 import { interessentStatusSetzen } from "@/app/(app)/kaufpruefung/actions";
@@ -17,16 +18,21 @@ export function StatusStepper({
   interessentId,
   status,
   uebernehmenAktion,
+  wiederaufnahmeGesperrt = null,
 }: {
   interessentId: string;
   status: InteressentStatus;
   // Optional: öffnet den Übernahme-Dialog, wenn "gekauft" angeklickt wird.
   uebernehmenAktion?: (() => void) | null;
+  // Meldung, wenn das Limit aktiver Interessenten erreicht ist: Dann lässt sich
+  // ein abgelehnter Interessent nicht wieder aktiv setzen.
+  wiederaufnahmeGesperrt?: string | null;
 }) {
   const [fehler, setFehler] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const abgelehnt = status === "abgelehnt";
   const aktuellerIndex = SCHRITTE.indexOf(status);
+  const reaktivierungGesperrt = abgelehnt && wiederaufnahmeGesperrt !== null;
 
   function setzen(neu: InteressentStatus) {
     setFehler(null);
@@ -42,7 +48,10 @@ export function StatusStepper({
         {SCHRITTE.map((schritt, index) => {
           const erreicht = !abgelehnt && index <= aktuellerIndex;
           const aktuell = schritt === status;
-          const klickbar = schritt === "gekauft" ? Boolean(uebernehmenAktion) && !aktuell : kannStatusSetzen(status, schritt);
+          const klickbar =
+            schritt === "gekauft"
+              ? Boolean(uebernehmenAktion) && !aktuell
+              : kannStatusSetzen(status, schritt) && !reaktivierungGesperrt;
           const inhalt = (
             <>
               <span className="flex items-center gap-1.5">
@@ -83,7 +92,14 @@ export function StatusStepper({
           {abgelehnt ? (
             <>
               <span className="text-sm text-neutral-700">Dieser Interessent ist abgelehnt.</span>
-              <Button type="button" variant="outline" size="sm" disabled={pending} onClick={() => setzen("beobachtet")}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={pending || reaktivierungGesperrt}
+                aria-describedby={reaktivierungGesperrt ? "wiederaufnahme-limit" : undefined}
+                onClick={() => setzen("beobachtet")}
+              >
                 Wieder aufnehmen
               </Button>
             </>
@@ -92,6 +108,12 @@ export function StatusStepper({
               Als abgelehnt markieren
             </Button>
           )}
+        </div>
+      )}
+
+      {reaktivierungGesperrt && (
+        <div className="mt-3">
+          <LimitHinweis id="wiederaufnahme-limit" text={wiederaufnahmeGesperrt} />
         </div>
       )}
 

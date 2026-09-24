@@ -19,9 +19,8 @@ export const INTERESSENT_STATUS_LABEL: Record<InteressentStatus, string> = {
   abgelehnt: "abgelehnt",
 };
 
-// Zählen auf das (noch nicht erzwungene) Limit; gekaufte und abgelehnte
-// Interessenten sind archiviert und zählen nicht mit (siehe
-// docs/planung/funktionsplanung-immobilienverwaltung.md). Das Limit ist
-// aktuell rein informativ, die Tarif-Logik entsteht erst mit eigenem Auftrag.
-export const AKTIVE_INTERESSENTEN_LIMIT = 20;
+// Zählen auf das Limit aktiver Interessenten (Grenze je Tarif, siehe
+// src/lib/constants/tarife.ts); gekaufte und abgelehnte Interessenten sind
+// archiviert und zählen nicht mit. Dieselbe Liste steht im Datenbank-Trigger
+// pruefe_interessenten_grenze().
 export const AKTIVE_STATUS: readonly InteressentStatus[] = ["beobachtet", "besichtigt", "angebot_abgegeben"];

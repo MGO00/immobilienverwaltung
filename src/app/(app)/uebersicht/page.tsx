@@ -12,16 +12,29 @@ import {
   portfolioRendite,
 } from "@/lib/calculators/portfolio";
 import { createClient } from "@/lib/supabase/server";
+import { LimitHinweis } from "@/components/tarif/limit-hinweis";
+import { grenzeFuer, limitErreicht, limitMeldung } from "@/lib/constants/tarife";
+import { getTarif } from "@/lib/data/tarif";
 
 export default async function UebersichtPage() {
   const supabase = await createClient();
-  const immobilien = await getImmobilienUebersicht(supabase);
+  const [immobilien, tarif] = await Promise.all([getImmobilienUebersicht(supabase), getTarif(supabase)]);
+  const grenze = grenzeFuer(tarif, "immobilien");
+  const limitErreichtJetzt = limitErreicht(immobilien.length, grenze);
+  // Gleiches Muster wie der Zähler auf der Kaufprüfung-Seite.
+  const zaehler =
+    grenze !== null ? (
+      <p className="mt-2 text-sm text-neutral-600 tabular-nums">
+        {immobilien.length} von {grenze} Objekten genutzt
+      </p>
+    ) : null;
 
   if (immobilien.length === 0) {
     return (
       <div className="px-6 py-8">
         <p className="text-xs font-semibold tracking-[0.06em] text-neutral-600 uppercase">Portfolio</p>
         <h1 className="mt-1 text-[25px] leading-[1.12] font-semibold tracking-[-0.015em]">Übersicht</h1>
+        {zaehler}
 
         <div className="mt-8 max-w-[560px]">
           <h2 className="text-lg font-semibold">Leg deine erste Immobilie an</h2>
@@ -72,15 +85,28 @@ export default async function UebersichtPage() {
 
   return (
     <div className="px-6 py-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <h1 className="text-[25px] leading-[1.12] font-semibold tracking-[-0.015em]">Übersicht</h1>
-        <Button asChild>
-          <Link href="/immobilien/neu">
+        {limitErreichtJetzt ? (
+          <Button disabled aria-describedby="objekt-limit">
             <Plus className="size-4" />
             Immobilie hinzufügen
-          </Link>
-        </Button>
+          </Button>
+        ) : (
+          <Button asChild>
+            <Link href="/immobilien/neu">
+              <Plus className="size-4" />
+              Immobilie hinzufügen
+            </Link>
+          </Button>
+        )}
       </div>
+      {zaehler}
+      {limitErreichtJetzt && (
+        <div className="mt-3">
+          <LimitHinweis id="objekt-limit" text={limitMeldung(tarif, "immobilien")} />
+        </div>
+      )}
 
       <div className="mt-6 grid grid-cols-5 gap-4 max-md:flex max-md:overflow-x-auto">
         {kpis.map((kpi) => (

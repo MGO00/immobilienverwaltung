@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentAccountId } from "@/lib/supabase/account";
 import { z } from "zod";
-import type { InteressentStatus } from "@/lib/constants/interessent";
+import { AKTIVE_STATUS, type InteressentStatus } from "@/lib/constants/interessent";
+import { DB_FEHLER_IMMOBILIEN_LIMIT, DB_FEHLER_INTERESSENTEN_LIMIT, limitMeldung } from "@/lib/constants/tarife";
+import { getTarifStatus } from "@/lib/data/tarif";
 import { kannStatusSetzen } from "@/lib/interessent-regeln";
 import {
   interessentNotizSchema,
@@ -52,11 +54,20 @@ export async function interessentAnlegen(eingabe: InteressentEingabe): Promise<I
   const accountId = await getCurrentAccountId(supabase, user.id);
   if (!accountId) return { error: "Kein Konto gefunden. Bitte melde dich erneut an." };
 
+  // Tarifgrenze vorab (klare Meldung); die Datenbank prüft verbindlich nach.
+  const tarifStatus = await getTarifStatus(supabase);
+  if (tarifStatus.aktiveInteressenten.erreicht) {
+    return { error: limitMeldung(tarifStatus.tarif, "aktiveInteressenten") };
+  }
+
   const { data: neu, error } = await supabase
     .from("prospect")
     .insert({ account_id: accountId, ...zuSpalten(parsed.data) })
     .select("id")
     .single();
+  if (error?.code === DB_FEHLER_INTERESSENTEN_LIMIT) {
+    return { error: limitMeldung(tarifStatus.tarif, "aktiveInteressenten") };
+  }
   if (error || !neu) return { error: "Der Interessent konnte nicht gespeichert werden. Bitte versuch es erneut." };
 
   revalidatePath("/kaufpruefung");
@@ -87,7 +98,17 @@ export async function interessentStatusSetzen(id: string, status: InteressentSta
     return { error: "Dieser Statuswechsel ist nicht möglich." };
   }
 
+  // Wiederaufnahme (inaktiv -> aktiv) zählt auf das Limit aktiver Interessenten.
+  const wirdAktiv = AKTIVE_STATUS.includes(parsedStatus.data) && !AKTIVE_STATUS.includes(aktuell.status);
+  const tarifStatus = wirdAktiv ? await getTarifStatus(supabase) : null;
+  if (tarifStatus?.aktiveInteressenten.erreicht) {
+    return { error: limitMeldung(tarifStatus.tarif, "aktiveInteressenten") };
+  }
+
   const { error } = await supabase.from("prospect").update({ status: parsedStatus.data }).eq("id", parsedId.data);
+  if (error?.code === DB_FEHLER_INTERESSENTEN_LIMIT) {
+    return { error: limitMeldung((tarifStatus ?? (await getTarifStatus(supabase))).tarif, "aktiveInteressenten") };
+  }
   if (error) return { error: "Der Status konnte nicht geändert werden." };
 
   revalidatePath("/kaufpruefung");
@@ -185,9 +206,18 @@ export async function interessentInBestandUebernehmen(id: string): Promise<Inter
   } = await supabase.auth.getUser();
   if (!user) return { error: "Bitte melde dich erneut an." };
 
+  // Die Übernahme legt eine Immobilie an und zählt damit auf das Objektlimit.
+  const tarifStatus = await getTarifStatus(supabase);
+  if (tarifStatus.immobilien.erreicht) {
+    return { error: limitMeldung(tarifStatus.tarif, "immobilien") };
+  }
+
   const { data: neueImmobilieId, error } = await supabase.rpc("prospect_to_property", {
     p_prospect_id: parsedId.data,
   });
+  if (error?.code === DB_FEHLER_IMMOBILIEN_LIMIT) {
+    return { error: limitMeldung(tarifStatus.tarif, "immobilien") };
+  }
   if (error || !neueImmobilieId) {
     // P0001 = eigene, deutsche Fehlermeldung der Datenbankfunktion.
     const meldung = error?.code === "P0001" ? error.message : "Die Übernahme ist fehlgeschlagen. Bitte versuch es erneut.";
