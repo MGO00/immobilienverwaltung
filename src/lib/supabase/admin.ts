@@ -3,9 +3,16 @@ import { createClient } from "@supabase/supabase-js";
 
 // Supabase-Client MIT dem Secret-Key, der die Zugriffsregeln (RLS) umgeht.
 //
-// AUSSCHLIESSLICH für die E-Mail-Liste (Newsletter) bestimmt: Die Tabelle
-// newsletter_subscriber ist für alle normalen Rollen gesperrt. Jede andere
-// Funktion, die erweiterten Zugriff jenseits der normalen Zugriffsregeln
+// Ausdrücklich freigegeben sind GENAU diese Nutzungen:
+// 1. E-Mail-Liste (Newsletter): Die Tabelle newsletter_subscriber ist für alle
+//    normalen Rollen gesperrt (src/app/newsletter/actions.ts,
+//    src/lib/newsletter/token-status.ts).
+// 2. Kontolöschung (src/app/(app)/einstellungen/konto-actions.ts), und dort nur
+//    a) auth.admin.deleteUser für den angemeldeten Nutzer selbst und
+//    b) das Nachprüfen und Leeren genau des Storage-Ordners {account_id}/
+//       dieses Kontos. Die account_id wird vorher serverseitig gelesen und
+//       stammt nie aus einer Eingabe des Browsers.
+// Jede weitere Funktion, die Zugriff jenseits der normalen Zugriffsregeln
 // bräuchte, ist eine eigene, bewusste Entscheidung — dieser Client wird dafür
 // nicht ohne Rücksprache wiederverwendet (siehe CLAUDE.md, Sicherheit).
 //

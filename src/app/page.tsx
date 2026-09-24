@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { ArrowRight } from "lucide-react";
 import { Abschnitt, AbschnittKopf } from "@/components/start/abschnitt";
 import { FaqListe } from "@/components/start/faq-liste";
+import { KontoGeloeschtHinweis } from "@/components/start/konto-geloescht-hinweis";
 import { Hero } from "@/components/start/hero";
 import { NewsletterKarte } from "@/components/start/newsletter-karte";
 import { StartHeader } from "@/components/start/start-header";
@@ -17,6 +19,9 @@ export default function StartPage() {
   return (
     <div className="flex min-h-full flex-col">
       <StartHeader />
+      <Suspense fallback={null}>
+        <KontoGeloeschtHinweis />
+      </Suspense>
 
       <main className="flex-1">
         <Hero />

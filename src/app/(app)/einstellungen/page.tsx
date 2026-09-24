@@ -1,15 +1,13 @@
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { AbmeldenButton } from "@/components/einstellungen/abmelden-button";
+import { KontoLoeschen } from "@/components/einstellungen/konto-loeschen";
+import { kontoloeschungVerfuegbar } from "@/lib/konto/verfuegbar";
 import { PasswortFormular } from "@/components/einstellungen/passwort-formular";
 import { ProfilFormular } from "@/components/einstellungen/profil-formular";
 import { TARIFE } from "@/lib/constants/tarife";
 import { getTarifStatus } from "@/lib/data/tarif";
 import { createClient } from "@/lib/supabase/server";
-
-// Platzhalter bis zu den Rechtstexten (Meilenstein 5), gleicher Wortlaut wie auf
-// der Startseite. Vor dem Livegang echt lösen (siehe CLAUDE.md, "Vor der Veröffentlichung").
-const KONTOLOESCHUNG_HINWEIS = "[Platzhalter] Der genaue Ablauf zur Kontolöschung folgt mit den Rechtstexten.";
 
 function Abschnitt({ titel, children }: { titel: string; children: ReactNode }) {
   const id = `abschnitt-${titel.toLowerCase().replace(/\s+/g, "-")}`;
@@ -64,9 +62,13 @@ export default async function EinstellungenPage() {
           </Abschnitt>
 
           <Abschnitt titel="Konto">
-            <p className="text-sm text-neutral-700">{KONTOLOESCHUNG_HINWEIS}</p>
-            <div className="mt-4">
-              <AbmeldenButton />
+            <AbmeldenButton />
+            <div className="mt-6">
+              {kontoloeschungVerfuegbar() ? (
+                <KontoLoeschen />
+              ) : (
+                <p className="text-sm text-neutral-700">Die Kontolöschung ist gerade nicht verfügbar.</p>
+              )}
             </div>
           </Abschnitt>
         </div>

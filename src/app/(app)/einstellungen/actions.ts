@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient as createStatelessClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { aktuellesPasswortStimmt } from "@/lib/supabase/passwort-pruefung";
 import { passwortAendernSchema, profilSchema } from "@/lib/validation/einstellungen";
 
 export type EinstellungenState = { error?: string; erfolg?: boolean };
@@ -29,23 +29,6 @@ export async function profilSpeichern(_vorher: EinstellungenState, formData: For
   // Name steht auch im Nutzermenü jeder Seite.
   revalidatePath("/", "layout");
   return { erfolg: true };
-}
-
-// Supabase prüft das bisherige Passwort beim Ändern nicht selbst. Deshalb wird
-// es hier vorher mit einem eigenen, zustandslosen Client geprüft: Dieser Client
-// speichert keine Cookies, die bestehende Sitzung im Browser bleibt also
-// unberührt. Die dabei entstehende Prüf-Sitzung wird sofort wieder beendet,
-// und zwar nur diese eine (scope "local"), nicht die übrigen Sitzungen.
-async function aktuellesPasswortStimmt(email: string, passwort: string): Promise<boolean> {
-  const pruefClient = createStatelessClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } },
-  );
-  const { data, error } = await pruefClient.auth.signInWithPassword({ email, password: passwort });
-  if (error || !data.session) return false;
-  await pruefClient.auth.signOut({ scope: "local" });
-  return true;
 }
 
 export async function passwortAendern(_vorher: EinstellungenState, formData: FormData): Promise<EinstellungenState> {

@@ -76,7 +76,8 @@ export const START_FAQ = [
   },
   {
     frage: "Wie lösche ich mein Konto?",
-    antwort: "[Platzhalter] Der genaue Ablauf zur Kontolöschung folgt mit den Rechtstexten.",
+    antwort:
+      "In den Einstellungen unter „Konto“ kannst du dein Konto selbst löschen. Dabei werden alle deine Daten dauerhaft entfernt.",
   },
 ] as const;
 
