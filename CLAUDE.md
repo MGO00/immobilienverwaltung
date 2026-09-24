@@ -113,7 +113,13 @@ Dokumente und weitere Rechner.
   Tilgung" erscheint im Cashflow-Rechner, sobald Darlehen und Zins bekannt sind; das
   Leerstand-Feld bleibt beim Interessenten sichtbar (es gibt keine echten Einheiten), nur beim
   Bestandsobjekt entfällt es.
-- Weitere Fälle, Startseite (Runde 4, Schritt 1, docs/design/runde-4/): Die öffentliche Startseite
+- Weitere Fälle, Startseite (Runde 4, Schritt 1): docs/design/runde-4/ enthält seit dem 24.09.2026
+  den Stand von Schritt 2 (Ressourcen, Glossar, Tipps & Tricks), nicht mehr das Handoff der
+  Startseite. Das Schritt-1-Handoff ist vollständig und unverändert in der Git-Historie verfügbar,
+  und zwar nur in Commit 5ddada4 — dem einzigen Commit, mit dem es ins Repository kam. Das ist ein
+  fachfremder Commit (Kaufprüfung-Detailseite), der die Dateien versehentlich mit aufgenommen hat;
+  einen eigenen Commit für das Schritt-1-Handoff gibt es nicht. Abrufen z. B. mit
+  `git show 5ddada4:docs/design/runde-4/README.md`. Die öffentliche Startseite
   `/` folgt dem Handoff in Aufbau und Optik (Navigation, Hero mit Beispielrechnung, vier
   Rechner-Kacheln, "So funktioniert's", FAQ-Akkordeon, E-Mail-Liste, Fußzeile), aber NICHT dessen
   Texten, wo diese falsch oder erfunden waren. Alle Texte stehen zentral in
