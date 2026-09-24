@@ -14,7 +14,7 @@ const PUBLIC_PATHS = [
 ];
 
 // Öffentlich erreichbare Seiten (ohne Login, für Marketing/SEO): die Startseite
-// "/" und die Rechnerseiten. Bewusst
+// "/", die Rechnerseiten, Ressourcen und Tipps & Tricks. Bewusst
 // als exakte Pfade statt mit startsWith: Sonst wäre jede künftige Route unter
 // /rechner (z. B. ein weiterer Rechner) automatisch öffentlich. Die
 // Objektbezüge (?immobilie=...) bleiben trotzdem an die Anmeldung gebunden,
@@ -29,6 +29,12 @@ const PUBLIC_EXACT_PATHS = [
   // Link-Seiten aus der Bestätigungsmail der E-Mail-Liste (Besucher ohne Konto).
   "/newsletter/bestaetigen",
   "/newsletter/abmelden",
+  // Ressourcen und Tipps & Tricks (Runde 4, Schritt 2), ebenfalls einzeln und exakt:
+  // Künftige Artikelseiten unter /tipps/... sind damit nicht automatisch öffentlich.
+  "/ressourcen",
+  "/ressourcen/grunderwerbsteuer",
+  "/ressourcen/glossar",
+  "/tipps",
 ];
 
 // Angemeldete Nutzer sollen nicht zurück zu Anmelden/Registrieren können.

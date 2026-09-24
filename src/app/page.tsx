@@ -6,7 +6,7 @@ import { FaqListe } from "@/components/start/faq-liste";
 import { KontoGeloeschtHinweis } from "@/components/start/konto-geloescht-hinweis";
 import { Hero } from "@/components/start/hero";
 import { NewsletterKarte } from "@/components/start/newsletter-karte";
-import { StartHeader } from "@/components/start/start-header";
+import { PublicHeader } from "@/components/shell/public-header";
 import { newsletterKonfiguriert } from "@/lib/newsletter/konfiguration";
 import { startseiteMetadata } from "@/lib/seo/rechner";
 import { START_FAQ, START_FAQ_KONTAKT, START_RECHNER, START_SCHRITTE } from "@/lib/start/inhalte";
@@ -18,7 +18,7 @@ export const metadata = startseiteMetadata();
 export default function StartPage() {
   return (
     <div className="flex min-h-full flex-col">
-      <StartHeader />
+      <PublicHeader rechnerHref="#rechner" />
       <Suspense fallback={null}>
         <KontoGeloeschtHinweis />
       </Suspense>

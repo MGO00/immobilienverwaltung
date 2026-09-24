@@ -55,7 +55,9 @@ export function UserMenu({ user }: { user: SessionUser | null }) {
       >
         <DropdownMenuLabel className="rounded-none px-3 py-2 text-[0.8125rem] font-normal">
           <span className="block font-semibold">{user.name}</span>
-          <span className="block text-neutral-600">{user.email}</span>
+          <span className="block truncate text-neutral-600" title={user.email}>
+            {user.email}
+          </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="mx-0 my-0 bg-border" />
         <DropdownMenuItem
@@ -63,6 +65,15 @@ export function UserMenu({ user }: { user: SessionUser | null }) {
           asChild
         >
           <Link href="/einstellungen">Profil</Link>
+        </DropdownMenuItem>
+        {/* Nachschlagen (Steuersätze, Glossar) statt eines Punkts in der Hauptnavigation,
+            laut Empfehlung des Handoffs Runde 4. "Tipps & Tricks" folgt mit dem ersten
+            echten Artikel. */}
+        <DropdownMenuItem
+          className="rounded-none px-3 py-2 text-[0.8125rem] focus:bg-neutral-100 focus:text-foreground"
+          asChild
+        >
+          <Link href="/ressourcen">Ressourcen</Link>
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={pending}

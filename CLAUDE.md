@@ -35,7 +35,10 @@ Dokumente und weitere Rechner.
   /immobilien/[id]/bearbeiten, /rechner,
   /rechner/kaufnebenkosten, /rechner/rendite, /rechner/finanzierung, /rechner/cashflow,
   /kaufpruefung, /kaufpruefung/neu, /kaufpruefung/[id], /kaufpruefung/[id]/bearbeiten,
-  /einstellungen, /newsletter/bestaetigen, /newsletter/abmelden
+  /einstellungen, /newsletter/bestaetigen, /newsletter/abmelden,
+  /ressourcen, /ressourcen/grunderwerbsteuer, /ressourcen/glossar, /tipps
+  (Artikelseiten /tipps/<slug> gibt es bewusst noch nicht, siehe "Keine öffentliche Seite mit
+  Blindtext" unter Arbeitsweise.)
   Technischer Endpunkt ohne Seite: /auth/confirm (Ziel der Bestätigungs- und Recovery-Links von
   Supabase Auth).
   (/passwort-zuruecksetzen ist kein eigenes Nav-Ziel, sondern das Ziel des Links aus der
@@ -90,10 +93,12 @@ Dokumente und weitere Rechner.
 - Weitere Fälle, öffentliche Rechner: Die vier Rechner und /rechner sind ohne Login erreichbar und
   liegen dafür in einer eigenen Routengruppe `(rechner)` mit session-abhängigem Layout
   (src/app/(rechner)/layout.tsx). Angemeldete sehen wie überall die normale App-Navigation
-  (AppShell); Besucher ohne Anmeldung einen schlichten Kopfbereich (Logo, "Anmelden" als Textlink,
-  "Registrieren" als hervorgehobener Button) und eine schmale Fußzeile mit Impressum/Datenschutz
-  (Platzhalter-Links bis Meilenstein 5) und dem Hinweis "Keine Steuer- oder Anlageberatung". Das
-  ist im Prototyp nicht designt und folgt den vorhandenen Mustern der Auth-Seiten und der Kopfzeile.
+  (AppShell); Besucher ohne Anmeldung den öffentlichen Rahmen (PublicShell) mit derselben
+  Navigation wie die Startseite (siehe "Weitere Fälle, Ressourcen und Tipps & Tricks") und eine
+  schmale Fußzeile mit Impressum/Datenschutz (Platzhalter-Links bis Meilenstein 5) und dem Hinweis
+  "Keine Steuer- oder Anlageberatung". Der Kopfbereich ist 1120 px breit wie auf der Startseite, der
+  Rechner-Inhalt behält die App-Breite; der kleine Versatz zwischen Logo und Inhalt ist bewusst so
+  belassen.
   Im eigenständigen Cashflow-Rechner (ohne Objektbezug) gibt es ein optionales Feld "Leerstand"
   in Prozent; die Ergebnisliste zeigt weiter die eingegebene Kaltmiete und den Leerstand als eigene
   Differenz-Zeile ("− Leerstand (x %)").
@@ -136,13 +141,37 @@ Dokumente und weitere Rechner.
   Eingaben werden nicht gespeichert."; Schritt 3 mit den echten Assistenten-Schritten; keine Zahl
   "bis zu 5 Immobilien" (Tariflimit unbestätigt und nicht umgesetzt). Grundsatz: Die Startseite
   verspricht nur, was die App tatsächlich kann — ändert sich die App, werden diese Texte
-  mitgezogen. "Tipps & Tricks" und "Ressourcen" fehlen in der Navigation und in den Texten der
-  E-Mail-Liste, bis es diese Seiten gibt. Die Beispielrechnung im Hero (189.000 €, Bayern →
+  mitgezogen. "Tipps & Tricks" und "Ressourcen" stehen seit Schritt 2 in der Navigation; der Text
+  der E-Mail-Liste nennt sie bewusst weiterhin nicht ("Neuigkeiten zu den Rechnern und neuen
+  Funktionen"), solange es keine echten Artikel gibt. Die Beispielrechnung im Hero (189.000 €, Bayern →
   17.142 €) wird aus dem echten Kaufnebenkosten-Rechner erzeugt, nicht hartkodiert
   (src/lib/start/beispielrechnung.ts, mit Test). Die Hero-Überschrift ist bewusst größer als H1 in
   der App (laut Handoff). Die E-Mail-Liste erscheint nur, wenn Mailversand und Secret-Key
-  eingerichtet sind (siehe Sicherheit); die Bestätigen- und Abmelden-Seiten nutzen den schlichten
-  öffentlichen Rahmen (PublicShell), dessen Logo jetzt zur Startseite führt.
+  eingerichtet sind (siehe Sicherheit); die Bestätigen- und Abmelden-Seiten nutzen den
+  öffentlichen Rahmen (PublicShell), dessen Logo zur Startseite führt.
+- Weitere Fälle, Ressourcen und Tipps & Tricks (Runde 4, Schritt 2): Quelle ist
+  docs/design/runde-4/ (README und Website.dc.html, Stand 24.09.2026, vom Auftraggeber geprüft;
+  Texte und Zahlen 1:1 übernommen). Seiten in der Routengruppe `(website)` mit session-abhängigem
+  Layout wie `(rechner)`: Angemeldete sehen den App-Rahmen, Besucher die PublicShell (Fußzeile
+  dort nur Impressum · Datenschutz). Texte zentral in src/lib/ressourcen/inhalte.ts, Glossar in
+  src/lib/ressourcen/glossar.ts; die Zahlen auf den Ressourcen-Karten ("16 Bundesländer",
+  "7 Begriffe") werden aus den Daten gezählt. Die Grunderwerbsteuer-Tabelle kommt aus derselben
+  Konstante wie der Kaufnebenkosten-Rechner (siehe Fachliche Regeln), belegt durch
+  src/lib/ressourcen/grunderwerbsteuer.test.ts. Glossar-Anker ohne Umlaute
+  (`#glossar-nicht-umlagefaehige-kosten`, Prototyp: mit "ä"). Abweichungen vom Prototyp: Die zwei
+  Platzhalter-Karten unter /tipps sind NICHT anklickbar (keine Artikelseiten); die Artikel-Vorlage
+  existiert nur als Baustein ohne Route und ohne Beispielinhalt
+  (src/components/tipps/artikel-vorlage.tsx, Datenform src/lib/tipps/artikel.ts).
+  Öffentliche Navigation überall gleich (src/components/shell/public-header.tsx; Startseite,
+  Rechner, Ressourcen, Tipps, Newsletter-Seiten): Rechner · Tipps & Tricks · Ressourcen |
+  Anmelden · Registrieren, mobil mit Menü. Aktiver Bereich unterstrichen mit aria-current:
+  "Ressourcen" auf allen Ressourcen-Seiten, "Tipps & Tricks" auf /tipps und — Ergänzung zum
+  Handoff — "Rechner" auf /rechner und allen Rechner-Unterseiten; auf der Startseite springt
+  "Rechner" zum Abschnitt #rechner und bleibt unmarkiert. Für Angemeldete (Empfehlung des Handoffs
+  aus Schritt 1, reduziert): Hauptnavigation der App unverändert; "Ressourcen" im Nutzermenü;
+  im Kaufnebenkosten-Rechner der Link "Alle Sätze im Überblick →" zur Tabelle (für alle sichtbar).
+  "Tipps & Tricks" kommt erst mit dem ersten echten Artikel ins Nutzermenü; "?"-Links neben
+  Fachbegriffen ins Glossar sind ein eigener späterer Schritt.
 - Weitere Fälle, Navigation und Einstellungen: Die Hauptnavigation hat vier Punkte — Übersicht,
   Kaufprüfung, Rechner, Einstellungen (src/components/shell/nav-links.ts); "Kaufprüfung" steht
   zwischen Übersicht und Rechner. Die mobile untere Leiste hat damit vier statt der drei Plätze aus
@@ -205,8 +234,10 @@ Im Umfang:
   vergleichen"), Konto (Abmelden und Konto löschen, siehe
   Sicherheit und Datenschutz, Kontolöschung).
 - Öffentliche Startseite `/` mit E-Mail-Liste (Double-Opt-in). Es wird nur die Bestätigungsmail
-  verschickt; einen Newsletter-Versand gibt es noch nicht. Ressourcen, Glossar,
-  Grunderwerbsteuer-Tabelle und Tipps & Tricks (weitere Schritte aus Runde 4) sind noch nicht gebaut.
+  verschickt; einen Newsletter-Versand gibt es noch nicht.
+- Ressourcen (Runde 4, Schritt 2): Übersicht, Grunderwerbsteuer-Tabelle aller 16 Bundesländer und
+  Glossar mit sieben Begriffen, öffentlich erreichbar. Tipps & Tricks: nur die Übersicht mit zwei
+  als "in Vorbereitung" gekennzeichneten, nicht anklickbaren Platzhalter-Karten; noch keine Artikel.
 
 Ausdrücklich NICHT im Umfang (nicht vorbauen): Mieterverwaltung, Mietverträge,
 Nebenkostenabrechnung, Dokumentenablage, Abos und Zahlungen, mehrere Nutzer pro Konto, andere
@@ -216,9 +247,10 @@ Reihenfolge — aber ausdrücklich nicht jetzt und nicht als Vorbereitung. Jede 
 gebaut, wenn sie explizit als eigener Auftrag kommt.
 
 ## Bekannte künftige Änderungen (noch nicht umsetzen)
-- Öffentliche Startseite und Rechnerseiten sind ohne Login erreichbar, aber bewusst noch auf noindex
+- Öffentliche Startseite, Rechnerseiten, Ressourcen und Tipps & Tricks sind ohne Login erreichbar,
+  aber bewusst noch auf noindex
   (Konstante `RECHNER_INDEXIERBAR = false` in src/lib/seo/rechner.ts; die deutschen Titel und
-  Beschreibungen stehen dort schon bereit, auch für die Startseite). Freigeschaltet wird erst nach fertigem Impressum
+  Beschreibungen stehen dort schon bereit, auch für Startseite, Ressourcen und Tipps). Freigeschaltet wird erst nach fertigem Impressum
   (Meilenstein 5) und ausdrücklicher Freigabe, ebenso keine Bewerbung der Seiten vorher. Die
   Impressumspflicht entsteht schon durch die bloße Erreichbarkeit, nicht erst durch die
   Indexierung — vor jedem echten Livegang muss das Impressum stehen.
@@ -231,6 +263,8 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   Anschlussfinanzierung/mehrerer Darlehen); eine transaktionale Buchungstabelle für Einnahmen/
   Ausgaben (könnte running_cost_item später ergänzen oder ablösen). Keine dieser Änderungen jetzt
   vornehmen.
+- Zahlenfelder zeigen und akzeptieren bisher einen Dezimalpunkt ("1.5"). Deutsche Eingabe mit
+  Komma ("1,5") in allen Formularen wird in einem eigenen Schritt umgesetzt.
 
 ## Tarife und Grenzen
 - Jedes Konto hat einen Tarif: Spalte `account.tarif` (kostenlos | plus | pro, Standard "kostenlos"
@@ -307,7 +341,11 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Rechner sind reine Funktionen in src/lib/calculators/ (ohne Oberfläche, ohne Datenbank) mit
   automatischen Tests. Als Testwerte dienen die Beispieldaten aus der Design-README.
 - Steuersätze und Prozentwerte (Grunderwerbsteuer je Bundesland, Notar, Grundbuch, Makler) stehen in
-  einer zentralen Konstantendatei mit Stand-Datum, nie in Komponenten.
+  einer zentralen Konstantendatei mit Stand-Datum, nie in Komponenten
+  (src/lib/constants/steuersaetze.ts). Die Grunderwerbsteuer (`GRUNDERWERBSTEUER_PROZENT`), ihr
+  Stand (`GRUNDERWERBSTEUER_STAND`) und die Formatierung (`formatSteuersatz()`) sind EINE Quelle
+  für Auswahlliste und Berechnung im Kaufnebenkosten-Rechner und die Tabelle unter
+  /ressourcen/grunderwerbsteuer; bei einer Änderung der Sätze den Stand mitziehen.
   Bremen: 5,5 % (die README aus Runde 1 nennt noch 5,0 %). Vor der Veröffentlichung alle Sätze
   gegen eine amtliche Quelle prüfen.
 - Formeln:
@@ -410,8 +448,10 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   Startseite erscheint nur, wenn `SUPABASE_SECRET_KEY`, `SMTP_HOST` und `MAIL_FROM` gesetzt sind
   (Vorlage in .env.example); vorher wird nichts gesammelt.
 - Startseite: `/` steht als exakter Pfad in der Liste der öffentlichen Pfade in src/proxy.ts (nie
-  per startsWith, sonst wäre jeder Pfad öffentlich), ebenso `/newsletter/bestaetigen` und
-  `/newsletter/abmelden`. Angemeldete Nutzer leitet der Proxy von `/` direkt zu /uebersicht.
+  per startsWith, sonst wäre jeder Pfad öffentlich), ebenso `/newsletter/bestaetigen`,
+  `/newsletter/abmelden`, `/ressourcen`, `/ressourcen/grunderwerbsteuer`, `/ressourcen/glossar` und
+  `/tipps` (künftige Artikelseiten unter /tipps/... sind damit nicht automatisch öffentlich und
+  müssen einzeln freigegeben werden). Angemeldete Nutzer leitet der Proxy von `/` direkt zu /uebersicht.
 - Öffentliche Rechnerseiten: src/proxy.ts gibt genau die fünf Rechner-Pfade als exakte Liste frei
   (kein startsWith, damit künftige Routen unter /rechner nicht automatisch öffentlich werden).
   ?immobilie=<id> wird nur bei angemeldetem Nutzer ausgewertet — zusätzlich zu den
@@ -434,6 +474,11 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   Commit mit verständlicher Nachricht und eine kurze Anleitung, wie der Auftraggeber das Ergebnis
   selbst ausprobiert.
 - Nichts bauen, was nicht im Umfang steht. Ideen für später als Vorschlag notieren.
+- Keine öffentliche Seite mit Blindtext: Keine öffentlich erreichbare Seite zeigt Lorem ipsum oder
+  erfundenen Beispielinhalt. Vorlagen (z. B. die Artikel-Vorlage für Tipps & Tricks) bleiben
+  Bausteine im Code ohne eigene Route; eine Seite entsteht erst mit echtem Inhalt. Sichtbar
+  gekennzeichnete [Platzhalter] sind nur dort erlaubt, wo sie freigegeben sind, und stehen in der
+  Liste unter "Vor der Veröffentlichung".
 
 ## Vor der Veröffentlichung (nicht vergessen)
 - Vercel: Der Hobby-Tarif ist nur für nicht-kommerzielle Nutzung erlaubt. Vor dem Livegang mit
@@ -454,11 +499,15 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Startseite: alle mit [Platzhalter] markierten Texte in src/lib/start/inhalte.ts ersetzen
   (Datensicherheit, Kontaktadresse). Außerdem alle Platzhalter-Links (bisher `#impressum`,
   `#datenschutz`, `#agb`) durch echte Seiten ersetzen: Fußzeile der Startseite (src/app/page.tsx),
-  der Rechnerseiten und Newsletter-Seiten (src/components/shell/public-shell.tsx) und der
+  der Rechnerseiten, Newsletter-Seiten, Ressourcen und Tipps & Tricks
+  (src/components/shell/public-shell.tsx) und der
   Anmelde-/Registrierungsseiten (src/app/(auth)/layout.tsx); der Datenschutz-Link in der Karte der
   E-Mail-Liste (src/components/start/newsletter-karte.tsx); bei der Registrierung die Links "AGB" und
   "Datenschutzerklärung" im Hinweistext unter dem Formular (src/app/(auth)/registrieren/
   sign-up-form.tsx; eine AGB-Checkbox gibt es bewusst nicht).
+- Tipps & Tricks: /tipps zeigt sichtbare [Platzhalter]-Karten. Vor dem Livegang entweder echte
+  Artikel veröffentlichen oder "Tipps & Tricks" aus der öffentlichen Navigation nehmen
+  (src/components/shell/public-header.tsx).
 - E-Mail-Liste einschalten erst, wenn die Datenschutzerklärung die Adress-Erhebung beschreibt:
   dann `SUPABASE_SECRET_KEY` und Mailversand (Anbieter mit eigener Domain, `SMTP_*`, `MAIL_FROM`)
   in .env.local und Vercel eintragen. Einwilligungstexte je Version im Repository ablegen (z. B.

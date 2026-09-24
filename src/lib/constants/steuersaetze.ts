@@ -1,6 +1,8 @@
-// Grunderwerbsteuer je Bundesland, in Prozent des Kaufpreises.
-// Stand: 2026-09-22. Vor der Veröffentlichung gegen eine amtliche Quelle
-// prüfen (siehe CLAUDE.md, "Vor der Veröffentlichung").
+// Grunderwerbsteuer je Bundesland, in Prozent des Kaufpreises. Eine Quelle für
+// den Kaufnebenkosten-Rechner (Auswahlliste und Berechnung) und die Tabelle unter
+// /ressourcen/grunderwerbsteuer. Stand siehe GRUNDERWERBSTEUER_STAND. Vor der
+// Veröffentlichung gegen eine amtliche Quelle prüfen (siehe CLAUDE.md,
+// "Vor der Veröffentlichung").
 // Bremen bewusst mit 5,5 % (nicht den 5,0 % aus der README von Runde 1).
 export const GRUNDERWERBSTEUER_PROZENT: Record<string, number> = {
   "Baden-Württemberg": 5.0,
@@ -21,6 +23,10 @@ export const GRUNDERWERBSTEUER_PROZENT: Record<string, number> = {
   Thüringen: 5.0,
 };
 
+// Stand der Sätze (JJJJ-MM-TT). Bei jeder Änderung der Sätze mitziehen; die
+// Tabelle zeigt ihn als "Stand: <Monat Jahr>" an.
+export const GRUNDERWERBSTEUER_STAND = "2026-09-22";
+
 export const BUNDESLAENDER = Object.keys(GRUNDERWERBSTEUER_PROZENT) as ReadonlyArray<
   keyof typeof GRUNDERWERBSTEUER_PROZENT
 >;
@@ -33,10 +39,25 @@ export const NOTAR_PROZENT_STANDARD = 1.5;
 export const GRUNDBUCH_PROZENT_STANDARD = 0.5;
 export const MAKLER_PROZENT_STANDARD = 3.57;
 
+/** Steuersatz mit genau einer Nachkommastelle, z. B. formatSteuersatz(5) → "5,0 %". */
+export function formatSteuersatz(satz: number): string {
+  return `${satz.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+}
+
+/** Stand-Datum als Monat und Jahr, z. B. "2026-09-22" → "September 2026". */
+export function formatStandMonat(stand: string): string {
+  const [jahr, monat] = stand.split("-").map(Number);
+  return new Date(Date.UTC(jahr, monat - 1, 1)).toLocaleDateString("de-DE", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function bundeslandLabel(bundesland: string): string {
   const satz = GRUNDERWERBSTEUER_PROZENT[bundesland];
   if (satz === undefined) {
     return bundesland;
   }
-  return `${bundesland} · ${satz.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+  return `${bundesland} · ${formatSteuersatz(satz)}`;
 }

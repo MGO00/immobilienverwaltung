@@ -58,3 +58,34 @@ export function startseiteMetadata(): Metadata {
     robots: RECHNER_ROBOTS,
   };
 }
+
+type WebsiteSeite = "ressourcen" | "grunderwerbsteuer" | "glossar" | "tipps";
+
+// Ressourcen und Tipps & Tricks (Runde 4, Schritt 2): gleicher Schalter, noindex bis
+// zum fertigen Impressum.
+const WEBSITE_SEITEN: Record<WebsiteSeite, { title: string; description: string }> = {
+  ressourcen: {
+    title: `Ressourcen: Steuersätze und Begriffe zum Immobilienkauf | ${MARKE}`,
+    description:
+      "Zum Nachschlagen: die Grunderwerbsteuer aller 16 Bundesländer und ein Glossar mit den wichtigsten Kennzahlen und Begriffen aus den Immobilien-Rechnern.",
+  },
+  grunderwerbsteuer: {
+    title: `Grunderwerbsteuer nach Bundesland: alle Steuersätze | ${MARKE}`,
+    description:
+      "Die Grunderwerbsteuersätze aller 16 Bundesländer auf einen Blick, mit Stand-Datum. Mit dem kostenlosen Rechner die Kaufnebenkosten deiner Immobilie berechnen.",
+  },
+  glossar: {
+    title: `Immobilien-Glossar: Rendite, Tilgung, Beleihungsauslauf | ${MARKE}`,
+    description:
+      "Beleihungsauslauf, Brutto- und Nettorendite, Kaufpreisfaktor, Tilgung, Zinsbindung und mehr: die Begriffe aus den Immobilien-Rechnern kurz erklärt.",
+  },
+  tipps: {
+    title: `Tipps & Tricks für private Vermieter | ${MARKE}`,
+    description:
+      "Artikel rund um Kauf, Finanzierung und Vermietung von Immobilien für private Vermieter und Kapitalanleger. Die ersten Artikel sind in Vorbereitung.",
+  },
+};
+
+export function websiteMetadata(seite: WebsiteSeite): Metadata {
+  return { ...WEBSITE_SEITEN[seite], robots: RECHNER_ROBOTS };
+}

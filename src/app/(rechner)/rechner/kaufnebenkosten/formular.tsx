@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -102,7 +103,12 @@ export function KaufnebenkostenFormular({
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-neutral-600">Bestimmt den Grunderwerbsteuersatz.</p>
+          <p className="text-xs text-neutral-600">
+            Bestimmt den Grunderwerbsteuersatz.{" "}
+            <Link href="/ressourcen/grunderwerbsteuer" className="text-primary hover:underline">
+              Alle Sätze im Überblick →
+            </Link>
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
