@@ -129,7 +129,8 @@ Dokumente und weitere Rechner.
   Rechner-Kacheln, "So funktioniert's", FAQ-Akkordeon, E-Mail-Liste, Fußzeile), aber NICHT dessen
   Texten, wo diese falsch oder erfunden waren. Alle Texte stehen zentral in
   src/lib/start/inhalte.ts. Korrigiert gegenüber dem Prototyp: keine Frage zum Datenexport (gibt es
-  nicht); Kontolöschung und Kontaktadresse als [Platzhalter]; "Bezahltarife sind für später
+  nicht); Kontaktadresse als [Platzhalter]; Kontolöschung mit der echten Funktion ("In den
+  Einstellungen unter „Konto“ kannst du dein Konto selbst löschen. …"); "Bezahltarife sind für später
   geplant." (kein Jahr); "Der Finanzierungsrechner rechnet monatlich, wie bei einer Bank üblich.";
   Übernahme in eine Immobilie nur für den Kaufnebenkosten-Rechner erwähnt; Schritt 1 "Deine
   Eingaben werden nicht gespeichert."; Schritt 3 mit den echten Assistenten-Schritten; keine Zahl
@@ -194,8 +195,8 @@ Im Umfang:
   angezeigt, Ändern folgt mit dem eigenen Mailversand), Passwort ändern (mit Prüfung des aktuellen
   Passworts), Tarif (aktueller Tarif mit Nutzung "X von 5 Objekten" / "X von 20 aktiven
   Interessenten" und "Größere Tarife sind in Vorbereitung."; bewusst kein Button "Tarife
-  vergleichen"), Konto (Abmelden und [Platzhalter] zur Kontolöschung, gleicher Wortlaut wie auf der
-  Startseite).
+  vergleichen"), Konto (Abmelden und Konto löschen, siehe
+  Sicherheit und Datenschutz, Kontolöschung).
 - Öffentliche Startseite `/` mit E-Mail-Liste (Double-Opt-in). Es wird nur die Bestätigungsmail
   verschickt; einen Newsletter-Versand gibt es noch nicht. Ressourcen, Glossar,
   Grunderwerbsteuer-Tabelle und Tipps & Tricks (weitere Schritte aus Runde 4) sind noch nicht gebaut.
@@ -362,10 +363,37 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   (scope "local"). Falsches Passwort: neutrale Meldung "Das aktuelle Passwort stimmt nicht."
 - Secret-Key (Supabase): Der einzige Code, der ihn nutzt, ist src/lib/supabase/admin.ts
   (`createAdminClient()`, mit `import "server-only"`, damit er nie in den Browser-Code gelangt; Wert
-  nur in .env.local bzw. Vercel als `SUPABASE_SECRET_KEY`, nie mit NEXT_PUBLIC_). Dieser Client ist
-  AUSSCHLIESSLICH für die E-Mail-Liste (Newsletter) bestimmt. Jede künftige Funktion, die ebenfalls
-  erweiterten Zugriff jenseits der normalen Zugriffsregeln bräuchte, ist eine eigene, bewusste
-  Entscheidung und kein Fall für die Wiederverwendung dieses admin-Clients ohne Rücksprache.
+  nur in .env.local bzw. Vercel als `SUPABASE_SECRET_KEY`, nie mit NEXT_PUBLIC_). Ausdrücklich
+  freigegeben sind genau diese Nutzungen:
+  1. E-Mail-Liste (Newsletter): die für alle normalen Rollen gesperrte Tabelle newsletter_subscriber.
+  2. Kontolöschung (src/app/(app)/einstellungen/konto-actions.ts), und dort nur
+     2a. `auth.admin.deleteUser` für den angemeldeten Nutzer selbst und
+     2b. das Nachprüfen und Leeren genau des Storage-Ordners `{account_id}/` dieses Kontos. Die
+         account_id wird vorher serverseitig gelesen und stammt nie aus einer Eingabe des Browsers.
+  Jede weitere Funktion, die erweiterten Zugriff jenseits der normalen Zugriffsregeln bräuchte, ist
+  eine eigene, bewusste Entscheidung und kein Fall für die Wiederverwendung dieses admin-Clients
+  ohne Rücksprache.
+- Kontolöschung (Einstellungen → Konto → "Konto löschen"), Ablauf in der Server Action
+  `kontoLoeschen`: (1) Dialog mit Warnung (alle Immobilien, Einheiten, Kosten, Notizen,
+  Interessenten und Fotos gehen dauerhaft verloren) und Hinweis, dass ein Eintrag in der E-Mail-Liste
+  unberührt bleibt und separat über den Abmelde-Link entfernt wird; (2) Zod → getUser() → Prüfung des
+  aktuellen Passworts mit dem zustandslosen Client (src/lib/supabase/passwort-pruefung.ts); falsches
+  Passwort: nichts wird gelöscht; (3) nur wenn der Nutzer das letzte Mitglied des Kontos ist: Fotos
+  ZUERST und streng — alle Dateien im Ordner `{account_id}/` auflisten (auch verwaiste und in
+  Unterordnern, nicht nur property.foto_pfad), mit den normalen Rechten des Nutzers löschen und
+  danach erneut auflisten; bleibt irgendetwas übrig oder meldet Supabase einen Fehler, wird der Nutzer
+  NICHT gelöscht, sondern es erscheint eine Meldung zum erneuten Versuch (Supabase meldet keinen
+  Fehler, wenn eine Zugriffsregel das Löschen einer Datei still verhindert — nur die Nachkontrolle
+  erkennt das); (4) `auth.admin.deleteUser` (2a); die Datenbank-Kaskade entfernt Mitgliedschaft und
+  Profil, beim letzten Mitglied löscht der Trigger delete_account_if_empty() das Konto samt aller
+  Fachdaten; bei weiteren Mitgliedern bleiben Konto, Daten und Fotos für diese erhalten; (5) erneute
+  Nachkontrolle des Ordners mit dem Admin-Client (2b) für eine Datei, die ein zweiter Browser in
+  diesem Moment noch hochgeladen haben könnte; (6) eigene Sitzungs-Cookies entfernen und Weiterleitung
+  auf /?konto=geloescht mit Bestätigung. Ein zweiter, gleichzeitig angemeldeter Browser landet beim
+  nächsten Seitenaufruf auf /anmelden. Ohne `SUPABASE_SECRET_KEY` zeigen die Einstellungen statt des
+  Buttons "Die Kontolöschung ist gerade nicht verfügbar." Belegt durch
+  supabase/tests/database/45_nutzer_loeschen.sql, src/lib/konto/foto-ordner.test.ts und
+  Ende-zu-Ende-Tests (lokal und im verbundenen Projekt).
 - E-Mail-Liste: Double-Opt-in (Eintrag erst nach Klick auf den Link in der Bestätigungsmail;
   Bestätigen und Abmelden passieren per Knopfdruck auf der Link-Seite, nicht schon beim Öffnen,
   damit vorab abrufende Mailprogramme nichts auslösen). Schutz ohne Drittanbieter: unsichtbares
@@ -406,17 +434,18 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Impressum, Datenschutzerklärung und AGB. Auftragsverarbeitungsverträge mit Supabase und Vercel.
 - Einmaliger Sicherheitsreview der Zugriffsregeln durch eine Fachperson.
 - Steuersätze und Rechenformeln erneut prüfen.
-- Kontolöschung (DSGVO-Pflicht, Recht auf Löschung): vor dem Livegang echt lösen — entweder als
-  Funktion in der App oder mit einer echten, betreuten Adresse und einem beschriebenen Ablauf. Bis
-  dahin steht an zwei Stellen ein [Platzhalter]: Startseite (src/lib/start/inhalte.ts) und
-  Einstellungen (src/app/(app)/einstellungen/page.tsx, KONTOLOESCHUNG_HINWEIS). Beide ersetzen.
+- Kontolöschung (DSGVO-Pflicht, Recht auf Löschung): technisch gelöst (Funktion in den
+  Einstellungen, siehe Sicherheit und Datenschutz). Noch offen: (a) Beschreibung in der
+  Datenschutzerklärung (was gelöscht wird, dass ein Eintrag in der E-Mail-Liste separat bleibt,
+  Backups/Aufbewahrung bei Supabase); (b) `SUPABASE_SECRET_KEY` auf Vercel eintragen, sonst ist die
+  Funktion im Livebetrieb nicht verfügbar.
 - Anmelde-Limit von Supabase prüfen und bei Bedarf erhöhen (Supabase-Dashboard, Authentication →
   Rate Limits, "sign-ins and sign-ups"; lokal 30 pro 5 Minuten und IP). Anmeldung und die Prüfung
   des aktuellen Passworts beim Passwortwechsel laufen über Server Actions, also vom Server aus;
   Supabase sieht dabei vermutlich die IP des Servers statt die der Nutzer, sodass sich alle Nutzer
   ein Kontingent teilen. Vor dem Livegang unter echter Last prüfen.
 - Startseite: alle mit [Platzhalter] markierten Texte in src/lib/start/inhalte.ts ersetzen
-  (Datensicherheit, Kontolöschung, Kontaktadresse), dazu die Impressum-/Datenschutz-Links auf der
+  (Datensicherheit, Kontaktadresse), dazu die Impressum-/Datenschutz-Links auf der
   Startseite, den Rechnerseiten und den Newsletter-Seiten (bisher `#impressum`/`#datenschutz`).
 - E-Mail-Liste einschalten erst, wenn die Datenschutzerklärung die Adress-Erhebung beschreibt:
   dann `SUPABASE_SECRET_KEY` und Mailversand (Anbieter mit eigener Domain, `SMTP_*`, `MAIL_FROM`)
