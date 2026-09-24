@@ -17,7 +17,7 @@ export default async function NewsletterBestaetigenPage({
       {status === "gueltig" && token ? (
         <div className="mt-4">
           <p className="mb-4 text-sm text-neutral-800">
-            Ein Klick noch, dann bekommst du einmal im Monat Neuigkeiten zu neuen Rechnern, Ressourcen und Tipps.
+            Ein Klick noch, dann bekommst du einmal im Monat Neuigkeiten zu den Rechnern und neuen Funktionen.
           </p>
           <LinkAktion
             aktion={newsletterBestaetigen}

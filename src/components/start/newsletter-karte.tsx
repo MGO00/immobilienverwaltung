@@ -26,7 +26,7 @@ export function NewsletterKarte() {
         <p className="mb-2 text-[11px] tracking-[0.1em] text-neutral-700 uppercase">E-Mail-Liste</p>
         <h2 className="text-[21px] font-semibold">Neuigkeiten per E-Mail</h2>
         <p className="mt-1.5 max-w-[440px] text-sm leading-[1.55] text-neutral-800 text-pretty">
-          Einmal im Monat: neue Rechner, Ressourcen und Tipps. Das ist kein Konto — dafür gibt es die Registrierung.
+          Einmal im Monat: Neuigkeiten zu den Rechnern und neuen Funktionen. Das ist kein Konto — dafür gibt es die Registrierung.
         </p>
       </div>
 
