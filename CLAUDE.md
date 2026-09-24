@@ -30,10 +30,14 @@ Dokumente und weitere Rechner.
 - Code-Bezeichner auf Englisch; Kommentare, Commit-Nachrichten und alle sichtbaren Texte auf Deutsch
 - Routen auf Deutsch: / (öffentliche Startseite), /anmelden, /registrieren, /passwort-vergessen,
   /email-bestaetigen,
-  /passwort-zuruecksetzen, /uebersicht, /immobilien/neu, /immobilien/[id], /rechner,
+  /passwort-zuruecksetzen, /uebersicht, /immobilien/neu, /immobilien/[id] (mit den Unterseiten
+  /einheiten, /kauf-und-finanzierung, /einnahmen-und-ausgaben, /rechner, /notizen je Tab),
+  /immobilien/[id]/bearbeiten, /rechner,
   /rechner/kaufnebenkosten, /rechner/rendite, /rechner/finanzierung, /rechner/cashflow,
   /kaufpruefung, /kaufpruefung/neu, /kaufpruefung/[id], /kaufpruefung/[id]/bearbeiten,
   /einstellungen, /newsletter/bestaetigen, /newsletter/abmelden
+  Technischer Endpunkt ohne Seite: /auth/confirm (Ziel der Bestätigungs- und Recovery-Links von
+  Supabase Auth).
   (/passwort-zuruecksetzen ist kein eigenes Nav-Ziel, sondern das Ziel des Links aus der
   Passwort-vergessen-E-Mail; im Prototyp nicht enthalten, aber ohne diesen Screen liefe der
   Reset-Link ins Leere.)
@@ -50,9 +54,11 @@ Dokumente und weitere Rechner.
     braucht einen laufenden lokalen Supabase-Stack (`npx supabase start`, benötigt Docker)
 
 ## Design
-- Quelle: docs/design/. Die neueste Runde (aktuell runde-2) gilt bei Widersprüchen. Was in der
-  neuesten README fehlt (Komponenten-Zuordnung zu shadcn/ui, Tailwind-Mapping, Routen, Fokus-Stil),
-  gilt aus runde-1 weiter.
+- Quelle: docs/design/. Für die App (alles hinter der Anmeldung) gilt runde-2 als neueste Runde bei
+  Widersprüchen. Was in deren README fehlt (Komponenten-Zuordnung zu shadcn/ui, Tailwind-Mapping,
+  Routen, Fokus-Stil), gilt aus runde-1 weiter. runde-4 betrifft nur die öffentliche Website
+  (Startseite, Ressourcen, Glossar, Tipps & Tricks) und ändert nichts am Design der App. Für die
+  Kaufprüfung gibt es keine eigene Runde (eine "runde-3" existiert nicht im Repository).
 - Bei Widersprüchen zwischen README und Prototyp (Immobilienverwaltung.dc.html) gilt der Prototyp.
   Bekannte Fälle in runde-2: Die Navigation ist eine obere Leiste am Desktop und eine untere Leiste
   mobil (nicht, wie in der README steht, eine Sidebar). Der Assistent hat die Schritte 1 Objekt,
@@ -68,9 +74,8 @@ Dokumente und weitere Rechner.
   Einheiten: "leer" petrolfarben hervorgehoben (tag-accent), "vermietet" und "selbstgenutzt" neutral
   in Tinte — eigene Festlegung, weil der Prototyp sich hier selbst widerspricht (Detailseite und
   Assistent-Vorschau behandeln denselben Status unterschiedlich). Der Rechner-Tab auf der
-  Detailseite zeigt ab Meilenstein 3 alle vier Rechner-Karten, aber nur Kaufnebenkosten ist
-  verlinkt; Rendite, Finanzierung und Cashflow sind als "kommt noch" markiert, bis sie in
-  Meilenstein 4 entstehen.
+  Detailseite zeigt alle vier Rechner-Karten als "Bereit", jeweils mit ?immobilie=<id> verlinkt (in
+  Meilenstein 3 war nur Kaufnebenkosten verlinkt, die übrigen kamen mit Meilenstein 4).
 - Weitere Fälle aus Meilenstein 4: Der Kaufnebenkosten-Rechner kann das Ergebnis bei Objektbezug
   (?immobilie=<id>) per "Übernehmen"-Button als kaufnebenkosten_betrag am Objekt speichern (im
   Prototyp die "Zuordnen"-Box) — ohne Objektbezug zeigt er nur das Ergebnis. Die
@@ -78,8 +83,8 @@ Dokumente und weitere Rechner.
   Darlehensjahren; ein Start- oder Endjahr mit weniger als 12 Monaten wird mit der Monatsanzahl
   gekennzeichnet (z. B. "2026 (7 Monate)"). Ohne Kaufdatum am Objekt gilt das heutige Datum als
   Start; der eigenständige Rechner hat dafür ein eigenes "Startdatum"-Feld (Default heute). Die
-  Zeile "Davon Tilgung" im Cashflow-Rechner erscheint nur bei Objektbezug, weil sie Darlehen und
-  Zins getrennt von der eingegebenen Rate kennen muss. Brutto- und Nettorendite werden im
+  Zeile "Davon Tilgung" im Cashflow-Rechner erscheint nur mit Bezug auf eine Immobilie oder einen
+  Interessenten mit Darlehen und Zins, weil sie beides getrennt von der eingegebenen Rate kennen muss. Brutto- und Nettorendite werden im
   Rendite-Rechner beide neutral dargestellt (der Prototyp hebt die Bruttorendite farbig hervor) —
   konsistent mit dem übrigen, durchgehend neutralen Kennzahlen-Stil der App.
 - Weitere Fälle, öffentliche Rechner: Die vier Rechner und /rechner sind ohne Login erreichbar und
@@ -92,8 +97,8 @@ Dokumente und weitere Rechner.
   Im eigenständigen Cashflow-Rechner (ohne Objektbezug) gibt es ein optionales Feld "Leerstand"
   in Prozent; die Ergebnisliste zeigt weiter die eingegebene Kaltmiete und den Leerstand als eigene
   Differenz-Zeile ("− Leerstand (x %)").
-- Weitere Fälle, Kaufprüfung: Für diesen Bereich gibt es keinen Design-Entwurf (docs/design hat nur
-  runde-1 und runde-2). Die Screens sind aus den vorhandenen Mustern abgeleitet (Übersicht,
+- Weitere Fälle, Kaufprüfung: Für diesen Bereich gibt es keinen Design-Entwurf (keine Runde in
+  docs/design deckt ihn ab). Die Screens sind aus den vorhandenen Mustern abgeleitet (Übersicht,
   Objektkarte, Bearbeiten-Formular, Detailseite, Dialoge) und wurden Schritt für Schritt anhand von
   Screenshots freigegeben. Die Übersicht ist eine einfache Liste mit Status-Reitern (Alle,
   beobachtet, besichtigt, Angebot abgegeben, gekauft, abgelehnt, jeweils mit Anzahl); die im
