@@ -190,7 +190,12 @@ Im Umfang:
 - Tarif-Grenzen im kostenlosen Tarif (5 Objekte, 20 aktive Interessenten), echt durchgesetzt, mit
   Zähler "X von 5 Objekten genutzt" auf der Übersicht (siehe "Tarife und Grenzen"). Kein
   Zahlungssystem, keine Preisseite, kein Tarifwechsel.
-- Einstellungen: Profil, Passwort ändern, Tarif (Platzhalter), Konto (Abmelden).
+- Einstellungen (nach runde-2, Abschnitt 10): Profil (Name änderbar; E-Mail-Adresse vorerst nur
+  angezeigt, Ändern folgt mit dem eigenen Mailversand), Passwort ändern (mit Prüfung des aktuellen
+  Passworts), Tarif (aktueller Tarif mit Nutzung "X von 5 Objekten" / "X von 20 aktiven
+  Interessenten" und "Größere Tarife sind in Vorbereitung."; bewusst kein Button "Tarife
+  vergleichen"), Konto (Abmelden und [Platzhalter] zur Kontolöschung, gleicher Wortlaut wie auf der
+  Startseite).
 - Öffentliche Startseite `/` mit E-Mail-Liste (Double-Opt-in). Es wird nur die Bestätigungsmail
   verschickt; einen Newsletter-Versand gibt es noch nicht. Ressourcen, Glossar,
   Grunderwerbsteuer-Tabelle und Tipps & Tricks (weitere Schritte aus Runde 4) sind noch nicht gebaut.
@@ -209,8 +214,8 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   (Meilenstein 5) und ausdrücklicher Freigabe, ebenso keine Bewerbung der Seiten vorher. Die
   Impressumspflicht entsteht schon durch die bloße Erreichbarkeit, nicht erst durch die
   Indexierung — vor jedem echten Livegang muss das Impressum stehen.
-- Tarifwechsel, Bezahlung (Stripe), Preisseite und die Anzeige des Tarifs in den Einstellungen
-  kommen erst mit eigenem Auftrag. Plus und Pro sind in der Konfiguration vorbereitet (Werte aus der
+- Tarifwechsel, Bezahlung (Stripe) und Preisseite kommen erst mit eigenem Auftrag (die
+  Einstellungen zeigen den Tarif nur an). Plus und Pro sind in der Konfiguration vorbereitet (Werte aus der
   Planung, noch unbestätigt), werden aber nicht vergeben.
 - Fünfter Rechner geplant: Mieterhöhung (Kappungsgrenze 20 %/15 % in drei Jahren, Index-/
   Staffelregeln, Pflichthinweis "keine Rechtsberatung"). Noch nicht gebaut.
@@ -347,6 +352,14 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Tarif-Grenzen sind nicht umgehbar: Sie werden per Trigger in der Datenbank geprüft (belegt durch
   supabase/tests/database/90_tarife.sql), die Prüfungen in Oberfläche und Server Actions sind nur
   zusätzlich. Nutzer können ihren Tarif nicht selbst ändern.
+- Abmelden ("Abmelden" im Nutzermenü und in den Einstellungen) meldet nur dieses Gerät ab
+  (`signOut({ scope: "local" })` in src/app/(app)/actions.ts); andere Geräte bleiben angemeldet. Alle
+  anderen Geräte werden nur beim Ändern des Passworts abgemeldet (macht Supabase dort automatisch;
+  die aktuelle Sitzung bleibt, die Erfolgsmeldung sagt das ausdrücklich).
+- Passwort ändern: Supabase prüft das bisherige Passwort nicht selbst. Die Server Action prüft es
+  vorher mit einem eigenen, zustandslosen Supabase-Client (keine Cookies, die Sitzung im Browser
+  bleibt unberührt) und beendet die dabei entstehende Prüf-Sitzung sofort wieder, nur diese eine
+  (scope "local"). Falsches Passwort: neutrale Meldung "Das aktuelle Passwort stimmt nicht."
 - Secret-Key (Supabase): Der einzige Code, der ihn nutzt, ist src/lib/supabase/admin.ts
   (`createAdminClient()`, mit `import "server-only"`, damit er nie in den Browser-Code gelangt; Wert
   nur in .env.local bzw. Vercel als `SUPABASE_SECRET_KEY`, nie mit NEXT_PUBLIC_). Dieser Client ist
@@ -393,6 +406,15 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Impressum, Datenschutzerklärung und AGB. Auftragsverarbeitungsverträge mit Supabase und Vercel.
 - Einmaliger Sicherheitsreview der Zugriffsregeln durch eine Fachperson.
 - Steuersätze und Rechenformeln erneut prüfen.
+- Kontolöschung (DSGVO-Pflicht, Recht auf Löschung): vor dem Livegang echt lösen — entweder als
+  Funktion in der App oder mit einer echten, betreuten Adresse und einem beschriebenen Ablauf. Bis
+  dahin steht an zwei Stellen ein [Platzhalter]: Startseite (src/lib/start/inhalte.ts) und
+  Einstellungen (src/app/(app)/einstellungen/page.tsx, KONTOLOESCHUNG_HINWEIS). Beide ersetzen.
+- Anmelde-Limit von Supabase prüfen und bei Bedarf erhöhen (Supabase-Dashboard, Authentication →
+  Rate Limits, "sign-ins and sign-ups"; lokal 30 pro 5 Minuten und IP). Anmeldung und die Prüfung
+  des aktuellen Passworts beim Passwortwechsel laufen über Server Actions, also vom Server aus;
+  Supabase sieht dabei vermutlich die IP des Servers statt die der Nutzer, sodass sich alle Nutzer
+  ein Kontingent teilen. Vor dem Livegang unter echter Last prüfen.
 - Startseite: alle mit [Platzhalter] markierten Texte in src/lib/start/inhalte.ts ersetzen
   (Datensicherheit, Kontolöschung, Kontaktadresse), dazu die Impressum-/Datenschutz-Links auf der
   Startseite, den Rechnerseiten und den Newsletter-Seiten (bisher `#impressum`/`#datenschutz`).
