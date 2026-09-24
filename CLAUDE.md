@@ -175,9 +175,10 @@ Im Umfang:
 - Kaufprüfung (Interessenten): Liste mit Status-Reitern, Interessent hinzufügen/bearbeiten/löschen,
   Status ändern, Notiz, vorbefüllte Rechner, Übernahme in den Bestand. Basisanalyse ohne mehrere
   Szenarien und ohne Vergleich (das ist laut Planung ab Plus). Der Zähler "X von 20 aktiven
-  Interessenten" ist rein informativ, es gibt keine Sperre (Konstante AKTIVE_INTERESSENTEN_LIMIT in
-  src/lib/constants/interessent.ts; aktiv = beobachtet, besichtigt, Angebot abgegeben). Die
-  Tarif-Logik dahinter kommt erst mit eigenem Auftrag.
+  Interessenten" zeigt die echte, durchgesetzte Grenze des Tarifs (siehe "Tarife und Grenzen").
+- Tarif-Grenzen im kostenlosen Tarif (5 Objekte, 20 aktive Interessenten), echt durchgesetzt, mit
+  Zähler "X von 5 Objekten genutzt" auf der Übersicht (siehe "Tarife und Grenzen"). Kein
+  Zahlungssystem, keine Preisseite, kein Tarifwechsel.
 - Einstellungen: Profil, Passwort ändern, Tarif (Platzhalter), Konto (Abmelden).
 - Öffentliche Startseite `/` mit E-Mail-Liste (Double-Opt-in). Es wird nur die Bestätigungsmail
   verschickt; einen Newsletter-Versand gibt es noch nicht. Ressourcen, Glossar,
@@ -197,8 +198,9 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   (Meilenstein 5) und ausdrücklicher Freigabe, ebenso keine Bewerbung der Seiten vorher. Die
   Impressumspflicht entsteht schon durch die bloße Erreichbarkeit, nicht erst durch die
   Indexierung — vor jedem echten Livegang muss das Impressum stehen.
-- Freier Tarif laut aktueller Planung: 5 Objekte (Plus/Pro mit mehr). Tarif-Logik als zentrale
-  Einstellung existiert im Code noch nicht und wird ebenfalls erst mit eigenem Auftrag gebaut.
+- Tarifwechsel, Bezahlung (Stripe), Preisseite und die Anzeige des Tarifs in den Einstellungen
+  kommen erst mit eigenem Auftrag. Plus und Pro sind in der Konfiguration vorbereitet (Werte aus der
+  Planung, noch unbestätigt), werden aber nicht vergeben.
 - Fünfter Rechner geplant: Mieterhöhung (Kappungsgrenze 20 %/15 % in drei Jahren, Index-/
   Staffelregeln, Pflichthinweis "keine Rechtsberatung"). Noch nicht gebaut.
 - Datenmodell-Erweiterungen, die später anstehen: Darlehen als eigene Tabelle statt Spalten an property (wegen künftiger
@@ -206,11 +208,42 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   Ausgaben (könnte running_cost_item später ergänzen oder ablösen). Keine dieser Änderungen jetzt
   vornehmen.
 
+## Tarife und Grenzen
+- Jedes Konto hat einen Tarif: Spalte `account.tarif` (kostenlos | plus | pro, Standard "kostenlos"
+  für neue und bestehende Konten). Aktuell wird nur "kostenlos" vergeben. Nutzer können ihren Tarif
+  nicht selbst ändern (account hat nur eine Lese-Policy); gesetzt wird er nur über die
+  Datenbank-Verwaltung bzw. später über den Bezahlprozess.
+- Grenzen je Tarif: kostenlos 5 Objekte im Bestand und 20 aktive Interessenten; plus 10 / 100; pro
+  unbegrenzt. Aktive Interessenten = beobachtet, besichtigt, Angebot abgegeben; gekaufte und
+  abgelehnte zählen nicht. Interessenten zählen nicht auf die Objektgrenze.
+- Die Werte stehen an ZWEI Stellen und werden IMMER gemeinsam geändert:
+  src/lib/constants/tarife.ts (Anzeige, Zähler, Buttons, Meldungen) und die Datenbankfunktion
+  `tarif_grenze()` (verbindliche Prüfung). Änderung nur per neuer Migration mit einem markierten
+  Block `-- TARIFE:BEGIN … -- TARIFE:END`; src/lib/tarife.test.ts liest den Block der neuesten
+  Migration und schlägt fehl, wenn die Zahlen von tarife.ts abweichen.
+- Durchgesetzt in der Datenbank (Trigger `property_tarif_grenze` und `prospect_tarif_grenze`, Fehlercodes
+  TL001/TL002), nicht nur in der Oberfläche. Das gilt für jeden Weg: Assistent, direkter API-Aufruf,
+  "In Bestand übernehmen" (legt eine Immobilie an) und "Wieder aufnehmen" (abgelehnt → aktiv).
+  Wechsel zwischen aktiven Status, Ablehnen und Kaufen bleiben immer erlaubt. Gegen gleichzeitige
+  Anlagen (zwei Tabs) sperrt ein Advisory Lock je Konto die Prüfung, sodass immer nur eine Anlage
+  gleichzeitig zählt. Gezählt wird mit einer einfachen count-Abfrage über den Index auf account_id.
+- In der Oberfläche: Bei erreichter Grenze sind "Immobilie hinzufügen", "Interessent hinzufügen",
+  "In Bestand übernehmen" und "Wieder aufnehmen" deaktiviert, mit sichtbarer Meldung (sachlicher
+  Hinweis, nicht in Fehlerfarbe); Direktaufrufe von /immobilien/neu und /kaufpruefung/neu zeigen die
+  Meldung statt Assistent/Formular. Die Server Actions prüfen zusätzlich vorab und übersetzen eine
+  Ablehnung der Datenbank in dieselbe Meldung. Meldungstext ehrlich, ohne Upgrade-Versprechen: "Du
+  hast dein Limit von 5 Objekten im kostenlosen Tarif erreicht. Größere Tarife sind in Vorbereitung."
+- Konten, die (z. B. nach einer späteren Senkung einer Grenze) schon über der Grenze liegen,
+  behalten alle Daten und können sie weiter bearbeiten und löschen; nur Neuanlagen werden abgelehnt.
+- Die öffentliche Startseite nennt bewusst keine Zahl ("Konto kostenlos."), solange die Grenzen
+  laut Planung unbestätigt sind.
+
 ## Datenmodell (Grundsätze)
 - Hierarchie: Nutzer → Konto (account) → Immobilie (property) → Einheit (unit).
 - Jede Immobilie hat mindestens eine Einheit. Eigentumswohnung und Einfamilienhaus haben genau
   eine, nur beim Mehrfamilienhaus sieht der Nutzer die Einheitenliste.
-- Alle Fachtabellen tragen eine account_id. Später hängen Abos und weitere Nutzer am Konto.
+- Alle Fachtabellen tragen eine account_id. Später hängen Abos und weitere Nutzer am Konto. Das Konto
+  trägt den Tarif (`account.tarif`, siehe "Tarife und Grenzen").
   unit, running_cost_item und note verweisen zusätzlich über einen verbundenen Fremdschlüssel
   (property_id, account_id) auf property. Das verhindert auf Datenbankebene, dass ihre account_id
   von der der zugehörigen Immobilie abweicht — unabhängig vom Zugriffsweg, nicht nur über
@@ -300,6 +333,9 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Geheimnisse (Schlüssel, Passwörter) nie in Code oder Git. .env.local steht in .gitignore. Den
   Service-Role- bzw. Secret-Key nie im Frontend verwenden.
 - Eingaben immer serverseitig validieren (z. B. mit zod).
+- Tarif-Grenzen sind nicht umgehbar: Sie werden per Trigger in der Datenbank geprüft (belegt durch
+  supabase/tests/database/90_tarife.sql), die Prüfungen in Oberfläche und Server Actions sind nur
+  zusätzlich. Nutzer können ihren Tarif nicht selbst ändern.
 - Secret-Key (Supabase): Der einzige Code, der ihn nutzt, ist src/lib/supabase/admin.ts
   (`createAdminClient()`, mit `import "server-only"`, damit er nie in den Browser-Code gelangt; Wert
   nur in .env.local bzw. Vercel als `SUPABASE_SECRET_KEY`, nie mit NEXT_PUBLIC_). Dieser Client ist
