@@ -10,7 +10,8 @@ import { FOTO_BUCKET } from "@/lib/supabase/foto";
 import { aktuellesPasswortStimmt } from "@/lib/supabase/passwort-pruefung";
 import { createClient } from "@/lib/supabase/server";
 
-export type KontoLoeschenState = { error?: string };
+// passwortFalsch: nur dann wird das Passwortfeld als fehlerhaft markiert.
+export type KontoLoeschenState = { error?: string; passwortFalsch?: boolean };
 
 const eingabeSchema = z.object({ passwort: z.string().min(1, "Bitte gib dein Passwort ein.") });
 
@@ -19,7 +20,9 @@ const eingabeSchema = z.object({ passwort: z.string().min(1, "Bitte gib dein Pas
 // ("Sicherheit und Datenschutz", Kontolöschung).
 export async function kontoLoeschen(_vorher: KontoLoeschenState, formData: FormData): Promise<KontoLoeschenState> {
   const parsed = eingabeSchema.safeParse({ passwort: formData.get("passwort") });
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Bitte gib dein Passwort ein." };
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Bitte gib dein Passwort ein.", passwortFalsch: true };
+  }
 
   const supabase = await createClient();
   const {
@@ -32,7 +35,7 @@ export async function kontoLoeschen(_vorher: KontoLoeschenState, formData: FormD
   }
 
   if (!(await aktuellesPasswortStimmt(user.email, parsed.data.passwort))) {
-    return { error: "Das Passwort stimmt nicht." };
+    return { error: "Das Passwort stimmt nicht.", passwortFalsch: true };
   }
 
   // Konto-ID und Mitglieder serverseitig lesen (RLS: nur das eigene Konto).

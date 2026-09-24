@@ -52,7 +52,7 @@ export function KontoLoeschen() {
                 type="password"
                 autoComplete="current-password"
                 required
-                aria-invalid={Boolean(state.error)}
+                aria-invalid={Boolean(state.passwortFalsch)}
                 aria-describedby={state.error ? "konto-loeschen-fehler" : undefined}
               />
             </div>

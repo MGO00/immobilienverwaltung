@@ -12,7 +12,7 @@ export function KontoGeloeschtHinweis() {
     <div role="status" className="border-b border-border bg-neutral-100">
       <p className="mx-auto flex max-w-[1120px] items-center gap-2 px-4 py-3 text-sm md:px-6">
         <Check className="size-4 shrink-0" />
-        Dein Konto wurde gelöscht. Alle deine Daten sind entfernt.
+        Dein Konto wurde gelöscht. Alle deine Kontodaten sind entfernt.
       </p>
     </div>
   );
