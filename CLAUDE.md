@@ -28,11 +28,12 @@ Dokumente und weitere Rechner.
 - Supabase (Postgres, Auth, Storage) in der EU-Region Frankfurt; Hosting auf Vercel; Stripe erst in
   einer späteren Stufe
 - Code-Bezeichner auf Englisch; Kommentare, Commit-Nachrichten und alle sichtbaren Texte auf Deutsch
-- Routen auf Deutsch: /anmelden, /registrieren, /passwort-vergessen, /email-bestaetigen,
+- Routen auf Deutsch: / (öffentliche Startseite), /anmelden, /registrieren, /passwort-vergessen,
+  /email-bestaetigen,
   /passwort-zuruecksetzen, /uebersicht, /immobilien/neu, /immobilien/[id], /rechner,
   /rechner/kaufnebenkosten, /rechner/rendite, /rechner/finanzierung, /rechner/cashflow,
   /kaufpruefung, /kaufpruefung/neu, /kaufpruefung/[id], /kaufpruefung/[id]/bearbeiten,
-  /einstellungen
+  /einstellungen, /newsletter/bestaetigen, /newsletter/abmelden
   (/passwort-zuruecksetzen ist kein eigenes Nav-Ziel, sondern das Ziel des Links aus der
   Passwort-vergessen-E-Mail; im Prototyp nicht enthalten, aber ohne diesen Screen liefe der
   Reset-Link ins Leere.)
@@ -112,6 +113,24 @@ Dokumente und weitere Rechner.
   Tilgung" erscheint im Cashflow-Rechner, sobald Darlehen und Zins bekannt sind; das
   Leerstand-Feld bleibt beim Interessenten sichtbar (es gibt keine echten Einheiten), nur beim
   Bestandsobjekt entfällt es.
+- Weitere Fälle, Startseite (Runde 4, Schritt 1, docs/design/runde-4/): Die öffentliche Startseite
+  `/` folgt dem Handoff in Aufbau und Optik (Navigation, Hero mit Beispielrechnung, vier
+  Rechner-Kacheln, "So funktioniert's", FAQ-Akkordeon, E-Mail-Liste, Fußzeile), aber NICHT dessen
+  Texten, wo diese falsch oder erfunden waren. Alle Texte stehen zentral in
+  src/lib/start/inhalte.ts. Korrigiert gegenüber dem Prototyp: keine Frage zum Datenexport (gibt es
+  nicht); Kontolöschung und Kontaktadresse als [Platzhalter]; "Bezahltarife sind für später
+  geplant." (kein Jahr); "Der Finanzierungsrechner rechnet monatlich, wie bei einer Bank üblich.";
+  Übernahme in eine Immobilie nur für den Kaufnebenkosten-Rechner erwähnt; Schritt 1 "Deine
+  Eingaben werden nicht gespeichert."; Schritt 3 mit den echten Assistenten-Schritten; keine Zahl
+  "bis zu 5 Immobilien" (Tariflimit unbestätigt und nicht umgesetzt). Grundsatz: Die Startseite
+  verspricht nur, was die App tatsächlich kann — ändert sich die App, werden diese Texte
+  mitgezogen. "Tipps & Tricks" und "Ressourcen" fehlen in der Navigation und in den Texten der
+  E-Mail-Liste, bis es diese Seiten gibt. Die Beispielrechnung im Hero (189.000 €, Bayern →
+  17.142 €) wird aus dem echten Kaufnebenkosten-Rechner erzeugt, nicht hartkodiert
+  (src/lib/start/beispielrechnung.ts, mit Test). Die Hero-Überschrift ist bewusst größer als H1 in
+  der App (laut Handoff). Die E-Mail-Liste erscheint nur, wenn Mailversand und Secret-Key
+  eingerichtet sind (siehe Sicherheit); die Bestätigen- und Abmelden-Seiten nutzen den schlichten
+  öffentlichen Rahmen (PublicShell), dessen Logo jetzt zur Startseite führt.
 - Die Design-Dateien sind Referenz, kein Produktionscode: nachbauen, nicht kopieren. Die
   Prototyp-Leiste (schwarzer Balken oben) gehört nicht zum Produkt.
 - Konkrete Werte (Farben, Größen, Radien, Abstände) stehen in der README der neuesten Runde und
@@ -160,6 +179,9 @@ Im Umfang:
   src/lib/constants/interessent.ts; aktiv = beobachtet, besichtigt, Angebot abgegeben). Die
   Tarif-Logik dahinter kommt erst mit eigenem Auftrag.
 - Einstellungen: Profil, Passwort ändern, Tarif (Platzhalter), Konto (Abmelden).
+- Öffentliche Startseite `/` mit E-Mail-Liste (Double-Opt-in). Es wird nur die Bestätigungsmail
+  verschickt; einen Newsletter-Versand gibt es noch nicht. Ressourcen, Glossar,
+  Grunderwerbsteuer-Tabelle und Tipps & Tricks (weitere Schritte aus Runde 4) sind noch nicht gebaut.
 
 Ausdrücklich NICHT im Umfang (nicht vorbauen): Mieterverwaltung, Mietverträge,
 Nebenkostenabrechnung, Dokumentenablage, Abos und Zahlungen, mehrere Nutzer pro Konto, andere
@@ -169,9 +191,9 @@ Reihenfolge — aber ausdrücklich nicht jetzt und nicht als Vorbereitung. Jede 
 gebaut, wenn sie explizit als eigener Auftrag kommt.
 
 ## Bekannte künftige Änderungen (noch nicht umsetzen)
-- Öffentliche Rechnerseiten sind seit Kurzem ohne Login erreichbar, aber bewusst noch auf noindex
+- Öffentliche Startseite und Rechnerseiten sind ohne Login erreichbar, aber bewusst noch auf noindex
   (Konstante `RECHNER_INDEXIERBAR = false` in src/lib/seo/rechner.ts; die deutschen Titel und
-  Beschreibungen stehen dort schon bereit). Freigeschaltet wird erst nach fertigem Impressum
+  Beschreibungen stehen dort schon bereit, auch für die Startseite). Freigeschaltet wird erst nach fertigem Impressum
   (Meilenstein 5) und ausdrücklicher Freigabe, ebenso keine Bewerbung der Seiten vorher. Die
   Impressumspflicht entsteht schon durch die bloße Erreichbarkeit, nicht erst durch die
   Indexierung — vor jedem echten Livegang muss das Impressum stehen.
@@ -214,6 +236,14 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   "besichtigt" und nur einmal je Interessent. Nicht übernommen werden Inserats-Link und Notiz. Wird
   die Immobilie gelöscht, bleibt der Interessent mit leerem Verweis; wird der Interessent gelöscht,
   bleibt die Immobilie. Ob später Darlehen/mehrere Szenarien dazukommen, ist offen.
+- E-Mail-Liste: Tabelle `newsletter_subscriber` — bewusste Ausnahme von "alle Fachtabellen tragen
+  eine account_id": Die Einträge gehören keinem Konto (Besucher ohne Konto tragen sich ein). RLS ist
+  an, es gibt aber keine Policies und keine Tabellenrechte für anon und authenticated (belegt durch
+  supabase/tests/database/80_newsletter.sql); nur der Server kommt über den Secret-Key-Client heran.
+  Gespeichert werden Adresse (kleingeschrieben), Status (pending, confirmed, unsubscribed),
+  Zeitstempel und consent_text_version; von den Links in der Mail nur ein SHA-256-Hash, nie der Code
+  selbst. Bestätigungslinks gelten 48 Stunden und einmal; nie bestätigte, abgelaufene Einträge werden
+  nach einer Woche gelöscht. Keine IP-Adressen.
 - Mieter kommen später als eigene Tabellen an die Einheit, ohne bestehende Tabellen umzubauen.
 
 ## Fachliche Regeln und Rechner
@@ -270,6 +300,23 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Geheimnisse (Schlüssel, Passwörter) nie in Code oder Git. .env.local steht in .gitignore. Den
   Service-Role- bzw. Secret-Key nie im Frontend verwenden.
 - Eingaben immer serverseitig validieren (z. B. mit zod).
+- Secret-Key (Supabase): Der einzige Code, der ihn nutzt, ist src/lib/supabase/admin.ts
+  (`createAdminClient()`, mit `import "server-only"`, damit er nie in den Browser-Code gelangt; Wert
+  nur in .env.local bzw. Vercel als `SUPABASE_SECRET_KEY`, nie mit NEXT_PUBLIC_). Dieser Client ist
+  AUSSCHLIESSLICH für die E-Mail-Liste (Newsletter) bestimmt. Jede künftige Funktion, die ebenfalls
+  erweiterten Zugriff jenseits der normalen Zugriffsregeln bräuchte, ist eine eigene, bewusste
+  Entscheidung und kein Fall für die Wiederverwendung dieses admin-Clients ohne Rücksprache.
+- E-Mail-Liste: Double-Opt-in (Eintrag erst nach Klick auf den Link in der Bestätigungsmail;
+  Bestätigen und Abmelden passieren per Knopfdruck auf der Link-Seite, nicht schon beim Öffnen,
+  damit vorab abrufende Mailprogramme nichts auslösen). Schutz ohne Drittanbieter: unsichtbares
+  Honigtopf-Feld, höchstens eine Mail pro Adresse in 10 Minuten, Obergrenze neuer
+  Bestätigungsmails pro Stunde. Die Rückmeldung ist immer dieselbe, egal ob die Adresse neu, offen
+  oder schon bestätigt ist — es lässt sich nicht herausfinden, wer eingetragen ist. Die Karte auf der
+  Startseite erscheint nur, wenn `SUPABASE_SECRET_KEY`, `SMTP_HOST` und `MAIL_FROM` gesetzt sind
+  (Vorlage in .env.example); vorher wird nichts gesammelt.
+- Startseite: `/` steht als exakter Pfad in der Liste der öffentlichen Pfade in src/proxy.ts (nie
+  per startsWith, sonst wäre jeder Pfad öffentlich), ebenso `/newsletter/bestaetigen` und
+  `/newsletter/abmelden`. Angemeldete Nutzer leitet der Proxy von `/` direkt zu /uebersicht.
 - Öffentliche Rechnerseiten: src/proxy.ts gibt genau die fünf Rechner-Pfade als exakte Liste frei
   (kein startsWith, damit künftige Routen unter /rechner nicht automatisch öffentlich werden).
   ?immobilie=<id> wird nur bei angemeldetem Nutzer ausgewertet — zusätzlich zu den
@@ -299,6 +346,17 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Impressum, Datenschutzerklärung und AGB. Auftragsverarbeitungsverträge mit Supabase und Vercel.
 - Einmaliger Sicherheitsreview der Zugriffsregeln durch eine Fachperson.
 - Steuersätze und Rechenformeln erneut prüfen.
+- Startseite: alle mit [Platzhalter] markierten Texte in src/lib/start/inhalte.ts ersetzen
+  (Datensicherheit, Kontolöschung, Kontaktadresse), dazu die Impressum-/Datenschutz-Links auf der
+  Startseite, den Rechnerseiten und den Newsletter-Seiten (bisher `#impressum`/`#datenschutz`).
+- E-Mail-Liste einschalten erst, wenn die Datenschutzerklärung die Adress-Erhebung beschreibt:
+  dann `SUPABASE_SECRET_KEY` und Mailversand (Anbieter mit eigener Domain, `SMTP_*`, `MAIL_FROM`)
+  in .env.local und Vercel eintragen. Einwilligungstexte je Version im Repository ablegen (z. B.
+  docs/einwilligung/v1.md mit dem genauen Hinweistext unter dem Feld und dem Stand der
+  Datenschutzerklärung), damit sich zu jedem Eintrag nachweisen lässt, welchem Text zugestimmt
+  wurde (Spalte consent_text_version). Bei jeder Textänderung eine neue Datei anlegen und die
+  Konstante `EINWILLIGUNG_TEXT_VERSION` in src/lib/newsletter/regeln.ts hochzählen; alte Versionen
+  nie überschreiben.
 - Eigenen Mailversand (SMTP) für Supabase Auth einrichten (z. B. über Resend, Postmark oder
   SendGrid) und im Supabase-Dashboard unter Authentication > SMTP Settings eintragen. Der
   eingebaute Mailversand ist auf wenige E-Mails pro Stunde begrenzt und nur für die Entwicklung
