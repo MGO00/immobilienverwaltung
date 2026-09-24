@@ -2,6 +2,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const FOTO_BUCKET = "property-photos";
 export const FOTO_MAX_BYTES = 8 * 1024 * 1024;
+// Obergrenze für den eigentlichen Upload nach dem Verkleinern im Browser. Fotos gehen per
+// Server Action an den Server, und Vercel nimmt höchstens 4,5 MB pro Anfrage an (dazu
+// passt serverActions.bodySizeLimit in next.config.ts); 4 MB lassen Platz für den Rest.
+export const FOTO_UPLOAD_MAX_BYTES = 4 * 1024 * 1024;
 export const FOTO_ERLAUBTE_TYPEN = ["image/jpeg", "image/png", "image/webp"] as const;
 const FOTO_SIGNIERUNG_SEKUNDEN = 60 * 60;
 
@@ -19,6 +23,16 @@ export function validiereFoto(file: File): string | null {
   return null;
 }
 
+/** Prüfung der hochzuladenden (bereits verkleinerten) Datei: zusätzlich höchstens FOTO_UPLOAD_MAX_BYTES. */
+export function validiereFotoUpload(file: File): string | null {
+  const fehler = validiereFoto(file);
+  if (fehler) return fehler;
+  if (file.size > FOTO_UPLOAD_MAX_BYTES) {
+    return "Das Foto ist auch verkleinert noch zu groß. Bitte wähle ein anderes Foto.";
+  }
+  return null;
+}
+
 /** Validiert und lädt eine Foto-Datei serverseitig in den privaten Bucket hoch (überschreibt ein vorhandenes Foto). */
 export async function ladeFotoHoch(
   supabase: SupabaseClient,
@@ -26,7 +40,7 @@ export async function ladeFotoHoch(
   propertyId: string,
   file: File,
 ): Promise<{ error?: string; pfad?: string }> {
-  const validierungsFehler = validiereFoto(file);
+  const validierungsFehler = validiereFotoUpload(file);
   if (validierungsFehler) return { error: validierungsFehler };
 
   const pfad = fotoPfad(accountId, propertyId);

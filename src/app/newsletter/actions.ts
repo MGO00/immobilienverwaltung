@@ -2,7 +2,8 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { LinkErgebnis } from "@/lib/newsletter/token-status";
-import { newsletterKonfiguriert, siteUrl } from "@/lib/newsletter/konfiguration";
+import { newsletterKonfiguriert } from "@/lib/newsletter/konfiguration";
+import { siteUrl } from "@/lib/site-url";
 import { sendeBestaetigungsmail } from "@/lib/newsletter/mail";
 import {
   ablaufZeitpunkt,

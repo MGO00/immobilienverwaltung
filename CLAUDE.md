@@ -200,8 +200,11 @@ Dokumente und weitere Rechner.
   Bearbeiten-Formular bekommt dafür einen Foto-Abschnitt, den der Prototyp dort gar nicht kennt.
   Kein Zuschnitt/Pan-Zoom-Editor wie im Prototyp — Bilder werden per `object-fit: cover` in die
   festen Rahmen eingepasst. Ein "Foto entfernen"-Button ergänzt die im Prototyp nur vorhandenen
-  "Replace"/"Edit"-Aktionen. Format: JPG, PNG, WebP, maximal 8 MB, im Browser automatisch auf
-  maximal 1920px lange Kante verkleinert. Pfad im Bucket: `<account_id>/<property_id>` ohne
+  "Replace"/"Edit"-Aktionen. Format: JPG, PNG, WebP, Auswahl bis maximal 8 MB, im Browser
+  automatisch auf maximal 1920px lange Kante verkleinert und, falls nötig, stärker komprimiert
+  (notfalls als JPEG), bis die hochgeladene Datei höchstens 4 MB hat (`FOTO_UPLOAD_MAX_BYTES`, vom
+  Server erneut geprüft). Grund: Der Upload läuft per Server Action, und Vercel nimmt höchstens
+  4,5 MB pro Anfrage an (`serverActions.bodySizeLimit` in next.config.ts). Pfad im Bucket: `<account_id>/<property_id>` ohne
   Dateiendung (Content-Type kommt als Objekt-Metadatum mit, dadurch kann ein Ersetzen mit anderem
   Format nie ein verwaistes Foto unter der alten Endung hinterlassen). Anzeige über eine
   serverseitig je Seitenaufruf frisch erzeugte, 1 Stunde gültige signierte URL — kein manueller

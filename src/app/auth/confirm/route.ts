@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sichererPfad } from "@/lib/weiterleitung";
 
 // Ziel jedes Links in Registrierungs- und Passwort-Reset-Mails (siehe
 // emailRedirectTo/redirectTo in registrieren/actions.ts und
@@ -9,7 +10,8 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/uebersicht";
+  // Nur eigene Pfade, sonst ließe sich ein echter Link auf eine fremde Seite umlenken.
+  const next = sichererPfad(searchParams.get("next"));
 
   if (code) {
     const supabase = await createClient();

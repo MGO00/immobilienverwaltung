@@ -4,7 +4,7 @@ import { useRef, useState, useTransition, type ChangeEvent } from "react";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { verkleinereBildFallsNoetig } from "@/lib/bild-verkleinern";
-import { validiereFoto } from "@/lib/supabase/foto";
+import { validiereFoto, validiereFotoUpload } from "@/lib/supabase/foto";
 import { fotoEntfernen, fotoHochladen } from "@/app/(app)/immobilien/[id]/bearbeiten/foto-actions";
 
 type FotoUploadProps = { hoehe: number; breite: number } & (
@@ -48,6 +48,11 @@ export function FotoUpload(props: FotoUploadProps) {
       verkleinert = await verkleinereBildFallsNoetig(file);
     } catch {
       setFehler("Das Foto konnte nicht gelesen werden. Bitte versuch es mit einer anderen Datei.");
+      return;
+    }
+    const uploadFehler = validiereFotoUpload(verkleinert);
+    if (uploadFehler) {
+      setFehler(uploadFehler);
       return;
     }
     setVorschauUrl(URL.createObjectURL(verkleinert));
