@@ -34,6 +34,7 @@ Dokumente und weitere Rechner.
   /einheiten, /kauf-und-finanzierung, /einnahmen-und-ausgaben, /rechner, /notizen je Tab),
   /immobilien/[id]/bearbeiten, /rechner,
   /rechner/kaufnebenkosten, /rechner/rendite, /rechner/finanzierung, /rechner/cashflow,
+  /rechner/mieterhoehung,
   /kaufpruefung, /kaufpruefung/neu, /kaufpruefung/[id], /kaufpruefung/[id]/bearbeiten,
   /einstellungen, /newsletter/bestaetigen, /newsletter/abmelden,
   /ressourcen, /ressourcen/grunderwerbsteuer, /ressourcen/glossar, /tipps
@@ -106,8 +107,9 @@ Dokumente und weitere Rechner.
   Einheiten: "leer" petrolfarben hervorgehoben (tag-accent), "vermietet" und "selbstgenutzt" neutral
   in Tinte — eigene Festlegung, weil der Prototyp sich hier selbst widerspricht (Detailseite und
   Assistent-Vorschau behandeln denselben Status unterschiedlich). Der Rechner-Tab auf der
-  Detailseite zeigt alle vier Rechner-Karten als "Bereit", jeweils mit ?immobilie=<id> verlinkt (in
-  Meilenstein 3 war nur Kaufnebenkosten verlinkt, die übrigen kamen mit Meilenstein 4).
+  Detailseite zeigt alle Rechner-Karten als "Bereit", jeweils mit ?immobilie=<id> verlinkt (in
+  Meilenstein 3 war nur Kaufnebenkosten verlinkt, die übrigen kamen mit Meilenstein 4, die
+  Mieterhöhung als Rechner 05 später).
 - Weitere Fälle aus Meilenstein 4: Der Kaufnebenkosten-Rechner kann das Ergebnis bei Objektbezug
   (?immobilie=<id>) per "Übernehmen"-Button als kaufnebenkosten_betrag am Objekt speichern (im
   Prototyp die "Zuordnen"-Box) — ohne Objektbezug zeigt er nur das Ergebnis. Die
@@ -119,7 +121,7 @@ Dokumente und weitere Rechner.
   Interessenten mit Darlehen und Zins, weil sie beides getrennt von der eingegebenen Rate kennen muss. Brutto- und Nettorendite werden im
   Rendite-Rechner beide neutral dargestellt (der Prototyp hebt die Bruttorendite farbig hervor) —
   konsistent mit dem übrigen, durchgehend neutralen Kennzahlen-Stil der App.
-- Weitere Fälle, öffentliche Rechner: Die vier Rechner und /rechner sind ohne Login erreichbar und
+- Weitere Fälle, öffentliche Rechner: Alle Rechner und /rechner sind ohne Login erreichbar und
   liegen dafür in einer eigenen Routengruppe `(rechner)` mit session-abhängigem Layout
   (src/app/(rechner)/layout.tsx). Angemeldete sehen wie überall die normale App-Navigation
   (AppShell); Besucher ohne Anmeldung den öffentlichen Rahmen (PublicShell) mit derselben
@@ -147,7 +149,8 @@ Dokumente und weitere Rechner.
   Text, nicht die datierte Notizliste des Bestands), Rechner-Karten, Löschen. "gekauft" ist nur über
   "In Bestand übernehmen" erreichbar (Klick auf den Schritt oder den Button, ab "besichtigt"),
   nie direkt. Der Übernahme-Dialog zeigt vorab alle übernommenen Felder inkl. Objektart. Die vier
-  Rechner öffnen sich mit ?interessent=<id> vorbefüllt (Kaufpreis, Bundesland, erwartete Miete,
+  Rechner 01–04 öffnen sich mit ?interessent=<id> vorbefüllt (die Mieterhöhung erscheint beim
+  Interessenten nicht, es gibt noch keinen Mietvertrag) (Kaufpreis, Bundesland, erwartete Miete,
   Darlehen/Zins/Tilgung; laufende Kosten und Kaufnebenkosten sind dort nicht erfasst). "Davon
   Tilgung" erscheint im Cashflow-Rechner, sobald Darlehen und Zins bekannt sind; das
   Leerstand-Feld bleibt beim Interessenten sichtbar (es gibt keine echten Einheiten), nur beim
@@ -184,7 +187,7 @@ Dokumente und weitere Rechner.
   Layout wie `(rechner)`: Angemeldete sehen den App-Rahmen, Besucher die PublicShell (Fußzeile
   dort nur Impressum · Datenschutz). Texte zentral in src/lib/ressourcen/inhalte.ts, Glossar in
   src/lib/ressourcen/glossar.ts; die Zahlen auf den Ressourcen-Karten ("16 Bundesländer",
-  "7 Begriffe") werden aus den Daten gezählt. Die Grunderwerbsteuer-Tabelle kommt aus derselben
+  "11 Begriffe") werden aus den Daten gezählt. Die Grunderwerbsteuer-Tabelle kommt aus derselben
   Konstante wie der Kaufnebenkosten-Rechner (siehe Fachliche Regeln), belegt durch
   src/lib/ressourcen/grunderwerbsteuer.test.ts. Glossar-Anker ohne Umlaute
   (`#glossar-nicht-umlagefaehige-kosten`, Prototyp: mit "ä"). Abweichungen vom Prototyp: Die zwei
@@ -208,6 +211,21 @@ Dokumente und weitere Rechner.
   Passwortbestätigung statt "Hinweis zum Löschen per E-Mail"; die E-Mail-Adresse wird nur angezeigt
   (Ändern folgt mit dem eigenen Mailversand); kein Button "Tarife vergleichen", stattdessen "Größere
   Tarife sind in Vorbereitung.".
+- Weitere Fälle, Mieterhöhung (Rechner 05, kein Design-Entwurf, aus den Rechner-Mustern
+  abgeleitet): Moduswahl "Mietspiegel" / "Indexmiete" und Kappungsgrenze 15 % / 20 % als
+  Umschalt-Buttons im Stil von "Nutzung" (aria-pressed). Der Pflichthinweis "Keine Rechtsberatung …"
+  steht deutlich sichtbar als Kasten unter der Überschrift. Warnungen (zu früher Zugang, Sperrjahr)
+  als Kasten mit Rahmen in Tinte, nicht in Fehlerfarbe. Aufklappbare Feld-Hilfen
+  (src/components/rechner/feld-hilfe.tsx: "Wo finde ich die Vergleichsmiete?" / "… den
+  Verbraucherpreisindex?"), nur Text, keine externen Links; mit Objektbezug und hinterlegtem Ort
+  zusätzlich "Suche nach: Mietspiegel <Ort>". Objektbezug nur mit Login (?immobilie=, &einheit=
+  nur aus derselben Immobilie, sonst die erste vermietete bzw. erste Einheit); beim
+  Mehrfamilienhaus eine Einheitenauswahl, ein Wechsel setzt nur Miete und Fläche neu. Nichts wird
+  gespeichert, kein Übernehmen-Button. Auf der Kaufprüfung-Detailseite gibt es keine
+  Mieterhöhungs-Karte. Die Startseite zeigt fünf Kacheln nebeneinander (lg:grid-cols-5).
+  Alle Rechner stehen in EINER Liste (src/lib/rechner/liste.ts, `RECHNER_LISTE`); Karten,
+  Startseiten-Kacheln, Glossar-Links und alle Texte mit der Anzahl ("Fünf Rechner …",
+  `rechnerAnzahl()`, `rechnerAufzaehlung()`) kommen daraus, nie eine feste Zahl im Text.
 - Die Design-Dateien sind Referenz, kein Produktionscode: nachbauen, nicht kopieren. Die
   Prototyp-Leiste (schwarzer Balken oben) gehört nicht zum Produkt.
 - Konkrete Werte (Farben, Größen, Radien, Abstände) stehen in der README der neuesten Runde und
@@ -254,7 +272,8 @@ Im Umfang:
 - Immobilie anlegen, bearbeiten, löschen
 - Detailseite mit Tabs: Übersicht, Einheiten, Kauf und Finanzierung, Einnahmen und Ausgaben,
   Rechner, Notizen
-- Rechner: Kaufnebenkosten, Rendite, Finanzierung mit Tilgungsplan, Cashflow
+- Rechner: Kaufnebenkosten, Rendite, Finanzierung mit Tilgungsplan, Cashflow, Mieterhöhung
+  (Mietspiegel und Indexmiete)
 - Objektfotos: ein Foto pro Immobilie, echter Upload über Supabase Storage (privater Bucket
   `property-photos`, siehe Design-Abschnitt für die Details). Objektkarte 132px hoch, Detailseite
   280×188px — beide nur Anzeige, kein Upload dort. Upload/Ersetzen/Entfernen ausschließlich im
@@ -276,7 +295,7 @@ Im Umfang:
 - Öffentliche Startseite `/` mit E-Mail-Liste (Double-Opt-in). Es wird nur die Bestätigungsmail
   verschickt; einen Newsletter-Versand gibt es noch nicht.
 - Ressourcen (Runde 4, Schritt 2): Übersicht, Grunderwerbsteuer-Tabelle aller 16 Bundesländer und
-  Glossar mit sieben Begriffen, öffentlich erreichbar. Tipps & Tricks: nur die Übersicht mit zwei
+  Glossar mit elf Begriffen (sieben aus dem Handoff, vier zur Mieterhöhung), öffentlich erreichbar. Tipps & Tricks: nur die Übersicht mit zwei
   als "in Vorbereitung" gekennzeichneten, nicht anklickbaren Platzhalter-Karten; noch keine Artikel.
 
 Ausdrücklich NICHT im Umfang (nicht vorbauen): Mieterverwaltung, Mietverträge,
@@ -297,8 +316,6 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Tarifwechsel, Bezahlung (Stripe) und Preisseite kommen erst mit eigenem Auftrag (die
   Einstellungen zeigen den Tarif nur an). Plus und Pro sind in der Konfiguration vorbereitet (Werte aus der
   Planung, noch unbestätigt), werden aber nicht vergeben.
-- Fünfter Rechner geplant: Mieterhöhung (Kappungsgrenze 20 %/15 % in drei Jahren, Index-/
-  Staffelregeln, Pflichthinweis "keine Rechtsberatung"). Noch nicht gebaut.
 - Datenmodell-Erweiterungen, die später anstehen: Darlehen als eigene Tabelle statt Spalten an property (wegen künftiger
   Anschlussfinanzierung/mehrerer Darlehen); eine transaktionale Buchungstabelle für Einnahmen/
   Ausgaben (könnte running_cost_item später ergänzen oder ablösen). Keine dieser Änderungen jetzt
@@ -429,6 +446,33 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   (immobilie.ts, portfolio.ts) runden bewusst nicht zusätzlich zentral — sie wurden nicht
   rückwirkend angefasst, um bereits getesteten Code nicht zu riskieren.
 - Wo Rechner Ergebnisse zeigen, steht der Hinweis "Keine Steuer- oder Anlageberatung".
+- Mieterhöhung (src/lib/calculators/mieterhoehung.ts, reine Funktionen mit Tests; Texte zentral in
+  src/lib/rechner/mieterhoehung-texte.ts). Rechtsstand als Konstante `MIETRECHT_STAND`
+  ("September 2026"). Datumswerte als ISO-Text, "heute" immer als Parameter; im Browser als
+  lokales Datum (`lokalesIsoDatum`, src/lib/datum.ts, nie toISOString()) und erst nach dem Laden
+  (`useHeute`, kein Hydration-Unterschied).
+  - Mietspiegel (§ 558 BGB): Grenze Vergleichsmiete = Vergleichsmiete €/m² × Fläche; Grenze
+    Kappung = Miete vor drei Jahren × (1 + 15 % bzw. 20 %); zulässig ist der kleinere Wert (bei
+    Gleichstand gilt die Vergleichsmiete als greifende Grenze). Liegt er nicht über der aktuellen
+    Miete: "Derzeit keine Erhöhung möglich" mit Grund. Frühester Zugang = letzte Erhöhung nach
+    § 558 (bzw. Mietbeginn) + 1 Jahr; ein früher geplanter Zugang wird NICHT still verschoben,
+    sondern mit "… ist unwirksam und muss neu gestellt werden" gewarnt (zugangZuFrueh), gerechnet
+    wird mit dem frühesten. Neue Miete ab Beginn des dritten Kalendermonats nach Zugang (März →
+    1. Juni). Präzisierung: Maßgeblich für die Kappung ist die Miete drei Jahre vor dem
+    Wirksamwerden (§ 558 Abs. 3); der Hinweis am Feld nennt dieses Datum. Erhöhungen nach
+    §§ 559/560 zählen weder für die Kappung noch für die Frist.
+  - Indexmiete (§ 557b BGB): neue Miete = Miete × Index neu ÷ Index alt (auch sinkend, keine
+    Kappung). Wirksam ab Beginn des übernächsten Monats nach Zugang (September → 1. November),
+    frühestens am ersten Monatsanfang ab letzte Anpassung + 1 Jahr (Sperrjahr). Greift das
+    Sperrjahr, zusätzlich: "Sicherer Weg: Erklärung so zustellen, dass sie nicht vor dem
+    [letzte Anpassung + 1 Jahr] zugeht. Ob eine früher zugestellte Erklärung wirkt, ist rechtlich
+    nicht eindeutig." Geplante Reform (Kappung bei Inflation über 3 %) nur als Hinweis mit
+    Stand-Datum, nicht gerechnet.
+  - Staffelmiete: kein eigener Modus, nur Hinweis. Pflichthinweis wörtlich: "Keine
+    Rechtsberatung. Der Rechner gibt eine Orientierung auf Basis deiner Eingaben; für verbindliche
+    Aussagen wende dich an einen Mieterverein, Haus & Grund oder eine Anwältin/einen Anwalt."
+  - Grenzen der Eingaben: Beträge ≥ 0, Wohnfläche > 0, Vergleichsmiete 0–100 €/m², Index > 0
+    (höchstens 1000), jeweils über `REGEL` in src/lib/validation/zahl.ts.
 - Zahleneingabe (deutsche Schreibweise, alle Formulare und Rechner):
   - EINE Einlese-Funktion für Browser und Server: `parseDeZahl` (src/lib/zahl.ts). Mit Komma ist
     das Komma Dezimalzeichen und Punkte davor sind Tausendertrenner in Dreiergruppen
@@ -522,7 +566,8 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   `/newsletter/abmelden`, `/ressourcen`, `/ressourcen/grunderwerbsteuer`, `/ressourcen/glossar` und
   `/tipps` (künftige Artikelseiten unter /tipps/... sind damit nicht automatisch öffentlich und
   müssen einzeln freigegeben werden). Angemeldete Nutzer leitet der Proxy von `/` direkt zu /uebersicht.
-- Öffentliche Rechnerseiten: src/proxy.ts gibt genau die fünf Rechner-Pfade als exakte Liste frei
+- Öffentliche Rechnerseiten: src/proxy.ts gibt genau die sechs Rechner-Pfade (/rechner und die fünf
+  Rechner) als exakte Liste frei
   (kein startsWith, damit künftige Routen unter /rechner nicht automatisch öffentlich werden).
   ?immobilie=<id> wird nur bei angemeldetem Nutzer ausgewertet — zusätzlich zu den
   Zugriffsregeln (RLS, Rolle anon sieht keine Zeile; belegt durch supabase/tests/database/
@@ -562,6 +607,15 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Impressum, Datenschutzerklärung und AGB. Auftragsverarbeitungsverträge mit Supabase und Vercel.
 - Einmaliger Sicherheitsreview der Zugriffsregeln durch eine Fachperson.
 - Steuersätze und Rechenformeln erneut prüfen.
+- Mieterhöhungsregeln fachlich prüfen lassen (Rechner 05): Fristen nach § 558/§ 558b und § 557b,
+  die zwei Präzisierungen (Stichtag der Kappung drei Jahre vor dem Wirksamwerden; Sperrjahr bei
+  Indexmiete als "erster Monatsanfang ab letzte Anpassung + 1 Jahr" und die Aussage, dass eine
+  früher zugestellte Erklärung rechtlich nicht eindeutig wirkt), die Texte der Feld-Hilfen und die
+  vier neuen Glossar-Begriffe (Indexmiete, Kappungsgrenze, Mietspiegel, Ortsübliche
+  Vergleichsmiete).
+- Stand der Mietrechtsreform (Indexmiete) prüfen und `MIETRECHT_STAND` in
+  src/lib/calculators/mieterhoehung.ts mitziehen; tritt die Reform in Kraft, muss der Rechner sie
+  rechnen statt nur zu erwähnen.
 - Kontolöschung (DSGVO-Pflicht, Recht auf Löschung): technisch gelöst (Funktion in den
   Einstellungen, siehe Sicherheit und Datenschutz). Noch offen: (a) Beschreibung in der
   Datenschutzerklärung (was gelöscht wird, dass ein Eintrag in der E-Mail-Liste separat bleibt,
