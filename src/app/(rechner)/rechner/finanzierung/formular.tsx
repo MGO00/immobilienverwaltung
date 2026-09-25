@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ErgebnisUngueltig } from "@/components/rechner/ergebnis-ungueltig";
+import { useHeute } from "@/components/rechner/use-heute";
 import { useZahlFeld } from "@/components/rechner/use-zahl-feld";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,13 +23,6 @@ type Vorbefuellung = {
   zinsbindungJahre: string;
   startDatum: string | null;
 } | null;
-
-function heuteISO(): string {
-  const heute = new Date();
-  const monat = String(heute.getMonth() + 1).padStart(2, "0");
-  const tag = String(heute.getDate()).padStart(2, "0");
-  return `${heute.getFullYear()}-${monat}-${tag}`;
-}
 
 function parseDatumInput(wert: string): Date {
   const [jahr, monat, tag] = wert.split("-").map(Number);
@@ -64,7 +58,11 @@ export function FinanzierungFormular({
     REGEL.rechnerTilgung,
   );
   const zinsbindung = useZahlFeld(vorbefuellung?.zinsbindungJahre ?? "10", REGEL.zinsbindungJahre);
-  const [startDatum, setStartDatum] = useState(vorbefuellung?.startDatum ?? heuteISO());
+  // Ohne Kaufdatum gilt heute als Start. "Heute" kommt erst im Browser (useHeute: lokales
+  // Datum, auf Server und beim ersten Rendern null), damit Server und Browser gleich rendern.
+  const heute = useHeute();
+  const [startDatumEingabe, setStartDatum] = useState(vorbefuellung?.startDatum ?? "");
+  const startDatum = startDatumEingabe || heute;
 
   const ungueltig =
     kaufpreis.ungueltig ||
@@ -85,7 +83,7 @@ export function FinanzierungFormular({
   const beleihungsauslaufWert = beleihungsauslauf(darlehenWert, kaufpreisZahl);
 
   const planMonatlich =
-    !ungueltig && darlehenWert > 0 && zinsbindungJahreZahl > 0
+    !ungueltig && startDatum && darlehenWert > 0 && zinsbindungJahreZahl > 0
       ? tilgungsplanMonatlich(darlehenWert, zinsZahl, tilgungZahl, Math.round(zinsbindungJahreZahl * 12), parseDatumInput(startDatum))
       : [];
   const planJaehrlich = tilgungsplanJaehrlich(planMonatlich);
@@ -136,7 +134,7 @@ export function FinanzierungFormular({
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="startdatum">Startdatum</Label>
-            <Input id="startdatum" type="date" value={startDatum} onChange={(e) => setStartDatum(e.target.value)} />
+            <Input id="startdatum" type="date" value={startDatum ?? ""} onChange={(e) => setStartDatum(e.target.value)} />
           </div>
         </div>
       </div>
