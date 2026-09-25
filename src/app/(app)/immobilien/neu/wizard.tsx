@@ -26,7 +26,7 @@ import { EinheitDialog, type EinheitFormWert } from "@/components/immobilie/einh
 import { FotoUpload } from "@/components/immobilie/foto-upload";
 import { StatusPille } from "@/components/immobilie/status-pille";
 import { ZahlInput } from "@/components/ui/zahl-input";
-import { formatArea, formatCurrency, formatPercent } from "@/lib/format";
+import { formatArea, formatCurrency, formatRendite } from "@/lib/format";
 import { BUNDESLAENDER, bundeslandLabel } from "@/lib/constants/steuersaetze";
 import { laufendeKostenFelder, LAUFENDE_KOSTEN_LABEL } from "@/lib/constants/laufende-kosten";
 import { annuitaetMonat, bruttorendite, cashflowMonat } from "@/lib/calculators/immobilie";
@@ -720,7 +720,7 @@ export function ImmobilienAssistent() {
               <div className="flex justify-between">
                 <dt className="text-neutral-600">Bruttorendite</dt>
                 <dd className="tabular-nums">
-                  {bruttorenditeZahl !== null ? formatPercent(bruttorenditeZahl * 100, 1) : "—"}
+                  {bruttorenditeZahl !== null ? formatRendite(bruttorenditeZahl * 100) : "—"}
                 </dd>
               </div>
               <div className="flex justify-between">

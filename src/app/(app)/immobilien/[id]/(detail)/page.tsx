@@ -10,7 +10,7 @@ import {
 } from "@/lib/calculators/immobilie";
 import { OBJEKTART_LABEL } from "@/lib/constants/objektart";
 import { getEinheiten, getImmobilie, getLaufendeKosten } from "@/lib/data/immobilie-detail";
-import { formatArea, formatCurrency, formatDezimal, formatPercent } from "@/lib/format";
+import { formatArea, formatCurrency, formatDezimal, formatRendite } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ImmobilieUebersichtTab({ params }: { params: Promise<{ id: string }> }) {
@@ -51,7 +51,7 @@ export default async function ImmobilieUebersichtTab({ params }: { params: Promi
     },
     {
       label: "Bruttorendite",
-      wert: rendite !== null ? formatPercent(rendite * 100, 1) : "—",
+      wert: rendite !== null ? formatRendite(rendite * 100) : "—",
       hinweis: "Jahresmiete ÷ Kaufpreis",
     },
     {
@@ -88,7 +88,7 @@ export default async function ImmobilieUebersichtTab({ params }: { params: Promi
         {kpis.map((kpi) => (
           <div key={kpi.label}>
             <p className="text-xs text-neutral-600">{kpi.label}</p>
-            <p className="mt-1 text-xl font-semibold tabular-nums">{kpi.wert}</p>
+            <p className="mt-1 text-xl font-semibold whitespace-nowrap tabular-nums">{kpi.wert}</p>
             <p className="mt-0.5 text-xs text-neutral-600">{kpi.hinweis}</p>
           </div>
         ))}

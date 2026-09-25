@@ -46,11 +46,23 @@ export function formatCurrency(value: number, decimals: 0 | 2 = 2): string {
 }
 
 /**
- * Formatiert einen Prozentwert, z. B. formatPercent(4.76) → "4,76 %". Renditen in
- * Übersicht und Karten mit einer Stelle: formatPercent(5.3, 1) → "5,3 %".
+ * Formatiert einen Prozentwert, z. B. formatPercent(4.76) → "4,76 %"; mit Stellenzahl
+ * z. B. die Leerstandsquote formatPercent(33.3, 0) → "33 %". Renditen: formatRendite.
  */
 export function formatPercent(value: number, stellen: 0 | 1 | 2 = 2): string {
   return `${formatDezimal(value, stellen)} %`;
+}
+
+// Nachkommastellen für Renditen (Brutto-, Netto-, Ø Rendite) — an dieser EINEN Stelle
+// festgelegt, laut Design-Handoff: "Prozentwerte mit zwei, Kaufpreisfaktor mit einer".
+const RENDITE_STELLEN = 2;
+
+/**
+ * Formatiert eine Rendite, angegeben in Prozent (nicht als Anteil): formatRendite(4.3809) → "4,38 %".
+ * Bruttorendite-Funktionen liefern einen Anteil, dort mit × 100 aufrufen.
+ */
+export function formatRendite(prozent: number): string {
+  return formatPercent(prozent, RENDITE_STELLEN);
 }
 
 /** Formatiert eine Zahl mit fester Stellenzahl, z. B. Kaufpreisfaktor formatDezimal(18.46, 1) → "18,5". */

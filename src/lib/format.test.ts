@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatArea, formatCurrency, formatDate, formatDezimal, formatPercent } from "./format";
+import { formatArea, formatCurrency, formatDate, formatDezimal, formatPercent, formatRendite } from "./format";
 
 describe("formatCurrency", () => {
   it("formatiert positive Beträge mit zwei Nachkommastellen", () => {
@@ -30,6 +30,19 @@ describe("formatPercent", () => {
     expect(formatPercent(5.2631, 1)).toBe("5,3 %");
     expect(formatPercent(0, 1)).toBe("0,0 %");
     expect(formatPercent(33.333, 0)).toBe("33 %");
+  });
+});
+
+describe("formatRendite", () => {
+  it("zeigt Renditen immer mit genau zwei Nachkommastellen", () => {
+    expect(formatRendite(4.3809)).toBe("4,38 %");
+    expect(formatRendite(1.2)).toBe("1,20 %");
+    expect(formatRendite(0)).toBe("0,00 %");
+    expect(formatRendite(12.345)).toBe("12,35 %");
+  });
+
+  it("nutzt das echte Minuszeichen bei negativer Nettorendite", () => {
+    expect(formatRendite(-0.5)).toBe("−0,50 %");
   });
 });
 

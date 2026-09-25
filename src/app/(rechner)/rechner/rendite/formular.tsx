@@ -6,7 +6,7 @@ import { useZahlFeld } from "@/components/rechner/use-zahl-feld";
 import { Label } from "@/components/ui/label";
 import { ZahlInput } from "@/components/ui/zahl-input";
 import { bruttorendite, gesamtinvestition, kaufpreisfaktor, nettorendite } from "@/lib/calculators/immobilie";
-import { formatCurrency, formatDezimal, formatPercent } from "@/lib/format";
+import { formatCurrency, formatDezimal, formatRendite } from "@/lib/format";
 import { REGEL } from "@/lib/validation/zahl";
 import { formatEingabe, formatEingabeOptional } from "@/lib/zahl";
 
@@ -95,13 +95,13 @@ export function RenditeFormular({
               <div>
                 <p className="text-xs text-neutral-600">Bruttorendite</p>
                 <p className="mt-1 text-[30px] leading-[1.1] font-semibold tabular-nums">
-                  {bruttoRatio !== null ? formatPercent(bruttoRatio * 100) : "—"}
+                  {bruttoRatio !== null ? formatRendite(bruttoRatio * 100) : "—"}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-neutral-600">Nettorendite</p>
                 <p className="mt-1 text-[30px] leading-[1.1] font-semibold tabular-nums">
-                  {netto !== null ? formatPercent(netto) : "—"}
+                  {netto !== null ? formatRendite(netto) : "—"}
                 </p>
               </div>
             </div>

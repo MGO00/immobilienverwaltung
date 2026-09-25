@@ -216,10 +216,14 @@ Dokumente und weitere Rechner.
   10px Radius, Status-Pillen 999px, Schatten nur für Popover und Dialog, eigener Fehler-Token.
 - Zahlen mit tabellarischen Ziffern. Ansprache "Du". Deutsche Formate: 1.234,56 €, TT.MM.JJJJ,
   58 m², Minuszeichen "−". Angezeigt wird nur über src/lib/format.ts (formatCurrency,
-  formatPercent(wert, stellen), formatDezimal, formatArea, formatDate), nie über toFixed() oder
-  String(zahl): Renditen mit einer Stelle ("5,3 %"), Leerstandsquote ohne ("33 %"),
-  Kaufpreisfaktor mit einer Stelle ("18,5"), Flächen ohne überflüssige Nullen, bis 2 Stellen
-  ("58 m²", "58,5 m²").
+  formatPercent(wert, stellen), formatRendite, formatDezimal, formatArea, formatDate), nie über
+  toFixed() oder String(zahl). Laut Design-Handoff "Prozentwerte mit zwei, Kaufpreisfaktor mit
+  einer": Renditen (Brutto-, Netto-, Ø Rendite) überall mit genau 2 Stellen ("4,38 %"), festgelegt
+  an EINER Stelle in `formatRendite` (Übersicht, Objektkarte, Detailseite, Rendite-Rechner,
+  Vorschau im Assistenten); Kaufpreisfaktor mit einer Stelle ("22,8"); Leerstandsquote ohne ("33 %");
+  Zins, Tilgung, Steuersätze, Nebenkosten-Anteil und Beleihungsauslauf wie bisher über
+  formatPercent; Flächen ohne überflüssige Nullen, bis 2 Stellen ("58 m²", "58,5 m²"). Werte in
+  den Kennzahlenbändern (Übersicht, Detailseite) brechen nie um (whitespace-nowrap).
 - Negative Werte werden überall neutral mit Minuszeichen dargestellt, nie rot. Die Fehlerfarbe ist
   nur für Fehler da. Die rote Darstellung des negativen Cashflows in Rechner 04 im Prototyp NICHT
   übernehmen.

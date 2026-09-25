@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImmobilienKarte } from "@/components/immobilie/immobilien-karte";
-import { formatCurrency, formatPercent } from "@/lib/format";
+import { formatCurrency, formatRendite } from "@/lib/format";
 import { getImmobilienUebersicht } from "@/lib/data/immobilien";
 import {
   anzahlEinheiten,
@@ -78,7 +78,7 @@ export default async function UebersichtPage() {
       label: "Ø Rendite",
       wert: (() => {
         const rendite = portfolioRendite(immobilien);
-        return rendite !== null ? formatPercent(rendite * 100, 1) : "—";
+        return rendite !== null ? formatRendite(rendite * 100) : "—";
       })(),
     },
   ];
@@ -112,7 +112,7 @@ export default async function UebersichtPage() {
         {kpis.map((kpi) => (
           <div key={kpi.label} className="min-w-[46%] border-r border-border pr-4 last:border-r-0 md:min-w-0">
             <p className="text-xs text-neutral-600">{kpi.label}</p>
-            <p className="mt-1 text-xl font-semibold tabular-nums">{kpi.wert}</p>
+            <p className="mt-1 text-xl font-semibold whitespace-nowrap tabular-nums">{kpi.wert}</p>
           </div>
         ))}
       </div>
