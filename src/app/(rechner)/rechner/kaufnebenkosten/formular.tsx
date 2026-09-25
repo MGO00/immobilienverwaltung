@@ -39,7 +39,7 @@ export function KaufnebenkostenFormular({
   interessent?: { kaufpreis: number; bundesland: string | null } | null;
 }) {
   const vorbefuellung = immobilie ?? interessent;
-  const kaufpreis = useZahlFeld(vorbefuellung ? formatEingabe(vorbefuellung.kaufpreis) : "", REGEL.rechnerBetrag);
+  const kaufpreis = useZahlFeld(vorbefuellung ? formatEingabe(vorbefuellung.kaufpreis, { betrag: true }) : "", REGEL.rechnerBetrag);
   const [bundesland, setBundesland] = useState(vorbefuellung?.bundesland ?? "");
   const notar = useZahlFeld(formatEingabe(NOTAR_PROZENT_STANDARD), REGEL.nebenkostenProzent);
   const grundbuch = useZahlFeld(formatEingabe(GRUNDBUCH_PROZENT_STANDARD), REGEL.nebenkostenProzent);

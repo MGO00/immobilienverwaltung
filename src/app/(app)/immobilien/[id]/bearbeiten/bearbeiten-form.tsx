@@ -56,21 +56,21 @@ export function BearbeitenForm({
     formatEingabeOptional(immobilie.grundstuecksflaecheQm),
   );
   const [kaufdatum, setKaufdatum] = useState(immobilie.kaufdatum ?? "");
-  const [kaufpreis, setKaufpreis] = useState(formatEingabe(immobilie.kaufpreis));
+  const [kaufpreis, setKaufpreis] = useState(formatEingabe(immobilie.kaufpreis, { betrag: true }));
   const [kaufnebenkostenBetrag, setKaufnebenkostenBetrag] = useState(
-    formatEingabeOptional(immobilie.kaufnebenkostenBetrag),
+    formatEingabeOptional(immobilie.kaufnebenkostenBetrag, { betrag: true }),
   );
   const [ohneFinanzierung, setOhneFinanzierung] = useState(!immobilie.darlehenBetrag);
-  const [darlehenBetrag, setDarlehenBetrag] = useState(formatEingabeOptional(immobilie.darlehenBetrag));
+  const [darlehenBetrag, setDarlehenBetrag] = useState(formatEingabeOptional(immobilie.darlehenBetrag, { betrag: true }));
   const [sollzinsProzent, setSollzinsProzent] = useState(formatEingabeOptional(immobilie.sollzinsProzent));
   const [tilgungProzent, setTilgungProzent] = useState(formatEingabeOptional(immobilie.tilgungProzent));
   const [zinsbindungBis, setZinsbindungBis] = useState(immobilie.zinsbindungBis ?? "");
   const [status, setStatus] = useState<EinheitStatus>(einheit?.status ?? "leer");
-  const [kaltmieteMonat, setKaltmieteMonat] = useState(formatEingabeOptional(einheit?.kaltmieteMonat));
+  const [kaltmieteMonat, setKaltmieteMonat] = useState(formatEingabeOptional(einheit?.kaltmieteMonat, { betrag: true }));
   const [kostenState, setKostenState] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     for (const posten of laufendeKosten) {
-      initial[posten.typ] = formatEingabe(posten.betragMonat);
+      initial[posten.typ] = formatEingabe(posten.betragMonat, { betrag: true });
     }
     return initial;
   });

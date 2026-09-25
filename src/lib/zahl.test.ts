@@ -104,6 +104,31 @@ describe("formatEingabe", () => {
     }
   });
 
+  it("zeigt Geldbeträge mit genau 2 Nachkommastellen, ganze Beträge ohne", () => {
+    const betrag = { betrag: true };
+    expect(formatEingabe(189000.5, betrag)).toBe("189000,50");
+    expect(formatEingabe(180.4, betrag)).toBe("180,40");
+    expect(formatEingabe(17142.55, betrag)).toBe("17142,55");
+    expect(formatEingabe(189000, betrag)).toBe("189000");
+    expect(formatEingabe(0, betrag)).toBe("0");
+    expect(formatEingabe(718.7512, betrag)).toBe("718,75");
+    expect(formatEingabe(0.1 + 0.2, betrag)).toBe("0,30");
+    expect(formatEingabe(99.999, betrag)).toBe("100");
+    expect(formatEingabeOptional(180.4, betrag)).toBe("180,40");
+    expect(formatEingabeOptional(null, betrag)).toBe("");
+  });
+
+  it("lässt Prozente und Flächen ohne überflüssige Nullen", () => {
+    expect(formatEingabe(3.5)).toBe("3,5");
+    expect(formatEingabe(58.5)).toBe("58,5");
+  });
+
+  it("lässt sich auch als Betrag verlustfrei wieder einlesen", () => {
+    for (const zahl of [0, 0.5, 180.4, 189000, 189000.5, 1250000.99, 17142.55]) {
+      expect(parseDeZahl(formatEingabe(zahl, { betrag: true }))).toBe(zahl);
+    }
+  });
+
   it("macht aus fehlenden Werten ein leeres Feld", () => {
     expect(formatEingabeOptional(null)).toBe("");
     expect(formatEingabeOptional(undefined)).toBe("");

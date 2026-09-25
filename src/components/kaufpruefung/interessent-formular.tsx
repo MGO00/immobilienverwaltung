@@ -54,10 +54,10 @@ export function InteressentFormular({
   const [plz, setPlz] = useState(initial?.plz ?? "");
   const [ort, setOrt] = useState(initial?.ort ?? "");
   const [bundesland, setBundesland] = useState(initial?.bundesland ?? "");
-  const [kaufpreis, setKaufpreis] = useState(formatEingabeOptional(initial?.kaufpreis));
+  const [kaufpreis, setKaufpreis] = useState(formatEingabeOptional(initial?.kaufpreis, { betrag: true }));
   const [flaeche, setFlaeche] = useState(formatEingabeOptional(initial?.flaecheQm));
-  const [miete, setMiete] = useState(formatEingabeOptional(initial?.kaltmieteMonat));
-  const [darlehen, setDarlehen] = useState(formatEingabeOptional(initial?.darlehenBetrag));
+  const [miete, setMiete] = useState(formatEingabeOptional(initial?.kaltmieteMonat, { betrag: true }));
+  const [darlehen, setDarlehen] = useState(formatEingabeOptional(initial?.darlehenBetrag, { betrag: true }));
   const [zins, setZins] = useState(formatEingabeOptional(initial?.sollzinsProzent));
   const [tilgung, setTilgung] = useState(formatEingabeOptional(initial?.tilgungProzent));
   const [inserat, setInserat] = useState(initial?.inseratUrl ?? "");

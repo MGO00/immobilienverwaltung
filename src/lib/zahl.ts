@@ -60,18 +60,31 @@ export function parseDeZahl(text: string, optionen: { erlaubeMinus?: boolean } =
   return parseDeZahlDetails(text, optionen)?.wert ?? null;
 }
 
+export type EingabeFormat = {
+  /** Geldbetrag: ganze Beträge ohne, alle anderen mit genau 2 Nachkommastellen. */
+  betrag?: boolean;
+};
+
 /**
  * Wert für die Vorbefüllung eines Eingabefelds: Komma als Dezimalzeichen, ohne
- * Tausenderpunkte (einfach weiterzutippen), ohne überflüssige Nullen. Vorher auf
- * 4 Stellen gerundet, damit Rechenreste aus Summen nie im Feld stehen.
- * 3.5 → "3,5", 189000 → "189000", 2 → "2".
+ * Tausenderpunkte (einfach weiterzutippen). Vorher gerundet, damit Rechenreste aus
+ * Summen nie im Feld stehen.
+ * - Standard (Prozente, Flächen): ohne überflüssige Nullen, höchstens 4 Stellen.
+ *   3.5 → "3,5", 58.5 → "58,5", 2 → "2".
+ * - { betrag: true }: auf Cent gerundet; ganze Beträge ohne, sonst genau 2
+ *   Nachkommastellen. 189000 → "189000", 189000.5 → "189000,50", 180.4 → "180,40".
  */
-export function formatEingabe(zahl: number): string {
+export function formatEingabe(zahl: number, { betrag = false }: EingabeFormat = {}): string {
+  if (betrag) {
+    const cent = Math.round(zahl * 100) / 100;
+    if (cent === 0) return "0";
+    return (Number.isInteger(cent) ? String(cent) : cent.toFixed(2)).replace(".", ",");
+  }
   const gerundet = Math.round(zahl * 10000) / 10000;
   return String(Object.is(gerundet, -0) ? 0 : gerundet).replace(".", ",");
 }
 
 /** formatEingabe für optionale Werte: null wird zum leeren Feld. */
-export function formatEingabeOptional(zahl: number | null | undefined): string {
-  return zahl === null || zahl === undefined ? "" : formatEingabe(zahl);
+export function formatEingabeOptional(zahl: number | null | undefined, format: EingabeFormat = {}): string {
+  return zahl === null || zahl === undefined ? "" : formatEingabe(zahl, format);
 }

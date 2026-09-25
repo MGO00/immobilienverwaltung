@@ -26,13 +26,13 @@ export function RenditeFormular({
   immobilieId: string | null;
   interessentId?: string | null;
 }) {
-  const kaufpreis = useZahlFeld(vorbefuellung ? formatEingabe(vorbefuellung.kaufpreis) : "", REGEL.rechnerBetrag);
+  const kaufpreis = useZahlFeld(vorbefuellung ? formatEingabe(vorbefuellung.kaufpreis, { betrag: true }) : "", REGEL.rechnerBetrag);
   const kaufnebenkosten = useZahlFeld(
-    vorbefuellung?.kaufnebenkostenBetrag ? formatEingabe(vorbefuellung.kaufnebenkostenBetrag) : "",
+    vorbefuellung?.kaufnebenkostenBetrag ? formatEingabe(vorbefuellung.kaufnebenkostenBetrag, { betrag: true }) : "",
     REGEL.rechnerBetrag,
   );
-  const kaltmiete = useZahlFeld(formatEingabeOptional(vorbefuellung?.kaltmieteMonat), REGEL.rechnerBetrag);
-  const kosten = useZahlFeld(formatEingabeOptional(vorbefuellung?.kostenMonat), REGEL.rechnerBetrag);
+  const kaltmiete = useZahlFeld(formatEingabeOptional(vorbefuellung?.kaltmieteMonat, { betrag: true }), REGEL.rechnerBetrag);
+  const kosten = useZahlFeld(formatEingabeOptional(vorbefuellung?.kostenMonat, { betrag: true }), REGEL.rechnerBetrag);
 
   const ungueltig = kaufpreis.ungueltig || kaufnebenkosten.ungueltig || kaltmiete.ungueltig || kosten.ungueltig;
   const kaufpreisZahl = kaufpreis.wert ?? 0;

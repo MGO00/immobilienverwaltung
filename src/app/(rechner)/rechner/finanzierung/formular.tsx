@@ -44,14 +44,14 @@ export function FinanzierungFormular({
   immobilieId: string | null;
   interessentId?: string | null;
 }) {
-  const kaufpreis = useZahlFeld(vorbefuellung ? formatEingabe(vorbefuellung.kaufpreis) : "", REGEL.rechnerBetrag);
+  const kaufpreis = useZahlFeld(vorbefuellung ? formatEingabe(vorbefuellung.kaufpreis, { betrag: true }) : "", REGEL.rechnerBetrag);
   const kaufnebenkosten = useZahlFeld(
-    vorbefuellung?.kaufnebenkostenBetrag ? formatEingabe(vorbefuellung.kaufnebenkostenBetrag) : "",
+    vorbefuellung?.kaufnebenkostenBetrag ? formatEingabe(vorbefuellung.kaufnebenkostenBetrag, { betrag: true }) : "",
     REGEL.rechnerBetrag,
   );
   const eigenkapital = useZahlFeld(
     vorbefuellung?.eigenkapital !== null && vorbefuellung?.eigenkapital !== undefined
-      ? formatEingabe(vorbefuellung.eigenkapital)
+      ? formatEingabe(vorbefuellung.eigenkapital, { betrag: true })
       : "",
     REGEL.rechnerBetrag,
   );

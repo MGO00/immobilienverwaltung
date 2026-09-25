@@ -159,7 +159,7 @@ export function EinheitenTab({
             ? {
                 name: bearbeitete.name,
                 flaecheQm: formatEingabeOptional(bearbeitete.flaecheQm),
-                kaltmieteMonat: formatEingabe(bearbeitete.kaltmieteMonat),
+                kaltmieteMonat: formatEingabe(bearbeitete.kaltmieteMonat, { betrag: true }),
                 status: bearbeitete.status,
               }
             : undefined

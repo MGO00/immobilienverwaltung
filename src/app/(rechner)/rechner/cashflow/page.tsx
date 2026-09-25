@@ -12,7 +12,7 @@ import { formatEingabe } from "@/lib/zahl";
 // toFixed(2) dort). Für das Eingabefeld in deutsche Schreibweise umwandeln; alles
 // andere wird ignoriert statt als unverständlicher Text im Feld zu landen.
 function rateAusUrl(rate: string | undefined): string {
-  return rate && /^\d+(\.\d+)?$/.test(rate) ? formatEingabe(Number(rate)) : "";
+  return rate && /^\d+(\.\d+)?$/.test(rate) ? formatEingabe(Number(rate), { betrag: true }) : "";
 }
 
 export const metadata = rechnerMetadata("cashflow");
@@ -53,11 +53,11 @@ export default async function CashflowPage({
         kosten.filter((k) => typen.includes(k.typ)).reduce((s, k) => s + k.betragMonat, 0);
       const rate = annuitaetMonat(immobilie.darlehenBetrag, immobilie.sollzinsProzent, immobilie.tilgungProzent);
       initial = {
-        kaltmieteMonat: formatEingabe(kaltmieteMonatVermietet(einheiten)),
-        kostenMonat: formatEingabe(summeNachTyp(["hausgeld", "grundsteuer", "versicherung", "instandhaltung"])),
-        ruecklageMonat: formatEingabe(summeNachTyp(["instandhaltungsruecklage"])),
-        verwaltungMonat: formatEingabe(summeNachTyp(["verwaltung_sonstiges"])),
-        rateMonat: rate !== null ? formatEingabe(rate) : "",
+        kaltmieteMonat: formatEingabe(kaltmieteMonatVermietet(einheiten), { betrag: true }),
+        kostenMonat: formatEingabe(summeNachTyp(["hausgeld", "grundsteuer", "versicherung", "instandhaltung"]), { betrag: true }),
+        ruecklageMonat: formatEingabe(summeNachTyp(["instandhaltungsruecklage"]), { betrag: true }),
+        verwaltungMonat: formatEingabe(summeNachTyp(["verwaltung_sonstiges"]), { betrag: true }),
+        rateMonat: rate !== null ? formatEingabe(rate, { betrag: true }) : "",
       };
       darlehenKontext = { darlehenBetrag: immobilie.darlehenBetrag, sollzinsProzent: immobilie.sollzinsProzent };
     }
@@ -75,8 +75,8 @@ export default async function CashflowPage({
       const rate = annuitaetMonat(interessent.darlehenBetrag, interessent.sollzinsProzent, interessent.tilgungProzent);
       initial = {
         ...initial,
-        kaltmieteMonat: interessent.kaltmieteMonat !== null ? formatEingabe(interessent.kaltmieteMonat) : "",
-        rateMonat: rate !== null ? formatEingabe(rate) : "",
+        kaltmieteMonat: interessent.kaltmieteMonat !== null ? formatEingabe(interessent.kaltmieteMonat, { betrag: true }) : "",
+        rateMonat: rate !== null ? formatEingabe(rate, { betrag: true }) : "",
       };
       darlehenKontext = { darlehenBetrag: interessent.darlehenBetrag, sollzinsProzent: interessent.sollzinsProzent };
     }
