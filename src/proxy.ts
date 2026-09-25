@@ -26,6 +26,7 @@ const PUBLIC_EXACT_PATHS = [
   "/rechner/rendite",
   "/rechner/finanzierung",
   "/rechner/cashflow",
+  "/rechner/mieterhoehung",
   // Link-Seiten aus der Bestätigungsmail der E-Mail-Liste (Besucher ohne Konto).
   "/newsletter/bestaetigen",
   "/newsletter/abmelden",

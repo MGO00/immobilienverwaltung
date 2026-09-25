@@ -16,6 +16,11 @@ export function useZahlFeld(start: string, regel: ZahlRegel) {
   return {
     wert: pruefung.ok ? pruefung.wert : null,
     ungueltig: !pruefung.ok,
+    /** Feld neu vorbefüllen (z. B. beim Wechsel der Einheit), Meldung erst wieder nach Verlassen. */
+    setze: (neu: string) => {
+      setText(neu);
+      setVerlassen(false);
+    },
     /** Props für ZahlInput. */
     feld: {
       value: text,

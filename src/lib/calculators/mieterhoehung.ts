@@ -86,6 +86,25 @@ export type MietspiegelErgebnis = {
   stichtagKappung: IsoDatum;
 };
 
+export type MietspiegelFristen = Pick<
+  MietspiegelErgebnis,
+  "fruehesterZugang" | "zugang" | "zugangZuFrueh" | "wirksamAb" | "stichtagKappung"
+>;
+
+/** Nur die Fristen (hängen nicht von den Beträgen ab, z. B. für den Stichtag-Hinweis am Feld). */
+export function fristenMietspiegel(
+  letzteErhoehungAb: IsoDatum,
+  geplanterZugang: IsoDatum | null | undefined,
+  heute: IsoDatum,
+): MietspiegelFristen {
+  const fruehesterZugang = plusJahre(letzteErhoehungAb, 1);
+  const geplant = geplanterZugang || heute;
+  const zugangZuFrueh = geplant < fruehesterZugang;
+  const zugang = zugangZuFrueh ? fruehesterZugang : geplant;
+  const wirksamAb = monatsanfangNach(zugang, 3);
+  return { fruehesterZugang, zugang, zugangZuFrueh, wirksamAb, stichtagKappung: plusJahre(wirksamAb, -3) };
+}
+
 export function mieterhoehungMietspiegel(e: MietspiegelEingabe): MietspiegelErgebnis | null {
   if (!(e.flaecheQm > 0) || !(e.mieteAktuell >= 0) || !(e.mieteVorDreiJahren >= 0) || !(e.vergleichsmieteQm >= 0)) {
     return null;
@@ -98,12 +117,6 @@ export function mieterhoehungMietspiegel(e: MietspiegelEingabe): MietspiegelErge
   const erhoehungMoeglich = grenze > e.mieteAktuell;
   const neueMiete = erhoehungMoeglich ? grenze : e.mieteAktuell;
 
-  const fruehesterZugang = plusJahre(e.letzteErhoehungAb, 1);
-  const geplant = e.geplanterZugang || e.heute;
-  const zugangZuFrueh = geplant < fruehesterZugang;
-  const zugang = zugangZuFrueh ? fruehesterZugang : geplant;
-  const wirksamAb = monatsanfangNach(zugang, 3);
-
   return {
     grenzeVergleichsmiete,
     grenzeKappung,
@@ -114,11 +127,7 @@ export function mieterhoehungMietspiegel(e: MietspiegelEingabe): MietspiegelErge
     erhoehungProzent: e.mieteAktuell > 0 ? (neueMiete / e.mieteAktuell - 1) * 100 : 0,
     mieteQmVorher: rundeCent(e.mieteAktuell / e.flaecheQm),
     mieteQmNachher: rundeCent(neueMiete / e.flaecheQm),
-    fruehesterZugang,
-    zugang,
-    zugangZuFrueh,
-    wirksamAb,
-    stichtagKappung: plusJahre(wirksamAb, -3),
+    ...fristenMietspiegel(e.letzteErhoehungAb, e.geplanterZugang, e.heute),
   };
 }
 

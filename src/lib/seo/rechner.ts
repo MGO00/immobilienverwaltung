@@ -11,7 +11,7 @@ export const RECHNER_ROBOTS: Metadata["robots"] = {
   follow: RECHNER_INDEXIERBAR,
 };
 
-type RechnerSeite = "uebersicht" | "kaufnebenkosten" | "rendite" | "finanzierung" | "cashflow";
+type RechnerSeite = "uebersicht" | "kaufnebenkosten" | "rendite" | "finanzierung" | "cashflow" | "mieterhoehung";
 
 const MARKE = "Immobilienverwaltung";
 
@@ -41,6 +41,11 @@ const SEITEN: Record<RechnerSeite, { title: string; description: string }> = {
     title: `Cashflow-Rechner für Vermieter | ${MARKE}`,
     description:
       "Monatlichen Cashflow einer Mietimmobilie berechnen: Kaltmiete, optionaler Leerstand, laufende Kosten und Darlehensrate im Überblick.",
+  },
+  mieterhoehung: {
+    title: `Mieterhöhungs-Rechner: Mietspiegel und Indexmiete | ${MARKE}`,
+    description:
+      "Mieterhöhung nach Mietspiegel (§ 558 BGB) mit Kappungsgrenze oder nach Indexmiete (§ 557b BGB) berechnen, mit frühestem Zugang und dem Datum, ab dem die neue Miete gilt. Keine Rechtsberatung.",
   },
 };
 

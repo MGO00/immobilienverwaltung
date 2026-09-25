@@ -126,6 +126,22 @@ export const REGEL = {
   rechnerBetrag: { max: BETRAG_MAX, maxMeldung: "Der Betrag ist zu groß." },
   rechnerZins: { max: 20, maxMeldung: "Der Zins darf höchstens 20 % betragen." },
   rechnerTilgung: { max: 20, maxMeldung: "Die Tilgung darf höchstens 20 % betragen." },
+  // Mieterhöhungs-Rechner
+  flaecheMiete: {
+    min: 0,
+    minExklusiv: true,
+    minMeldung: "Die Wohnfläche muss größer als 0 sein.",
+    max: FLAECHE_MAX,
+    maxMeldung: "Die Fläche ist zu groß.",
+  },
+  vergleichsmieteQm: { max: 100, maxMeldung: "Die Vergleichsmiete darf höchstens 100 €/m² betragen." },
+  verbraucherpreisindex: {
+    min: 0,
+    minExklusiv: true,
+    minMeldung: "Der Index muss größer als 0 sein.",
+    max: 1000,
+    maxMeldung: "Der Index ist zu groß (Basis 2020 = 100).",
+  },
   zinsbindungJahre: {
     ganzzahl: true,
     min: 1,
