@@ -10,7 +10,7 @@ import {
 } from "@/lib/calculators/immobilie";
 import { OBJEKTART_LABEL } from "@/lib/constants/objektart";
 import { getEinheiten, getImmobilie, getLaufendeKosten } from "@/lib/data/immobilie-detail";
-import { formatCurrency } from "@/lib/format";
+import { formatArea, formatCurrency, formatDezimal, formatPercent } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ImmobilieUebersichtTab({ params }: { params: Promise<{ id: string }> }) {
@@ -51,12 +51,12 @@ export default async function ImmobilieUebersichtTab({ params }: { params: Promi
     },
     {
       label: "Bruttorendite",
-      wert: rendite !== null ? `${(rendite * 100).toFixed(1)} %` : "—",
+      wert: rendite !== null ? formatPercent(rendite * 100, 1) : "—",
       hinweis: "Jahresmiete ÷ Kaufpreis",
     },
     {
       label: "Kaufpreisfaktor",
-      wert: faktor !== null ? faktor.toFixed(1) : "—",
+      wert: faktor !== null ? formatDezimal(faktor, 1) : "—",
       hinweis: "Jahresmieten",
     },
   ];
@@ -73,10 +73,10 @@ export default async function ImmobilieUebersichtTab({ params }: { params: Promi
     { label: "Baujahr", wert: immobilie.baujahr ? String(immobilie.baujahr) : "—" },
     {
       label: immobilie.art === "mehrfamilienhaus" ? "Wohnfläche gesamt" : "Wohnfläche",
-      wert: wohnflaeche ? `${wohnflaeche} m²` : "—",
+      wert: wohnflaeche ? formatArea(wohnflaeche) : "—",
     },
     ...(immobilie.grundstuecksflaecheQm
-      ? [{ label: "Grundstücksfläche", wert: `${immobilie.grundstuecksflaecheQm} m²` }]
+      ? [{ label: "Grundstücksfläche", wert: formatArea(immobilie.grundstuecksflaecheQm) }]
       : []),
     { label: "Einheiten", wert: String(einheiten.length) },
     { label: "Nutzung", wert: nutzung },

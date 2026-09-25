@@ -6,7 +6,7 @@ import { AlertCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EinheitDialog, type EinheitFormWert } from "@/components/immobilie/einheit-dialog";
 import { StatusPille } from "@/components/immobilie/status-pille";
-import { formatArea, formatCurrency } from "@/lib/format";
+import { formatArea, formatCurrency, formatPercent } from "@/lib/format";
 import { formatEingabe, formatEingabeOptional } from "@/lib/zahl";
 import { leerstandsquote, wohnflaecheGesamt } from "@/lib/calculators/immobilie";
 import type { EinheitZeile } from "@/lib/data/immobilie-detail";
@@ -137,7 +137,7 @@ export function EinheitenTab({
         <div className="grid grid-cols-3 gap-4 border-t border-border pt-4 text-sm">
           <div>
             <p className="text-neutral-600">Gesamtfläche</p>
-            <p className="tabular-nums">{gesamtflaeche ? `${gesamtflaeche} m²` : "—"}</p>
+            <p className="tabular-nums">{gesamtflaeche ? formatArea(gesamtflaeche) : "—"}</p>
           </div>
           <div>
             <p className="text-neutral-600">Gesamtmiete / Monat</p>
@@ -145,7 +145,7 @@ export function EinheitenTab({
           </div>
           <div>
             <p className="text-neutral-600">Leerstandsquote</p>
-            <p className="tabular-nums">{leerquote !== null ? `${(leerquote * 100).toFixed(0)} %` : "—"}</p>
+            <p className="tabular-nums">{leerquote !== null ? formatPercent(leerquote * 100, 0) : "—"}</p>
           </div>
         </div>
       )}

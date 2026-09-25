@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatArea, formatCurrency, formatDate, formatPercent } from "./format";
+import { formatArea, formatCurrency, formatDate, formatDezimal, formatPercent } from "./format";
 
 describe("formatCurrency", () => {
   it("formatiert positive Beträge mit zwei Nachkommastellen", () => {
@@ -25,11 +25,31 @@ describe("formatPercent", () => {
   it("nutzt das echte Minuszeichen bei negativen Prozentwerten", () => {
     expect(formatPercent(-1.5)).toBe("−1,50 %");
   });
+
+  it("formatiert mit wählbarer Stellenzahl (Renditen mit 1, Leerstandsquote mit 0)", () => {
+    expect(formatPercent(5.2631, 1)).toBe("5,3 %");
+    expect(formatPercent(0, 1)).toBe("0,0 %");
+    expect(formatPercent(33.333, 0)).toBe("33 %");
+  });
+});
+
+describe("formatDezimal", () => {
+  it("formatiert den Kaufpreisfaktor mit Komma und einer Stelle", () => {
+    expect(formatDezimal(18.46, 1)).toBe("18,5");
+    expect(formatDezimal(22.8, 1)).toBe("22,8");
+    expect(formatDezimal(1234.56, 1)).toBe("1.234,6");
+  });
 });
 
 describe("formatArea", () => {
   it("formatiert Quadratmeter", () => {
     expect(formatArea(58)).toBe("58 m²");
+  });
+
+  it("zeigt Nachkommastellen statt still zu runden", () => {
+    expect(formatArea(58.5)).toBe("58,5 m²");
+    expect(formatArea(72.25)).toBe("72,25 m²");
+    expect(formatArea(1234)).toBe("1.234 m²");
   });
 });
 

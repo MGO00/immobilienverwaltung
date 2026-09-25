@@ -6,7 +6,7 @@ import { useZahlFeld } from "@/components/rechner/use-zahl-feld";
 import { Label } from "@/components/ui/label";
 import { ZahlInput } from "@/components/ui/zahl-input";
 import { bruttorendite, gesamtinvestition, kaufpreisfaktor, nettorendite } from "@/lib/calculators/immobilie";
-import { formatCurrency, formatPercent } from "@/lib/format";
+import { formatCurrency, formatDezimal, formatPercent } from "@/lib/format";
 import { REGEL } from "@/lib/validation/zahl";
 import { formatEingabe, formatEingabeOptional } from "@/lib/zahl";
 
@@ -121,13 +121,13 @@ export function RenditeFormular({
               </div>
               <div className="flex items-center justify-between pt-2 text-sm font-semibold">
                 <span>Kaufpreisfaktor</span>
-                <span className="tabular-nums">{faktor !== null ? faktor.toFixed(1) : "—"}</span>
+                <span className="tabular-nums">{faktor !== null ? formatDezimal(faktor, 1) : "—"}</span>
               </div>
             </div>
 
             {faktor !== null && (
               <p className="mt-4 text-sm text-neutral-700">
-                Beim Faktor {faktor.toFixed(1)} ist der Kaufpreis nach rund {Math.round(faktor)} Jahren Kaltmiete
+                Beim Faktor {formatDezimal(faktor, 1)} ist der Kaufpreis nach rund {Math.round(faktor)} Jahren Kaltmiete
                 wieder eingespielt (ohne Kosten, Zinsen oder Steuern).
               </p>
             )}

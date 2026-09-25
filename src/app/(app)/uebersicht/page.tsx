@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ImmobilienKarte } from "@/components/immobilie/immobilien-karte";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatPercent } from "@/lib/format";
 import { getImmobilienUebersicht } from "@/lib/data/immobilien";
 import {
   anzahlEinheiten,
@@ -78,7 +78,7 @@ export default async function UebersichtPage() {
       label: "Ø Rendite",
       wert: (() => {
         const rendite = portfolioRendite(immobilien);
-        return rendite !== null ? `${(rendite * 100).toFixed(1)} %` : "—";
+        return rendite !== null ? formatPercent(rendite * 100, 1) : "—";
       })(),
     },
   ];

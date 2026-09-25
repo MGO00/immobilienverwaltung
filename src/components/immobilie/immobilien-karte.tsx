@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatPercent } from "@/lib/format";
 import { OBJEKTART_LABEL } from "@/lib/constants/objektart";
 import {
   bruttorendite,
@@ -73,7 +73,7 @@ export function ImmobilienKarte({ immobilie }: { immobilie: ImmobilieUebersicht 
           </div>
           <div className="flex justify-between">
             <dt className="text-neutral-600">Rendite</dt>
-            <dd className="tabular-nums">{rendite !== null ? `${(rendite * 100).toFixed(1)} %` : "—"}</dd>
+            <dd className="tabular-nums">{rendite !== null ? formatPercent(rendite * 100, 1) : "—"}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="text-neutral-600">Cashflow / Monat</dt>
