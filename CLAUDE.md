@@ -215,7 +215,11 @@ Dokumente und weitere Rechner.
   sparsam (primäre Aktion, Links, Hauptzahl), Schrift Archivo mit Überschriften in 600, Karten mit
   10px Radius, Status-Pillen 999px, Schatten nur für Popover und Dialog, eigener Fehler-Token.
 - Zahlen mit tabellarischen Ziffern. Ansprache "Du". Deutsche Formate: 1.234,56 €, TT.MM.JJJJ,
-  58 m², Minuszeichen "−".
+  58 m², Minuszeichen "−". Angezeigt wird nur über src/lib/format.ts (formatCurrency,
+  formatPercent(wert, stellen), formatDezimal, formatArea, formatDate), nie über toFixed() oder
+  String(zahl): Renditen mit einer Stelle ("5,3 %"), Leerstandsquote ohne ("33 %"),
+  Kaufpreisfaktor mit einer Stelle ("18,5"), Flächen ohne überflüssige Nullen, bis 2 Stellen
+  ("58 m²", "58,5 m²").
 - Negative Werte werden überall neutral mit Minuszeichen dargestellt, nie rot. Die Fehlerfarbe ist
   nur für Fehler da. Die rote Darstellung des negativen Cashflows in Rechner 04 im Prototyp NICHT
   übernehmen.
@@ -295,8 +299,9 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   Anschlussfinanzierung/mehrerer Darlehen); eine transaktionale Buchungstabelle für Einnahmen/
   Ausgaben (könnte running_cost_item später ergänzen oder ablösen). Keine dieser Änderungen jetzt
   vornehmen.
-- Zahlenfelder zeigen und akzeptieren bisher einen Dezimalpunkt ("1.5"). Deutsche Eingabe mit
-  Komma ("1,5") in allen Formularen wird in einem eigenen Schritt umgesetzt.
+- Zahleneingabe: Einheiten ("5 €", "3,5 %") und Leerzeichen innen ("189 000") sind vorerst
+  bewusst ungültig, damit die Regel einfach bleibt (siehe Fachliche Regeln, Zahleneingabe).
+  Tolerantere Eingabe beim Einfügen aus Exposés prüfen, falls Testnutzer darüber stolpern.
 
 ## Tarife und Grenzen
 - Jedes Konto hat einen Tarif: Spalte `account.tarif` (kostenlos | plus | pro, Standard "kostenlos"
@@ -420,6 +425,35 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   (immobilie.ts, portfolio.ts) runden bewusst nicht zusätzlich zentral — sie wurden nicht
   rückwirkend angefasst, um bereits getesteten Code nicht zu riskieren.
 - Wo Rechner Ergebnisse zeigen, steht der Hinweis "Keine Steuer- oder Anlageberatung".
+- Zahleneingabe (deutsche Schreibweise, alle Formulare und Rechner):
+  - EINE Einlese-Funktion für Browser und Server: `parseDeZahl` (src/lib/zahl.ts). Mit Komma ist
+    das Komma Dezimalzeichen und Punkte davor sind Tausendertrenner in Dreiergruppen
+    ("189.000,50"); ohne Komma sind Punkte vor genau drei Ziffern Tausendertrenner ("189.000",
+    "1.500" → 1500); sonst ist ein einzelner Punkt Dezimalzeichen ("3.5", "0.500" → 0,5). Alles
+    andere ist ungültig ("1,2,3", "abc", "1.23.4", "5 €", "189 000", "1e5") — nie still 0 oder
+    eine andere Zahl. Ein Minus ist nirgends erlaubt (Option erlaubeMinus, derzeit ungenutzt).
+  - Prüfregeln und Meldungen zentral in src/lib/validation/zahl.ts (`REGEL`, `pruefeZahl`,
+    `zahlFeld`/`pflichtZahlFeld` für Zod, `zahlFehler`/`zahlWert` für Formulare). Formulare
+    schicken Zahlen als TEXT an die Server Actions; die Schemas (ZAHLENFELDER_IMMOBILIE,
+    ZAHLENFELDER_EINHEIT, kostenPostenFeld, ZAHLENFELDER_INTERESSENT) lesen sie mit denselben
+    Regeln ein, der Browser prüft vorab mit genau diesen Schemas. Keine zweite Parser-Logik.
+  - Grenzen: Beträge und Flächen ≥ 0 (unter der Grenze der Datenbankspalte), Zins und Tilgung
+    0–20 %, Notar/Grundbuch/Makler je 0–10 %, Leerstand 0–100 %, Baujahr nach 1000 bis aktuelles
+    Jahr + 5, Zinsbindung (Rechner) 1–40 Jahre. Gespeicherte Werte höchstens 2 Nachkommastellen
+    (sonst Meldung, nie stilles Runden durch die Datenbank); reine Rechner-Felder beliebig viele.
+    Zins "1.500" wird so als "höchstens 20 %" abgefangen.
+  - Felder: `ZahlInput` (src/components/ui/zahl-input.tsx), type="text" mit inputMode="decimal"
+    (Baujahr, Zinsbindung: "numeric"), sichtbare Einheit daneben, Meldung als Text unter dem
+    Feld (aria-invalid, aria-describedby). Formulare melden beim Absenden bzw. "Weiter",
+    Rechner (`useZahlFeld`) beim Verlassen des Feldes; solange ein Rechner-Feld ungültig ist,
+    zeigt das Ergebnis "—" (ErgebnisUngueltig) statt mit 0 zu rechnen. Die Vorschau im
+    Assistenten rechnet ebenfalls nur mit gültigen Werten.
+  - Kein Umformatieren beim Verlassen eines Feldes (was getippt wurde, bleibt stehen).
+    Vorbefüllung aus der Datenbank und Standardwerte über `formatEingabe`: Komma, keine
+    Tausenderpunkte; Prozente und Flächen ohne überflüssige Nullen ("3,5", "58,5"), Geldbeträge
+    mit `{ betrag: true }` ganz ohne oder mit genau 2 Nachkommastellen ("189000", "189000,50").
+    ?rate= (Finanzierung → Cashflow) bleibt in der Adresse Maschinenschreibweise ("718.75") und
+    wird auf der Cashflow-Seite umgewandelt.
 
 ## Sicherheit und Datenschutz
 - Row Level Security auf allen Tabellen. Jede Regel wird mit Tests belegt: Nutzer A sieht nie Daten
