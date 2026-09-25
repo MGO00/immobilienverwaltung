@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { ErgebnisUngueltig } from "@/components/rechner/ergebnis-ungueltig";
+import { useZahlFeld } from "@/components/rechner/use-zahl-feld";
 import { Label } from "@/components/ui/label";
+import { ZahlInput } from "@/components/ui/zahl-input";
 import { bruttorendite, gesamtinvestition, kaufpreisfaktor, nettorendite } from "@/lib/calculators/immobilie";
 import { formatCurrency, formatPercent } from "@/lib/format";
+import { REGEL } from "@/lib/validation/zahl";
+import { formatEingabe, formatEingabeOptional } from "@/lib/zahl";
 
 type Vorbefuellung = {
   kaufpreis: number;
@@ -13,12 +16,6 @@ type Vorbefuellung = {
   kaltmieteMonat: number;
   kostenMonat: number;
 } | null;
-
-function zuZahl(wert: string): number | null {
-  if (wert.trim() === "") return null;
-  const zahl = Number(wert.replace(",", "."));
-  return Number.isFinite(zahl) ? zahl : null;
-}
 
 export function RenditeFormular({
   vorbefuellung,
@@ -29,17 +26,19 @@ export function RenditeFormular({
   immobilieId: string | null;
   interessentId?: string | null;
 }) {
-  const [kaufpreis, setKaufpreis] = useState(vorbefuellung ? String(vorbefuellung.kaufpreis) : "");
-  const [kaufnebenkosten, setKaufnebenkosten] = useState(
-    vorbefuellung?.kaufnebenkostenBetrag ? String(vorbefuellung.kaufnebenkostenBetrag) : "",
+  const kaufpreis = useZahlFeld(vorbefuellung ? formatEingabe(vorbefuellung.kaufpreis) : "", REGEL.rechnerBetrag);
+  const kaufnebenkosten = useZahlFeld(
+    vorbefuellung?.kaufnebenkostenBetrag ? formatEingabe(vorbefuellung.kaufnebenkostenBetrag) : "",
+    REGEL.rechnerBetrag,
   );
-  const [kaltmiete, setKaltmiete] = useState(vorbefuellung ? String(vorbefuellung.kaltmieteMonat) : "");
-  const [kosten, setKosten] = useState(vorbefuellung ? String(vorbefuellung.kostenMonat) : "");
+  const kaltmiete = useZahlFeld(formatEingabeOptional(vorbefuellung?.kaltmieteMonat), REGEL.rechnerBetrag);
+  const kosten = useZahlFeld(formatEingabeOptional(vorbefuellung?.kostenMonat), REGEL.rechnerBetrag);
 
-  const kaufpreisZahl = zuZahl(kaufpreis) ?? 0;
-  const kaltmieteZahl = zuZahl(kaltmiete) ?? 0;
-  const kostenZahl = zuZahl(kosten) ?? 0;
-  const kaufnebenkostenZahl = zuZahl(kaufnebenkosten);
+  const ungueltig = kaufpreis.ungueltig || kaufnebenkosten.ungueltig || kaltmiete.ungueltig || kosten.ungueltig;
+  const kaufpreisZahl = kaufpreis.wert ?? 0;
+  const kaltmieteZahl = kaltmiete.wert ?? 0;
+  const kostenZahl = kosten.wert ?? 0;
+  const kaufnebenkostenZahl = kaufnebenkosten.wert;
 
   const jahreskaltmieteWert = kaltmieteZahl * 12;
   const gesamtinvestitionWert = gesamtinvestition(kaufpreisZahl, kaufnebenkostenZahl);
@@ -58,24 +57,12 @@ export function RenditeFormular({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kaufpreis">Kaufpreis</Label>
-          <div className="flex items-center gap-1.5">
-            <Input id="kaufpreis" type="number" min={0} value={kaufpreis} onChange={(e) => setKaufpreis(e.target.value)} />
-            <span className="text-sm text-neutral-600">€</span>
-          </div>
+          <ZahlInput id="kaufpreis" einheit="€" {...kaufpreis.feld} />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kaufnebenkosten">Kaufnebenkosten</Label>
-          <div className="flex items-center gap-1.5">
-            <Input
-              id="kaufnebenkosten"
-              type="number"
-              min={0}
-              value={kaufnebenkosten}
-              onChange={(e) => setKaufnebenkosten(e.target.value)}
-            />
-            <span className="text-sm text-neutral-600">€</span>
-          </div>
+          <ZahlInput id="kaufnebenkosten" einheit="€" {...kaufnebenkosten.feld} />
           <p className="text-xs text-neutral-600">Grunderwerbsteuer, Notar, Grundbuch, Makler.</p>
           <Link href={kaufnebenkostenHref} className="self-start text-xs font-semibold text-primary hover:underline">
             Nebenkosten im Rechner Kaufnebenkosten ermitteln
@@ -84,25 +71,21 @@ export function RenditeFormular({
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kaltmiete">Kaltmiete pro Monat</Label>
-          <div className="flex items-center gap-1.5">
-            <Input id="kaltmiete" type="number" min={0} value={kaltmiete} onChange={(e) => setKaltmiete(e.target.value)} />
-            <span className="text-sm text-neutral-600">€</span>
-          </div>
+          <ZahlInput id="kaltmiete" einheit="€" {...kaltmiete.feld} />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kosten">Nicht umlagefähige Kosten pro Monat</Label>
-          <div className="flex items-center gap-1.5">
-            <Input id="kosten" type="number" min={0} value={kosten} onChange={(e) => setKosten(e.target.value)} />
-            <span className="text-sm text-neutral-600">€</span>
-          </div>
+          <ZahlInput id="kosten" einheit="€" {...kosten.feld} />
           <p className="text-xs text-neutral-600">Hausgeld-Anteil, Rücklage, Verwaltung, Versicherung.</p>
         </div>
       </div>
 
       <div className="h-fit border border-border p-4">
         <p className="text-sm font-semibold">Ergebnis</p>
-        {jahreskaltmieteWert <= 0 ? (
+        {ungueltig ? (
+          <ErgebnisUngueltig zeilen={["Bruttorendite", "Nettorendite", "Kaufpreisfaktor"]} />
+        ) : jahreskaltmieteWert <= 0 ? (
           <p className="mt-3 text-sm text-neutral-600">
             Trag eine Kaltmiete ein — ohne Mieteinnahme lässt sich keine Rendite rechnen.
           </p>

@@ -2,11 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ErgebnisUngueltig } from "@/components/rechner/ergebnis-ungueltig";
+import { useZahlFeld } from "@/components/rechner/use-zahl-feld";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ZahlInput } from "@/components/ui/zahl-input";
 import { annuitaetMonat, beleihungsauslauf, gesamtinvestition } from "@/lib/calculators/immobilie";
 import { darlehenAusEigenkapital, tilgungsplanJaehrlich, tilgungsplanMonatlich } from "@/lib/calculators/finanzierung";
 import { formatCurrency, formatPercent } from "@/lib/format";
+import { REGEL } from "@/lib/validation/zahl";
+import { formatEingabe } from "@/lib/zahl";
 
 type Vorbefuellung = {
   kaufpreis: number;
@@ -17,12 +22,6 @@ type Vorbefuellung = {
   zinsbindungJahre: string;
   startDatum: string | null;
 } | null;
-
-function zuZahl(wert: string): number | null {
-  if (wert.trim() === "") return null;
-  const zahl = Number(wert.replace(",", "."));
-  return Number.isFinite(zahl) ? zahl : null;
-}
 
 function heuteISO(): string {
   const heute = new Date();
@@ -45,33 +44,48 @@ export function FinanzierungFormular({
   immobilieId: string | null;
   interessentId?: string | null;
 }) {
-  const [kaufpreis, setKaufpreis] = useState(vorbefuellung ? String(vorbefuellung.kaufpreis) : "");
-  const [kaufnebenkosten, setKaufnebenkosten] = useState(
-    vorbefuellung?.kaufnebenkostenBetrag ? String(vorbefuellung.kaufnebenkostenBetrag) : "",
+  const kaufpreis = useZahlFeld(vorbefuellung ? formatEingabe(vorbefuellung.kaufpreis) : "", REGEL.rechnerBetrag);
+  const kaufnebenkosten = useZahlFeld(
+    vorbefuellung?.kaufnebenkostenBetrag ? formatEingabe(vorbefuellung.kaufnebenkostenBetrag) : "",
+    REGEL.rechnerBetrag,
   );
-  const [eigenkapital, setEigenkapital] = useState(
+  const eigenkapital = useZahlFeld(
     vorbefuellung?.eigenkapital !== null && vorbefuellung?.eigenkapital !== undefined
-      ? String(vorbefuellung.eigenkapital)
+      ? formatEingabe(vorbefuellung.eigenkapital)
       : "",
+    REGEL.rechnerBetrag,
   );
-  const [sollzins, setSollzins] = useState(vorbefuellung?.sollzinsProzent ? String(vorbefuellung.sollzinsProzent) : "3.5");
-  const [tilgung, setTilgung] = useState(vorbefuellung?.tilgungProzent ? String(vorbefuellung.tilgungProzent) : "2.0");
-  const [zinsbindungJahre, setZinsbindungJahre] = useState(vorbefuellung?.zinsbindungJahre ?? "10");
+  const sollzins = useZahlFeld(
+    vorbefuellung?.sollzinsProzent ? formatEingabe(vorbefuellung.sollzinsProzent) : "3,5",
+    REGEL.rechnerZins,
+  );
+  const tilgung = useZahlFeld(
+    vorbefuellung?.tilgungProzent ? formatEingabe(vorbefuellung.tilgungProzent) : "2",
+    REGEL.rechnerTilgung,
+  );
+  const zinsbindung = useZahlFeld(vorbefuellung?.zinsbindungJahre ?? "10", REGEL.zinsbindungJahre);
   const [startDatum, setStartDatum] = useState(vorbefuellung?.startDatum ?? heuteISO());
 
-  const kaufpreisZahl = zuZahl(kaufpreis) ?? 0;
-  const eigenkapitalZahl = zuZahl(eigenkapital) ?? 0;
-  const zinsZahl = zuZahl(sollzins) ?? 0;
-  const tilgungZahl = zuZahl(tilgung) ?? 0;
-  const zinsbindungJahreZahl = zuZahl(zinsbindungJahre) ?? 0;
+  const ungueltig =
+    kaufpreis.ungueltig ||
+    kaufnebenkosten.ungueltig ||
+    eigenkapital.ungueltig ||
+    sollzins.ungueltig ||
+    tilgung.ungueltig ||
+    zinsbindung.ungueltig;
+  const kaufpreisZahl = kaufpreis.wert ?? 0;
+  const eigenkapitalZahl = eigenkapital.wert ?? 0;
+  const zinsZahl = sollzins.wert ?? 0;
+  const tilgungZahl = tilgung.wert ?? 0;
+  const zinsbindungJahreZahl = zinsbindung.wert ?? 0;
 
-  const gesamtinvestitionWert = gesamtinvestition(kaufpreisZahl, zuZahl(kaufnebenkosten));
+  const gesamtinvestitionWert = gesamtinvestition(kaufpreisZahl, kaufnebenkosten.wert);
   const darlehenWert = darlehenAusEigenkapital(gesamtinvestitionWert, eigenkapitalZahl);
   const rate = annuitaetMonat(darlehenWert, zinsZahl, tilgungZahl);
   const beleihungsauslaufWert = beleihungsauslauf(darlehenWert, kaufpreisZahl);
 
   const planMonatlich =
-    darlehenWert > 0 && zinsbindungJahreZahl > 0
+    !ungueltig && darlehenWert > 0 && zinsbindungJahreZahl > 0
       ? tilgungsplanMonatlich(darlehenWert, zinsZahl, tilgungZahl, Math.round(zinsbindungJahreZahl * 12), parseDatumInput(startDatum))
       : [];
   const planJaehrlich = tilgungsplanJaehrlich(planMonatlich);
@@ -81,7 +95,8 @@ export function FinanzierungFormular({
     ? `/rechner/cashflow?immobilie=${immobilieId}`
     : interessentId
       ? `/rechner/cashflow?interessent=${interessentId}`
-      : `/rechner/cashflow?rate=${rate?.toFixed(2) ?? ""}`;
+      : // Rate in Maschinenschreibweise, die Cashflow-Seite wandelt sie für das Feld um.
+        `/rechner/cashflow?rate=${!ungueltig && rate !== null ? rate.toFixed(2) : ""}`;
 
   return (
     <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-[0.9fr_1.1fr]">
@@ -89,71 +104,35 @@ export function FinanzierungFormular({
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="kaufpreis">Kaufpreis</Label>
-            <div className="flex items-center gap-1.5">
-              <Input id="kaufpreis" type="number" min={0} value={kaufpreis} onChange={(e) => setKaufpreis(e.target.value)} />
-              <span className="text-sm text-neutral-600">€</span>
-            </div>
+            <ZahlInput id="kaufpreis" einheit="€" {...kaufpreis.feld} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="kaufnebenkosten">Kaufnebenkosten</Label>
-            <div className="flex items-center gap-1.5">
-              <Input
-                id="kaufnebenkosten"
-                type="number"
-                min={0}
-                value={kaufnebenkosten}
-                onChange={(e) => setKaufnebenkosten(e.target.value)}
-              />
-              <span className="text-sm text-neutral-600">€</span>
-            </div>
+            <ZahlInput id="kaufnebenkosten" einheit="€" {...kaufnebenkosten.feld} />
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="eigenkapital">Eigenkapital</Label>
-          <div className="flex items-center gap-1.5">
-            <Input
-              id="eigenkapital"
-              type="number"
-              min={0}
-              value={eigenkapital}
-              onChange={(e) => setEigenkapital(e.target.value)}
-            />
-            <span className="text-sm text-neutral-600">€</span>
-          </div>
+          <ZahlInput id="eigenkapital" einheit="€" {...eigenkapital.feld} />
           <p className="text-xs text-neutral-600">Banken erwarten meist mindestens die Nebenkosten.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="zins">Sollzins</Label>
-            <div className="flex items-center gap-1.5">
-              <Input id="zins" type="number" step="0.1" min={0} value={sollzins} onChange={(e) => setSollzins(e.target.value)} />
-              <span className="text-sm text-neutral-600">%</span>
-            </div>
+            <ZahlInput id="zins" einheit="%" {...sollzins.feld} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="tilgung">Anfängliche Tilgung</Label>
-            <div className="flex items-center gap-1.5">
-              <Input id="tilgung" type="number" step="0.1" min={0} value={tilgung} onChange={(e) => setTilgung(e.target.value)} />
-              <span className="text-sm text-neutral-600">%</span>
-            </div>
+            <ZahlInput id="tilgung" einheit="%" {...tilgung.feld} />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="zinsbindung">Zinsbindung</Label>
-            <div className="flex items-center gap-1.5">
-              <Input
-                id="zinsbindung"
-                type="number"
-                min={1}
-                value={zinsbindungJahre}
-                onChange={(e) => setZinsbindungJahre(e.target.value)}
-              />
-              <span className="text-sm text-neutral-600">Jahre</span>
-            </div>
+            <ZahlInput id="zinsbindung" einheit="Jahre" ganzzahl {...zinsbindung.feld} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="startdatum">Startdatum</Label>
@@ -164,7 +143,9 @@ export function FinanzierungFormular({
 
       <div className="h-fit border border-border p-4">
         <p className="text-sm font-semibold">Ergebnis</p>
-        {darlehenWert <= 0 ? (
+        {ungueltig ? (
+          <ErgebnisUngueltig zeilen={["Rate pro Monat", "Darlehen", "Restschuld nach der Zinsbindung"]} />
+        ) : darlehenWert <= 0 ? (
           <p className="mt-3 text-sm text-neutral-600">
             Mit diesem Eigenkapital ist kein Darlehen nötig — es fällt keine Rate an.
           </p>
@@ -202,7 +183,7 @@ export function FinanzierungFormular({
                 <span className="tabular-nums">{formatCurrency(planMonatlich[0]?.tilgungsanteil ?? 0, 0)}</span>
               </div>
               <div className="flex items-center justify-between border-b border-border py-2 text-sm">
-                <span className="text-neutral-600">Restschuld nach {zinsbindungJahre} Jahren</span>
+                <span className="text-neutral-600">Restschuld nach {zinsbindungJahreZahl} Jahren</span>
                 <span className="tabular-nums">{formatCurrency(planMonatlich.at(-1)?.restschuldNachher ?? 0, 0)}</span>
               </div>
               <div className="flex items-center justify-between pt-2 text-sm font-semibold">

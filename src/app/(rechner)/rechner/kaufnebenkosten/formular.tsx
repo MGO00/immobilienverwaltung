@@ -5,7 +5,9 @@ import { useState, useTransition } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { ErgebnisUngueltig } from "@/components/rechner/ergebnis-ungueltig";
+import { useZahlFeld } from "@/components/rechner/use-zahl-feld";
+import { ZahlInput } from "@/components/ui/zahl-input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { berechneKaufnebenkosten } from "@/lib/calculators/kaufnebenkosten";
@@ -18,6 +20,8 @@ import {
   bundeslandLabel,
 } from "@/lib/constants/steuersaetze";
 import { formatCurrency, formatPercent } from "@/lib/format";
+import { REGEL } from "@/lib/validation/zahl";
+import { formatEingabe } from "@/lib/zahl";
 import { kaufnebenkostenUebernehmen } from "./actions";
 
 type ImmobilieVorbefuellung = {
@@ -27,12 +31,6 @@ type ImmobilieVorbefuellung = {
   bundesland: string | null;
 } | null;
 
-function zuZahl(wert: string): number | null {
-  if (wert.trim() === "") return null;
-  const zahl = Number(wert.replace(",", "."));
-  return Number.isFinite(zahl) ? zahl : null;
-}
-
 export function KaufnebenkostenFormular({
   immobilie,
   interessent = null,
@@ -41,27 +39,28 @@ export function KaufnebenkostenFormular({
   interessent?: { kaufpreis: number; bundesland: string | null } | null;
 }) {
   const vorbefuellung = immobilie ?? interessent;
-  const [kaufpreis, setKaufpreis] = useState(vorbefuellung ? String(vorbefuellung.kaufpreis) : "");
+  const kaufpreis = useZahlFeld(vorbefuellung ? formatEingabe(vorbefuellung.kaufpreis) : "", REGEL.rechnerBetrag);
   const [bundesland, setBundesland] = useState(vorbefuellung?.bundesland ?? "");
-  const [notarProzent, setNotarProzent] = useState(String(NOTAR_PROZENT_STANDARD));
-  const [grundbuchProzent, setGrundbuchProzent] = useState(String(GRUNDBUCH_PROZENT_STANDARD));
+  const notar = useZahlFeld(formatEingabe(NOTAR_PROZENT_STANDARD), REGEL.nebenkostenProzent);
+  const grundbuch = useZahlFeld(formatEingabe(GRUNDBUCH_PROZENT_STANDARD), REGEL.nebenkostenProzent);
   const [maklerAktiv, setMaklerAktiv] = useState(true);
-  const [maklerProzent, setMaklerProzent] = useState(String(MAKLER_PROZENT_STANDARD));
+  const makler = useZahlFeld(formatEingabe(MAKLER_PROZENT_STANDARD), REGEL.nebenkostenProzent);
   const [uebernommen, setUebernommen] = useState(false);
   const [uebernehmenFehler, setUebernehmenFehler] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const kaufpreisZahl = zuZahl(kaufpreis) ?? 0;
+  const ungueltig = kaufpreis.ungueltig || notar.ungueltig || grundbuch.ungueltig || (maklerAktiv && makler.ungueltig);
+  const kaufpreisZahl = kaufpreis.wert ?? 0;
   const grunderwerbsteuerProzent = bundesland ? GRUNDERWERBSTEUER_PROZENT[bundesland] : null;
 
   const ergebnis =
-    kaufpreisZahl > 0 && grunderwerbsteuerProzent !== null
+    !ungueltig && kaufpreisZahl > 0 && grunderwerbsteuerProzent !== null
       ? berechneKaufnebenkosten(
           kaufpreisZahl,
           grunderwerbsteuerProzent,
-          zuZahl(notarProzent) ?? 0,
-          zuZahl(grundbuchProzent) ?? 0,
-          maklerAktiv ? (zuZahl(maklerProzent) ?? 0) : null,
+          notar.wert ?? 0,
+          grundbuch.wert ?? 0,
+          maklerAktiv ? (makler.wert ?? 0) : null,
         )
       : null;
 
@@ -83,10 +82,7 @@ export function KaufnebenkostenFormular({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kaufpreis">Kaufpreis</Label>
-          <div className="flex items-center gap-1.5">
-            <Input id="kaufpreis" type="number" min={0} value={kaufpreis} onChange={(e) => setKaufpreis(e.target.value)} />
-            <span className="text-sm text-neutral-600">€</span>
-          </div>
+          <ZahlInput id="kaufpreis" einheit="€" {...kaufpreis.feld} />
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -114,31 +110,11 @@ export function KaufnebenkostenFormular({
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="notar">Notar</Label>
-            <div className="flex items-center gap-1.5">
-              <Input
-                id="notar"
-                type="number"
-                step="0.1"
-                min={0}
-                value={notarProzent}
-                onChange={(e) => setNotarProzent(e.target.value)}
-              />
-              <span className="text-sm text-neutral-600">%</span>
-            </div>
+            <ZahlInput id="notar" einheit="%" {...notar.feld} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="grundbuch">Grundbuch</Label>
-            <div className="flex items-center gap-1.5">
-              <Input
-                id="grundbuch"
-                type="number"
-                step="0.1"
-                min={0}
-                value={grundbuchProzent}
-                onChange={(e) => setGrundbuchProzent(e.target.value)}
-              />
-              <span className="text-sm text-neutral-600">%</span>
-            </div>
+            <ZahlInput id="grundbuch" einheit="%" {...grundbuch.feld} />
           </div>
         </div>
 
@@ -150,17 +126,7 @@ export function KaufnebenkostenFormular({
           {maklerAktiv && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="makler">Maklerprovision</Label>
-              <div className="flex items-center gap-1.5">
-                <Input
-                  id="makler"
-                  type="number"
-                  step="0.01"
-                  min={0}
-                  value={maklerProzent}
-                  onChange={(e) => setMaklerProzent(e.target.value)}
-                />
-                <span className="text-sm text-neutral-600">%</span>
-              </div>
+              <ZahlInput id="makler" einheit="%" {...makler.feld} />
             </div>
           )}
         </div>
@@ -168,7 +134,9 @@ export function KaufnebenkostenFormular({
 
       <div className="h-fit border border-border p-4">
         <p className="text-sm font-semibold">Ergebnis</p>
-        {!ergebnis ? (
+        {ungueltig ? (
+          <ErgebnisUngueltig zeilen={["Kaufnebenkosten gesamt", "Gesamtinvestition"]} />
+        ) : !ergebnis ? (
           <p className="mt-3 text-sm text-neutral-600">
             Trag den Kaufpreis ein und wähl ein Bundesland, dann rechnet der Rechner mit.
           </p>

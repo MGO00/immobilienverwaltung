@@ -11,7 +11,8 @@ function zinsbindungJahre(kaufdatum: string | null, zinsbindungBis: string | nul
   const jahre = Math.round(
     (new Date(zinsbindungBis).getTime() - new Date(kaufdatum).getTime()) / (365.25 * 24 * 60 * 60 * 1000),
   );
-  return jahre > 0 ? String(jahre) : "10";
+  // 1–40 Jahre wie im Eingabefeld (REGEL.zinsbindungJahre), sonst der Standard.
+  return jahre > 0 && jahre <= 40 ? String(jahre) : "10";
 }
 
 export const metadata = rechnerMetadata("finanzierung");

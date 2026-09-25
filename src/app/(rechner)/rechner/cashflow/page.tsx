@@ -6,6 +6,14 @@ import { getInteressent } from "@/lib/data/interessenten";
 import { createClient } from "@/lib/supabase/server";
 import { CashflowFormular } from "./formular";
 import { rechnerMetadata } from "@/lib/seo/rechner";
+import { formatEingabe } from "@/lib/zahl";
+
+// ?rate= kommt vom Finanzierungs-Rechner in Maschinenschreibweise ("718.75", siehe
+// toFixed(2) dort). Für das Eingabefeld in deutsche Schreibweise umwandeln; alles
+// andere wird ignoriert statt als unverständlicher Text im Feld zu landen.
+function rateAusUrl(rate: string | undefined): string {
+  return rate && /^\d+(\.\d+)?$/.test(rate) ? formatEingabe(Number(rate)) : "";
+}
 
 export const metadata = rechnerMetadata("cashflow");
 
@@ -29,7 +37,7 @@ export default async function CashflowPage({
     kostenMonat: "",
     ruecklageMonat: "",
     verwaltungMonat: "",
-    rateMonat: rateParam ?? "",
+    rateMonat: rateAusUrl(rateParam),
   };
   let darlehenKontext: { darlehenBetrag: number | null; sollzinsProzent: number | null } | null = null;
 
@@ -45,11 +53,11 @@ export default async function CashflowPage({
         kosten.filter((k) => typen.includes(k.typ)).reduce((s, k) => s + k.betragMonat, 0);
       const rate = annuitaetMonat(immobilie.darlehenBetrag, immobilie.sollzinsProzent, immobilie.tilgungProzent);
       initial = {
-        kaltmieteMonat: String(kaltmieteMonatVermietet(einheiten)),
-        kostenMonat: String(summeNachTyp(["hausgeld", "grundsteuer", "versicherung", "instandhaltung"])),
-        ruecklageMonat: String(summeNachTyp(["instandhaltungsruecklage"])),
-        verwaltungMonat: String(summeNachTyp(["verwaltung_sonstiges"])),
-        rateMonat: rate !== null ? String(rate) : "",
+        kaltmieteMonat: formatEingabe(kaltmieteMonatVermietet(einheiten)),
+        kostenMonat: formatEingabe(summeNachTyp(["hausgeld", "grundsteuer", "versicherung", "instandhaltung"])),
+        ruecklageMonat: formatEingabe(summeNachTyp(["instandhaltungsruecklage"])),
+        verwaltungMonat: formatEingabe(summeNachTyp(["verwaltung_sonstiges"])),
+        rateMonat: rate !== null ? formatEingabe(rate) : "",
       };
       darlehenKontext = { darlehenBetrag: immobilie.darlehenBetrag, sollzinsProzent: immobilie.sollzinsProzent };
     }
@@ -67,8 +75,8 @@ export default async function CashflowPage({
       const rate = annuitaetMonat(interessent.darlehenBetrag, interessent.sollzinsProzent, interessent.tilgungProzent);
       initial = {
         ...initial,
-        kaltmieteMonat: interessent.kaltmieteMonat !== null ? String(interessent.kaltmieteMonat) : "",
-        rateMonat: rate !== null ? String(rate) : "",
+        kaltmieteMonat: interessent.kaltmieteMonat !== null ? formatEingabe(interessent.kaltmieteMonat) : "",
+        rateMonat: rate !== null ? formatEingabe(rate) : "",
       };
       darlehenKontext = { darlehenBetrag: interessent.darlehenBetrag, sollzinsProzent: interessent.sollzinsProzent };
     }
