@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { beispielrechnungKaufnebenkosten } from "@/lib/start/beispielrechnung";
 import { formatCurrency } from "@/lib/format";
+import { rechnerAnzahl, rechnerAufzaehlung } from "@/lib/rechner/liste";
 
 // Prozentsätze wie im Design: "3,5 %", "2,0 %", "3,57 %", "9,07 %".
 const satzFormat = new Intl.NumberFormat("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 2 });
@@ -23,8 +24,8 @@ export function Hero() {
           Rechne deine Immobilie durch, bevor du unterschreibst.
         </h1>
         <p className="mt-4 max-w-[520px] text-[17px] leading-[1.55] text-neutral-800 text-pretty">
-          Vier kostenlose Rechner für Kaufnebenkosten, Rendite, Finanzierung und Cashflow. Mit Konto speicherst du
-          deine Objekte und behältst Mieten, Kosten und Darlehen an einem Ort im Blick.
+          {rechnerAnzahl(true)} kostenlose Rechner für {rechnerAufzaehlung()}. Mit Konto speicherst du deine Objekte
+          und behältst Mieten, Kosten und Darlehen an einem Ort im Blick.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Button asChild className="h-10 whitespace-nowrap">

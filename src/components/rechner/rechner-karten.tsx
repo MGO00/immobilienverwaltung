@@ -1,38 +1,13 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-export const RECHNER = [
-  {
-    nr: "01",
-    slug: "kaufnebenkosten",
-    titel: "Kaufnebenkosten",
-    beschreibung: "Grunderwerbsteuer, Notar, Grundbuch und Makler auf einen Blick.",
-  },
-  {
-    nr: "02",
-    slug: "rendite",
-    titel: "Rendite",
-    beschreibung: "Brutto- und Nettorendite sowie Kaufpreisfaktor.",
-  },
-  {
-    nr: "03",
-    slug: "finanzierung",
-    titel: "Finanzierung",
-    beschreibung: "Annuität, Beleihungsauslauf und Tilgungsplan.",
-  },
-  {
-    nr: "04",
-    slug: "cashflow",
-    titel: "Cashflow",
-    beschreibung: "Miete, laufende Kosten und Finanzierung zusammen.",
-  },
-] as const;
+import { RECHNER_LISTE } from "@/lib/rechner/liste";
 
 export function RechnerKarten({ immobilieId, interessentId }: { immobilieId?: string; interessentId?: string }) {
   return (
     <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-      {RECHNER.map((rechner) => {
+      {/* Beim Interessenten nur Rechner, die ohne Mietvertrag Sinn ergeben (nicht: Mieterhöhung). */}
+      {RECHNER_LISTE.filter((rechner) => !interessentId || rechner.mitInteressent).map((rechner) => {
         const href = immobilieId
           ? `/rechner/${rechner.slug}?immobilie=${immobilieId}`
           : interessentId
@@ -47,7 +22,7 @@ export function RechnerKarten({ immobilieId, interessentId }: { immobilieId?: st
               </Badge>
             </div>
             <p className="mt-2 font-semibold">{rechner.titel}</p>
-            <p className="mt-1 text-sm text-neutral-600">{rechner.beschreibung}</p>
+            <p className="mt-1 text-sm text-neutral-600">{rechner.karte}</p>
             <Button asChild variant="outline" className="mt-3">
               <Link href={href}>Rechner öffnen</Link>
             </Button>

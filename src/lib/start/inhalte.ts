@@ -4,32 +4,15 @@
 // "Weitere Fälle, Startseite"). Mit [Platzhalter] markierte Texte müssen vor dem
 // Livegang durch echte Angaben ersetzt werden (CLAUDE.md, "Vor der Veröffentlichung").
 
-export const START_RECHNER = [
-  {
-    nr: "01",
-    titel: "Kaufnebenkosten",
-    text: "Grunderwerbsteuer nach Bundesland, Notar, Grundbuch und Makler in Euro.",
-    href: "/rechner/kaufnebenkosten",
-  },
-  {
-    nr: "02",
-    titel: "Rendite",
-    text: "Brutto- und Nettorendite sowie Kaufpreisfaktor aus Miete und Gesamtkosten.",
-    href: "/rechner/rendite",
-  },
-  {
-    nr: "03",
-    titel: "Finanzierung",
-    text: "Annuität, Restschuld am Ende der Zinsbindung und Tilgungsplan pro Jahr.",
-    href: "/rechner/finanzierung",
-  },
-  {
-    nr: "04",
-    titel: "Cashflow",
-    text: "Miete minus Rate und laufende Kosten, monatlich und auf das Jahr gerechnet.",
-    href: "/rechner/cashflow",
-  },
-] as const;
+import { RECHNER_LISTE } from "@/lib/rechner/liste";
+
+// Kacheln der Startseite: aus der einen Rechnerliste (src/lib/rechner/liste.ts), Texte dort.
+export const START_RECHNER = RECHNER_LISTE.map((rechner) => ({
+  nr: rechner.nr,
+  titel: rechner.titel,
+  text: rechner.start,
+  href: `/rechner/${rechner.slug}`,
+}));
 
 export const START_SCHRITTE = [
   {

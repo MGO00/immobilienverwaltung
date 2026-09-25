@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { rechnerAnzahl, rechnerAufzaehlung } from "@/lib/rechner/liste";
 
 // Solange das Impressum nicht fertig ist (Meilenstein 5), sollen Suchmaschinen
 // die öffentlichen Rechnerseiten nicht aufnehmen. Zum Freischalten nur diesen
@@ -19,8 +20,7 @@ const MARKE = "Immobilienverwaltung";
 const SEITEN: Record<RechnerSeite, { title: string; description: string }> = {
   uebersicht: {
     title: `Immobilien-Rechner kostenlos | ${MARKE}`,
-    description:
-      "Kaufnebenkosten, Rendite, Finanzierung mit Tilgungsplan und Cashflow: vier kostenlose Immobilien-Rechner für Privatvermieter und Kapitalanleger in Deutschland.",
+    description: `${rechnerAufzaehlung()}: ${rechnerAnzahl()} kostenlose Immobilien-Rechner für Privatvermieter und Kapitalanleger in Deutschland.`,
   },
   kaufnebenkosten: {
     title: `Kaufnebenkosten-Rechner: Grunderwerbsteuer, Notar, Makler | ${MARKE}`,
@@ -53,8 +53,7 @@ export function rechnerMetadata(seite: RechnerSeite): Metadata {
 export function startseiteMetadata(): Metadata {
   return {
     title: `Immobilien-Rechner und Verwaltung für private Vermieter | ${MARKE}`,
-    description:
-      "Vier kostenlose Rechner für Kaufnebenkosten, Rendite, Finanzierung und Cashflow. Mit Konto speicherst du deine Immobilien und behältst Mieten, Kosten und Darlehen im Blick.",
+    description: `${rechnerAnzahl(true)} kostenlose Rechner für ${rechnerAufzaehlung()}. Mit Konto speicherst du deine Immobilien und behältst Mieten, Kosten und Darlehen im Blick.`,
     robots: RECHNER_ROBOTS,
   };
 }

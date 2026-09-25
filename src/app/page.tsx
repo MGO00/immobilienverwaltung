@@ -8,6 +8,7 @@ import { Hero } from "@/components/start/hero";
 import { NewsletterKarte } from "@/components/start/newsletter-karte";
 import { PublicHeader } from "@/components/shell/public-header";
 import { newsletterKonfiguriert } from "@/lib/newsletter/konfiguration";
+import { rechnerAnzahl } from "@/lib/rechner/liste";
 import { startseiteMetadata } from "@/lib/seo/rechner";
 import { START_FAQ, START_FAQ_KONTAKT, START_RECHNER, START_SCHRITTE } from "@/lib/start/inhalte";
 
@@ -28,10 +29,10 @@ export default function StartPage() {
 
         <Abschnitt id="rechner">
           <AbschnittKopf
-            titel="Vier Rechner, ohne Anmeldung"
+            titel={`${rechnerAnzahl(true)} Rechner, ohne Anmeldung`}
             text="Jeder Rechner funktioniert für sich. Ergebnisse des Kaufnebenkosten-Rechners kannst du mit Konto direkt einer Immobilie zuordnen."
           />
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-4 lg:grid-cols-5">
             {START_RECHNER.map((rechner) => (
               <Link
                 key={rechner.nr}
