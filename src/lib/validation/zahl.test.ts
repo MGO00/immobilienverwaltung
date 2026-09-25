@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { kaufpreisRegel, pflichtZahlFeld, pruefeZahl, REGEL, ZAHL_MELDUNG, zahlFeld } from "./zahl";
+import { kaufpreisRegel, pflichtZahlFeld, pruefeZahl, REGEL, ZAHL_MELDUNG, zahlFehler, zahlFeld, zahlWert } from "./zahl";
 
 const meldung = (text: string, regel: Parameters<typeof pruefeZahl>[1]) => {
   const ergebnis = pruefeZahl(text, regel);
@@ -83,6 +83,15 @@ describe("zahlFeld / pflichtZahlFeld (Zod)", () => {
 
     const leer = pflichtZahlFeld(kaufpreisRegel("Kaufpreis fehlt.")).safeParse("");
     expect(leer.error?.issues[0]?.message).toBe("Kaufpreis fehlt.");
+  });
+
+  it("liefert für die Formulare Meldung bzw. Wert aus demselben Schema", () => {
+    const zins = zahlFeld(REGEL.zins);
+    expect(zahlFehler(zins, "1.500")).toBe("Der Zins darf höchstens 20 % betragen.");
+    expect(zahlFehler(zins, "3,5")).toBeNull();
+    expect(zahlWert(zins, "3,5")).toBe(3.5);
+    expect(zahlWert(zins, "1.500")).toBeNull();
+    expect(zahlWert(zins, "")).toBeNull();
   });
 
   it("nimmt keine Zahlen, nur Text an", () => {

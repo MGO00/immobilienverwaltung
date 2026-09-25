@@ -36,7 +36,7 @@ import {
   type EinheitStatus,
   type ObjektArt,
 } from "@/lib/validation/immobilie";
-import { zahlFehler } from "@/lib/validation/zahl";
+import { zahlFehler, zahlWert } from "@/lib/validation/zahl";
 import { parseDeZahl } from "@/lib/zahl";
 import { erstelleImmobilie } from "./actions";
 
@@ -133,6 +133,7 @@ export function ImmobilienAssistent() {
   const istMfh = state.art === "mehrfamilienhaus";
   const istHaus = state.art === "einfamilienhaus";
   const kostenFelder = state.art ? laufendeKostenFelder(state.art) : [];
+  const Z = ZAHLENFELDER_IMMOBILIE;
 
   function pruefeSchritt(nr: 1 | 2 | 3): Record<string, string> {
     const neueFehler: Record<string, string> = {};
@@ -141,7 +142,6 @@ export function ImmobilienAssistent() {
       const meldung = zahlFehler(schema, text);
       if (meldung) neueFehler[schluessel] = meldung;
     };
-    const Z = ZAHLENFELDER_IMMOBILIE;
     if (nr === 1) {
       if (!state.art) neueFehler.art = "Wähl eine Objektart.";
       if (!state.bezeichnung.trim()) neueFehler.bezeichnung = "Gib der Immobilie eine Bezeichnung.";
@@ -254,29 +254,35 @@ export function ImmobilienAssistent() {
     }
   }
 
-  const kaufpreisZahl = parseDeZahl(state.kaufpreis) ?? 0;
+  // Die Vorschau rechnet nur mit gültigen Werten (dieselben Regeln wie beim Speichern),
+  // nie z. B. mit einem abgelehnten Zins von 1.500 %.
+  const kaufpreisZahl = zahlWert(Z.kaufpreis, state.kaufpreis) ?? 0;
   const bruttorenditeZahl = bruttorendite(
     (istMfh
       ? state.einheiten
           .filter((e) => e.status === "vermietet")
           .reduce((s, e) => s + (parseDeZahl(e.kaltmieteMonat) ?? 0), 0)
       : state.status === "vermietet"
-        ? (parseDeZahl(state.kaltmieteMonat) ?? 0)
+        ? (zahlWert(Z.kaltmieteMonat, state.kaltmieteMonat) ?? 0)
         : 0) * 12,
     kaufpreisZahl,
   );
   const annuitaetZahl = state.ohneFinanzierung
     ? null
-    : annuitaetMonat(parseDeZahl(state.darlehenBetrag), parseDeZahl(state.sollzinsProzent), parseDeZahl(state.tilgungProzent));
+    : annuitaetMonat(
+        zahlWert(Z.darlehenBetrag, state.darlehenBetrag),
+        zahlWert(Z.sollzinsProzent, state.sollzinsProzent),
+        zahlWert(Z.tilgungProzent, state.tilgungProzent),
+      );
   const kaltmieteFuerCashflow = istMfh
     ? state.einheiten
         .filter((e) => e.status === "vermietet")
         .reduce((s, e) => s + (parseDeZahl(e.kaltmieteMonat) ?? 0), 0)
     : state.status === "vermietet"
-      ? (parseDeZahl(state.kaltmieteMonat) ?? 0)
+      ? (zahlWert(Z.kaltmieteMonat, state.kaltmieteMonat) ?? 0)
       : 0;
   const laufendeKostenSumme = Object.values(state.laufendeKosten).reduce(
-    (s, wert) => s + (parseDeZahl(wert) ?? 0),
+    (s, wert) => s + (zahlWert(kostenPostenFeld, wert) ?? 0),
     0,
   );
   const cashflowZahl = cashflowMonat(kaltmieteFuerCashflow, annuitaetZahl, laufendeKostenSumme);

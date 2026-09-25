@@ -71,6 +71,12 @@ export function zahlFehler(schema: z.ZodType<unknown, string>, text: string): st
   return ergebnis.success ? null : (ergebnis.error.issues[0]?.message ?? ZAHL_MELDUNG.ungueltig);
 }
 
+/** Wert eines Zahlenfeld-Schemas für einen Feldinhalt; null, wenn leer oder ungültig. */
+export function zahlWert(schema: z.ZodType<number | null, string>, text: string): number | null {
+  const ergebnis = schema.safeParse(text);
+  return ergebnis.success ? ergebnis.data : null;
+}
+
 /** Optionales Zahlenfeld für Zod: Text rein, number | null raus. */
 export function zahlFeld(regel: ZahlRegel) {
   return z.string().transform((text, ctx): number | null => {
