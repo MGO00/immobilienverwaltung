@@ -3,7 +3,9 @@ import { START_RECHNER } from "@/lib/start/inhalte";
 type RechnerTitel = (typeof START_RECHNER)[number]["titel"];
 
 // Glossar laut Handoff Runde 4, Schritt 2 (fachlich geprüft, wortgleich
-// übernehmen, nicht umformulieren).
+// übernehmen, nicht umformulieren). Die vier Begriffe zur Mieterhöhung (Indexmiete,
+// Kappungsgrenze, Mietspiegel, Ortsübliche Vergleichsmiete) kamen mit Rechner 05 dazu
+// und stehen noch auf der Liste "fachlich prüfen lassen" (CLAUDE.md).
 export const GLOSSAR: ReadonlyArray<{ begriff: string; text: string; rechner: RechnerTitel }> = [
   { begriff: "Beleihungsauslauf", text: "Anteil des Kaufpreises, der über ein Darlehen finanziert wird.", rechner: "Finanzierung" },
   { begriff: "Bruttorendite", text: "Jahreskaltmiete geteilt durch den Kaufpreis, ohne Kosten abzuziehen.", rechner: "Rendite" },
@@ -31,6 +33,26 @@ export const GLOSSAR: ReadonlyArray<{ begriff: string; text: string; rechner: Re
     begriff: "Zinsbindung",
     text: "Der Zeitraum, für den der vereinbarte Zinssatz eines Darlehens fest steht.",
     rechner: "Finanzierung",
+  },
+  {
+    begriff: "Indexmiete",
+    text: "Eine Miete, die sich nach dem Verbraucherpreisindex des Statistischen Bundesamts richtet. Angepasst wird höchstens einmal im Jahr; eine Erhöhung nach Mietspiegel ist dann ausgeschlossen.",
+    rechner: "Mieterhöhung",
+  },
+  {
+    begriff: "Kappungsgrenze",
+    text: "Obergrenze für Erhöhungen bis zur ortsüblichen Vergleichsmiete: In drei Jahren darf die Miete um höchstens 20 % steigen, in Gebieten mit angespanntem Wohnungsmarkt um höchstens 15 %.",
+    rechner: "Mieterhöhung",
+  },
+  {
+    begriff: "Mietspiegel",
+    text: "Übersicht der ortsüblichen Vergleichsmieten einer Gemeinde, eingeteilt nach Baujahr, Größe, Lage und Ausstattung. Er gibt tatsächlich gezahlte Mieten wieder, keine Angebotspreise.",
+    rechner: "Mieterhöhung",
+  },
+  {
+    begriff: "Ortsübliche Vergleichsmiete",
+    text: "Die Miete, die in der Gemeinde für vergleichbare Wohnungen in den letzten sechs Jahren üblicherweise vereinbart oder geändert wurde. Bis zu ihr darf die Miete nach § 558 BGB erhöht werden.",
+    rechner: "Mieterhöhung",
   },
 ];
 

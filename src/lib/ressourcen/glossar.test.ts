@@ -4,19 +4,33 @@ import { GLOSSAR, glossarGruppen, glossarId } from "./glossar";
 import { RESSOURCEN_KARTEN } from "./inhalte";
 
 describe("Glossar", () => {
-  it("hat sieben Einträge in den Gruppen B, K, N, T, Z", () => {
-    expect(GLOSSAR).toHaveLength(7);
+  it("hat elf Einträge in den Gruppen B, I, K, M, N, O, T, Z", () => {
+    expect(GLOSSAR).toHaveLength(11);
     const gruppen = glossarGruppen();
-    expect(gruppen.map((g) => g.buchstabe)).toEqual(["B", "K", "N", "T", "Z"]);
+    expect(gruppen.map((g) => g.buchstabe)).toEqual(["B", "I", "K", "M", "N", "O", "T", "Z"]);
     expect(gruppen.flatMap((g) => g.eintraege.map((e) => e.begriff))).toEqual([
       "Beleihungsauslauf",
       "Bruttorendite",
+      "Indexmiete",
+      "Kappungsgrenze",
       "Kaufpreisfaktor",
+      "Mietspiegel",
       "Nettorendite",
       "Nicht umlagefähige Kosten",
+      "Ortsübliche Vergleichsmiete",
       "Tilgung",
       "Zinsbindung",
     ]);
+  });
+
+  it("verlinkt die Begriffe zur Mieterhöhung auf Rechner 05", () => {
+    const eintraege = glossarGruppen().flatMap((g) => g.eintraege);
+    for (const begriff of ["Indexmiete", "Kappungsgrenze", "Mietspiegel", "Ortsübliche Vergleichsmiete"]) {
+      const eintrag = eintraege.find((e) => e.begriff === begriff);
+      expect(eintrag?.href).toBe("/rechner/mieterhoehung");
+      expect(eintrag?.linkText).toBe("Zum Rechner 05 · Mieterhöhung");
+    }
+    expect(glossarId("Ortsübliche Vergleichsmiete")).toBe("glossar-ortsuebliche-vergleichsmiete");
   });
 
   it("vergibt eindeutige Anker-IDs ohne Umlaute", () => {
@@ -37,6 +51,6 @@ describe("Glossar", () => {
   });
 
   it("zählt die Werte auf den Ressourcen-Karten aus den Daten", () => {
-    expect(RESSOURCEN_KARTEN.map((k) => k.meta)).toEqual(["Tabelle · 16 Bundesländer", "Glossar · 7 Begriffe"]);
+    expect(RESSOURCEN_KARTEN.map((k) => k.meta)).toEqual(["Tabelle · 16 Bundesländer", "Glossar · 11 Begriffe"]);
   });
 });
