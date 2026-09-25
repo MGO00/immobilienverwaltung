@@ -56,6 +56,35 @@ Dokumente und weitere Rechner.
   - `npx supabase test db` — führt die Datenbank-Tests aus (pgTAP, supabase/tests/database/),
     braucht einen laufenden lokalen Supabase-Stack (`npx supabase start`, benötigt Docker)
 
+## Deployment (Stand 24.09.2026)
+- Vercel-Projekt "immobilienverwaltung", verbunden mit GitHub `MGO00/immobilienverwaltung`. Jeder
+  Push auf `main` wird automatisch als Production veröffentlicht, andere Branches als Preview.
+  Adresse: https://immobilienverwaltung-fawn.vercel.app (noch keine eigene Domain).
+- Region der Server-Funktionen: Frankfurt (`fra1`), festgelegt in vercel.json (Hobby-Tarif: genau
+  eine Region), passend zur Supabase-Region. Ohne diese Datei liefen sie in Washington (`iad1`).
+- Zugriffsschutz: Vercel Authentication mit Umfang "All Deployments" (Production UND Preview),
+  kostenlos auf allen Tarifen. Nur angemeldete Vercel-Nutzer mit Zugriff auf das Projekt sehen die
+  App; alle anderen landen auf der Vercel-Anmeldung. NICHT "Standard Protection" wählen — die lässt
+  die Production-Adresse offen. Zusätzlich bleibt noindex aktiv (siehe Bekannte künftige
+  Änderungen); die Seiten werden nicht beworben.
+- Umgebungsvariablen auf Vercel: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+  `NEXT_PUBLIC_SITE_URL` (= Vercel-Adresse, ohne "/" am Ende) für Production und Preview;
+  `SUPABASE_SECRET_KEY` nur für Production und als "Sensitive" (in Previews ist die Kontolöschung
+  daher nicht verfügbar). `SMTP_*` und `MAIL_FROM` bewusst nicht gesetzt, die E-Mail-Liste ist aus.
+  `NEXT_PUBLIC_*`-Werte werden beim Bauen fest eingebaut: nach einer Änderung neu deployen.
+  `siteUrl()` (src/lib/site-url.ts) bricht im Produktions-Build ohne `NEXT_PUBLIC_SITE_URL` mit
+  einem Fehler ab, statt Mails mit localhost-Links zu verschicken.
+- Supabase, Authentication → URL Configuration: Site URL = Vercel-Adresse; Redirect URLs =
+  `https://immobilienverwaltung-fawn.vercel.app/auth/confirm**` und `http://localhost:3000/**`
+  (lokale Entwicklung). Links aus Bestätigungs- und Reset-Mails laufen immer über /auth/confirm;
+  das Ziel `next` wird dort geprüft (nur eigene Pfade, src/lib/weiterleitung.ts).
+- Lokal und auf Vercel wird dasselbe Supabase-Projekt genutzt: lokale Testdaten sind auch online
+  sichtbar und umgekehrt. Migrationen werden weiterhin aus dem Repository eingespielt; vor einem
+  Deployment mit neuer Migration prüfen, dass sie im Supabase-Projekt angekommen ist
+  (`npx supabase migration list`).
+- Mail-Links funktionieren nur im selben Browser, in dem Registrierung bzw. Reset angefordert
+  wurden (Anmeldung per Code-Austausch), und im geschützten Betrieb nur nach Vercel-Anmeldung.
+
 ## Design
 - Quelle: docs/design/. Für die App (alles hinter der Anmeldung) gilt runde-2 als neueste Runde bei
   Widersprüchen. Was in deren README fehlt (Komponenten-Zuordnung zu shadcn/ui, Tailwind-Mapping,
@@ -484,6 +513,12 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   Liste unter "Vor der Veröffentlichung".
 
 ## Vor der Veröffentlichung (nicht vergessen)
+- Vercel-Zugriffsschutz ("All Deployments", siehe Deployment) erst abschalten, wenn Impressum,
+  Datenschutzerklärung und AGB veröffentlicht sind — die Impressumspflicht entsteht mit der
+  öffentlichen Erreichbarkeit. Danach erst, mit ausdrücklicher Freigabe, die Indexierung
+  (`RECHNER_INDEXIERBAR`) einschalten.
+- Eigenes Supabase-Projekt für den Betrieb prüfen (bisher teilen sich lokale Entwicklung und Vercel
+  ein Projekt samt Daten).
 - Vercel: Der Hobby-Tarif ist nur für nicht-kommerzielle Nutzung erlaubt. Vor dem Livegang mit
   Abos auf Pro wechseln.
 - Impressum, Datenschutzerklärung und AGB. Auftragsverarbeitungsverträge mit Supabase und Vercel.
@@ -492,8 +527,8 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
 - Kontolöschung (DSGVO-Pflicht, Recht auf Löschung): technisch gelöst (Funktion in den
   Einstellungen, siehe Sicherheit und Datenschutz). Noch offen: (a) Beschreibung in der
   Datenschutzerklärung (was gelöscht wird, dass ein Eintrag in der E-Mail-Liste separat bleibt,
-  Backups/Aufbewahrung bei Supabase); (b) `SUPABASE_SECRET_KEY` auf Vercel eintragen, sonst ist die
-  Funktion im Livebetrieb nicht verfügbar.
+  Backups/Aufbewahrung bei Supabase). Erledigt: `SUPABASE_SECRET_KEY` ist auf Vercel (Production)
+  eingetragen, die Löschung wurde dort am 24.09.2026 erfolgreich getestet.
 - Anmelde-Limit von Supabase prüfen und bei Bedarf erhöhen (Supabase-Dashboard, Authentication →
   Rate Limits, "sign-ins and sign-ups"; lokal 30 pro 5 Minuten und IP). Anmeldung und die Prüfung
   des aktuellen Passworts beim Passwortwechsel laufen über Server Actions, also vom Server aus;
@@ -521,8 +556,8 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
   nie überschreiben.
 - Eigenen Mailversand (SMTP) für Supabase Auth einrichten (z. B. über Resend, Postmark oder
   SendGrid) und im Supabase-Dashboard unter Authentication > SMTP Settings eintragen. Der
-  eingebaute Mailversand ist auf wenige E-Mails pro Stunde begrenzt und nur für die Entwicklung
-  gedacht, nicht für den echten Betrieb.
+  eingebaute Mailversand ist auf wenige E-Mails pro Stunde begrenzt (beim Test am 24.09.2026 nach
+  zwei Mails erschöpft) und nur für die Entwicklung gedacht, nicht für den echten Betrieb.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
