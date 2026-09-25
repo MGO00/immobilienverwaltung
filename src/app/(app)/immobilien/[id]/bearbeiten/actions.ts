@@ -3,7 +3,12 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { einheitStatusSchema, objektArtSchema } from "@/lib/validation/immobilie";
+import {
+  einheitStatusSchema,
+  laufendeKostenSchema,
+  objektArtSchema,
+  ZAHLENFELDER_IMMOBILIE,
+} from "@/lib/validation/immobilie";
 import { z } from "zod";
 import { BUNDESLAENDER } from "@/lib/constants/steuersaetze";
 import { FOTO_BUCKET } from "@/lib/supabase/foto";
@@ -16,25 +21,20 @@ const bearbeitenSchema = z.object({
   plz: z.string().nullable(),
   ort: z.string().nullable(),
   bundesland: z.enum(BUNDESLAENDER as unknown as [string, ...string[]]).nullable(),
-  baujahr: z.number().int().gt(1000).nullable(),
-  grundstuecksflaecheQm: z.number().min(0).nullable(),
-  wohnflaecheQm: z.number().min(0).nullable(),
+  // Zahlenfelder als Text, eingelesen wie im Browser (src/lib/validation/zahl.ts).
+  ...ZAHLENFELDER_IMMOBILIE,
   kaufdatum: z.string().nullable(),
-  kaufpreis: z.number().gt(0, "Trag den Kaufpreis ein — ohne ihn lässt sich keine Rendite rechnen."),
-  kaufnebenkostenBetrag: z.number().min(0).nullable(),
   ohneFinanzierung: z.boolean(),
-  darlehenBetrag: z.number().min(0).nullable(),
-  sollzinsProzent: z.number().min(0).nullable(),
-  tilgungProzent: z.number().min(0).nullable(),
   zinsbindungBis: z.string().nullable(),
-  kaltmieteMonat: z.number().min(0).nullable(),
   status: einheitStatusSchema.nullable(),
-  laufendeKosten: z.record(z.string(), z.number().min(0)),
+  laufendeKosten: laufendeKostenSchema,
 });
 
 export type BearbeitenState = { error?: string };
 
-export async function immobilieAktualisieren(eingabe: z.infer<typeof bearbeitenSchema>): Promise<BearbeitenState> {
+export type BearbeitenEingabe = z.input<typeof bearbeitenSchema>;
+
+export async function immobilieAktualisieren(eingabe: BearbeitenEingabe): Promise<BearbeitenState> {
   const parsed = bearbeitenSchema.safeParse(eingabe);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Bitte prüf deine Eingaben." };

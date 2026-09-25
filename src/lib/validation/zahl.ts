@@ -62,6 +62,15 @@ export function pruefeZahl(text: string, regel: ZahlRegel): ZahlPruefung {
   return { ok: true, wert: zahl.wert };
 }
 
+/**
+ * Meldung eines Zahlenfeld-Schemas für einen Feldinhalt (null = in Ordnung). Die
+ * Formulare prüfen damit im Browser mit genau dem Schema, das auch der Server nutzt.
+ */
+export function zahlFehler(schema: z.ZodType<unknown, string>, text: string): string | null {
+  const ergebnis = schema.safeParse(text);
+  return ergebnis.success ? null : (ergebnis.error.issues[0]?.message ?? ZAHL_MELDUNG.ungueltig);
+}
+
 /** Optionales Zahlenfeld für Zod: Text rein, number | null raus. */
 export function zahlFeld(regel: ZahlRegel) {
   return z.string().transform((text, ctx): number | null => {

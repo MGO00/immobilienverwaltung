@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BUNDESLAENDER } from "@/lib/constants/steuersaetze";
+import { kaufpreisRegel, pflichtZahlFeld, REGEL, zahlFeld } from "@/lib/validation/zahl";
 
 export const objektArtSchema = z.enum(["eigentumswohnung", "einfamilienhaus", "mehrfamilienhaus"]);
 export type ObjektArt = z.infer<typeof objektArtSchema>;
@@ -7,14 +8,37 @@ export type ObjektArt = z.infer<typeof objektArtSchema>;
 export const einheitStatusSchema = z.enum(["vermietet", "selbstgenutzt", "leer"]);
 export type EinheitStatus = z.infer<typeof einheitStatusSchema>;
 
+// Zahlenfelder kommen als Text, genau wie eingetippt, und werden mit denselben
+// Regeln eingelesen wie im Browser (src/lib/validation/zahl.ts).
+export const KAUFPREIS_MELDUNG = "Trag den Kaufpreis ein — ohne ihn lässt sich keine Rendite rechnen.";
+
+export const ZAHLENFELDER_IMMOBILIE = {
+  baujahr: zahlFeld(REGEL.baujahr),
+  grundstuecksflaecheQm: zahlFeld(REGEL.flaeche),
+  wohnflaecheQm: zahlFeld(REGEL.flaeche),
+  kaufpreis: pflichtZahlFeld(kaufpreisRegel(KAUFPREIS_MELDUNG)),
+  kaufnebenkostenBetrag: zahlFeld(REGEL.betrag),
+  darlehenBetrag: zahlFeld(REGEL.betrag),
+  sollzinsProzent: zahlFeld(REGEL.zins),
+  tilgungProzent: zahlFeld(REGEL.tilgung),
+  kaltmieteMonat: zahlFeld(REGEL.betrag),
+};
+
+/** Einheit: leere Kaltmiete zählt als 0 (Datenbank: not null default 0). */
+export const ZAHLENFELDER_EINHEIT = {
+  flaecheQm: zahlFeld(REGEL.flaeche),
+  kaltmieteMonat: zahlFeld(REGEL.betrag).transform((wert) => wert ?? 0),
+};
+
 const einheitEingabeSchema = z.object({
   name: z.string().min(1, "Bitte eine Bezeichnung für die Einheit angeben."),
-  flaecheQm: z.number().min(0).nullable(),
-  kaltmieteMonat: z.number().min(0, "Die Kaltmiete darf nicht negativ sein."),
+  ...ZAHLENFELDER_EINHEIT,
   status: einheitStatusSchema,
 });
 
-const laufendeKostenSchema = z.record(z.string(), z.number().min(0));
+/** Ein Posten der laufenden Kosten; leer zählt als 0 und wird nicht gespeichert. */
+export const kostenPostenFeld = zahlFeld(REGEL.betrag).transform((wert) => wert ?? 0);
+export const laufendeKostenSchema = z.record(z.string(), kostenPostenFeld);
 
 export const immobilieSchema = z
   .object({
@@ -24,18 +48,10 @@ export const immobilieSchema = z
     plz: z.string().nullable(),
     ort: z.string().nullable(),
     bundesland: z.enum(BUNDESLAENDER as unknown as [string, ...string[]]).nullable(),
-    baujahr: z.number().int().gt(1000).nullable(),
-    grundstuecksflaecheQm: z.number().min(0).nullable(),
-    wohnflaecheQm: z.number().min(0).nullable(),
+    ...ZAHLENFELDER_IMMOBILIE,
     kaufdatum: z.string().nullable(),
-    kaufpreis: z.number().gt(0, "Trag den Kaufpreis ein — ohne ihn lässt sich keine Rendite rechnen."),
-    kaufnebenkostenBetrag: z.number().min(0).nullable(),
     ohneFinanzierung: z.boolean(),
-    darlehenBetrag: z.number().min(0).nullable(),
-    sollzinsProzent: z.number().min(0).nullable(),
-    tilgungProzent: z.number().min(0).nullable(),
     zinsbindungBis: z.string().nullable(),
-    kaltmieteMonat: z.number().min(0).nullable(),
     status: einheitStatusSchema.nullable(),
     einheiten: z.array(einheitEingabeSchema),
     laufendeKosten: laufendeKostenSchema,
@@ -50,7 +66,8 @@ export const immobilieSchema = z
     }
   });
 
-export type ImmobilieEingabe = z.infer<typeof immobilieSchema>;
+/** Eingabe aus dem Formular (Zahlenfelder als Text). */
+export type ImmobilieEingabe = z.input<typeof immobilieSchema>;
 
 export const notizSchema = z.object({
   text: z.string().min(1, "Die Notiz darf nicht leer sein."),

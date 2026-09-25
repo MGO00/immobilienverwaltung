@@ -25,11 +25,19 @@ import {
 import { EinheitDialog, type EinheitFormWert } from "@/components/immobilie/einheit-dialog";
 import { FotoUpload } from "@/components/immobilie/foto-upload";
 import { StatusPille } from "@/components/immobilie/status-pille";
-import { formatCurrency } from "@/lib/format";
+import { ZahlInput } from "@/components/ui/zahl-input";
+import { formatArea, formatCurrency } from "@/lib/format";
 import { BUNDESLAENDER, bundeslandLabel } from "@/lib/constants/steuersaetze";
 import { laufendeKostenFelder, LAUFENDE_KOSTEN_LABEL } from "@/lib/constants/laufende-kosten";
 import { annuitaetMonat, bruttorendite, cashflowMonat } from "@/lib/calculators/immobilie";
-import type { EinheitStatus, ObjektArt } from "@/lib/validation/immobilie";
+import {
+  kostenPostenFeld,
+  ZAHLENFELDER_IMMOBILIE,
+  type EinheitStatus,
+  type ObjektArt,
+} from "@/lib/validation/immobilie";
+import { zahlFehler } from "@/lib/validation/zahl";
+import { parseDeZahl } from "@/lib/zahl";
 import { erstelleImmobilie } from "./actions";
 
 type ObjektArtOption = { wert: ObjektArt; label: string; hinweis: string };
@@ -90,13 +98,26 @@ const LEER: WizardState = {
   foto: null,
 };
 
-function zuZahl(wert: string): number | null {
-  if (wert.trim() === "") return null;
-  const zahl = Number(wert.replace(",", "."));
-  return Number.isFinite(zahl) ? zahl : null;
-}
-
 const SCHRITT_LABEL = ["1 · Objekt", "2 · Kauf und Finanzierung", "3 · Miete und Kosten"];
+
+// Feldnamen für die Fehlerübersicht oben ("Zins: Bitte eine Zahl eingeben …").
+const FELD_NAME: Record<string, string> = {
+  baujahr: "Baujahr",
+  wohnflaecheQm: "Wohnfläche",
+  grundstuecksflaecheQm: "Grundstücksfläche",
+  kaufpreis: "Kaufpreis",
+  kaufnebenkostenBetrag: "Kaufnebenkosten",
+  darlehenBetrag: "Darlehen",
+  sollzinsProzent: "Zins",
+  tilgungProzent: "Tilgung",
+  kaltmieteMonat: "Kaltmiete",
+  ...Object.fromEntries(Object.entries(LAUFENDE_KOSTEN_LABEL).map(([typ, label]) => [`kosten-${typ}`, label])),
+};
+
+function flaecheText(text: string): string {
+  const flaeche = parseDeZahl(text);
+  return flaeche ? formatArea(flaeche) : "—";
+}
 
 export function ImmobilienAssistent() {
   const router = useRouter();
@@ -111,25 +132,44 @@ export function ImmobilienAssistent() {
 
   const istMfh = state.art === "mehrfamilienhaus";
   const istHaus = state.art === "einfamilienhaus";
+  const kostenFelder = state.art ? laufendeKostenFelder(state.art) : [];
 
   function pruefeSchritt(nr: 1 | 2 | 3): Record<string, string> {
     const neueFehler: Record<string, string> = {};
+    // Zahlenfelder mit genau den Schemas prüfen, die auch der Server nutzt.
+    const zahl = (schluessel: string, schema: Parameters<typeof zahlFehler>[0], text: string) => {
+      const meldung = zahlFehler(schema, text);
+      if (meldung) neueFehler[schluessel] = meldung;
+    };
+    const Z = ZAHLENFELDER_IMMOBILIE;
     if (nr === 1) {
       if (!state.art) neueFehler.art = "Wähl eine Objektart.";
       if (!state.bezeichnung.trim()) neueFehler.bezeichnung = "Gib der Immobilie eine Bezeichnung.";
+      zahl("baujahr", Z.baujahr, state.baujahr);
+      if (!istMfh) zahl("wohnflaecheQm", Z.wohnflaecheQm, state.wohnflaecheQm);
+      if (istHaus) zahl("grundstuecksflaecheQm", Z.grundstuecksflaecheQm, state.grundstuecksflaecheQm);
     }
     if (nr === 2) {
-      const kaufpreis = zuZahl(state.kaufpreis);
-      if (!kaufpreis || kaufpreis <= 0) {
-        neueFehler.kaufpreis = "Trag den Kaufpreis ein — ohne ihn lässt sich keine Rendite rechnen.";
+      zahl("kaufpreis", Z.kaufpreis, state.kaufpreis);
+      zahl("kaufnebenkostenBetrag", Z.kaufnebenkostenBetrag, state.kaufnebenkostenBetrag);
+      if (!state.ohneFinanzierung) {
+        zahl("darlehenBetrag", Z.darlehenBetrag, state.darlehenBetrag);
+        zahl("sollzinsProzent", Z.sollzinsProzent, state.sollzinsProzent);
+        zahl("tilgungProzent", Z.tilgungProzent, state.tilgungProzent);
       }
     }
     if (nr === 3) {
       if (istMfh) {
         if (state.einheiten.length === 0) neueFehler.einheiten = "Leg mindestens eine Einheit an.";
       } else {
-        const kaltmiete = zuZahl(state.kaltmieteMonat);
-        if (!kaltmiete || kaltmiete <= 0) neueFehler.kaltmieteMonat = "Trag die Kaltmiete ein.";
+        zahl("kaltmieteMonat", Z.kaltmieteMonat, state.kaltmieteMonat);
+        const kaltmiete = parseDeZahl(state.kaltmieteMonat);
+        if (!neueFehler.kaltmieteMonat && (!kaltmiete || kaltmiete <= 0)) {
+          neueFehler.kaltmieteMonat = "Trag die Kaltmiete ein.";
+        }
+      }
+      for (const typ of kostenFelder) {
+        zahl(`kosten-${typ}`, kostenPostenFeld, state.laufendeKosten[typ] ?? "");
       }
     }
     return neueFehler;
@@ -147,10 +187,12 @@ export function ImmobilienAssistent() {
 
     setSpeichernFehler(null);
     startTransition(async () => {
-      const laufendeKosten: Record<string, number> = {};
-      for (const [typ, wert] of Object.entries(state.laufendeKosten)) {
-        const zahl = zuZahl(wert);
-        if (zahl && zahl > 0) laufendeKosten[typ] = zahl;
+      // Zahlenfelder gehen als Text an den Server und werden dort mit denselben
+      // Regeln eingelesen (src/lib/validation/zahl.ts). Nicht passende Felder leer.
+      const laufendeKosten: Record<string, string> = {};
+      for (const typ of kostenFelder) {
+        const text = (state.laufendeKosten[typ] ?? "").trim();
+        if (text) laufendeKosten[typ] = text;
       }
 
       let fotoFormData: FormData | null = null;
@@ -167,24 +209,24 @@ export function ImmobilienAssistent() {
           plz: state.plz.trim() || null,
           ort: state.ort.trim() || null,
           bundesland: state.bundesland || null,
-          baujahr: zuZahl(state.baujahr),
-          grundstuecksflaecheQm: istHaus ? zuZahl(state.grundstuecksflaecheQm) : null,
-          wohnflaecheQm: !istMfh ? zuZahl(state.wohnflaecheQm) : null,
+          baujahr: state.baujahr,
+          grundstuecksflaecheQm: istHaus ? state.grundstuecksflaecheQm : "",
+          wohnflaecheQm: !istMfh ? state.wohnflaecheQm : "",
           kaufdatum: state.kaufdatum || null,
-          kaufpreis: zuZahl(state.kaufpreis) ?? 0,
-          kaufnebenkostenBetrag: zuZahl(state.kaufnebenkostenBetrag),
+          kaufpreis: state.kaufpreis,
+          kaufnebenkostenBetrag: state.kaufnebenkostenBetrag,
           ohneFinanzierung: state.ohneFinanzierung,
-          darlehenBetrag: zuZahl(state.darlehenBetrag),
-          sollzinsProzent: zuZahl(state.sollzinsProzent),
-          tilgungProzent: zuZahl(state.tilgungProzent),
+          darlehenBetrag: state.ohneFinanzierung ? "" : state.darlehenBetrag,
+          sollzinsProzent: state.ohneFinanzierung ? "" : state.sollzinsProzent,
+          tilgungProzent: state.ohneFinanzierung ? "" : state.tilgungProzent,
           zinsbindungBis: state.zinsbindungBis || null,
-          kaltmieteMonat: !istMfh ? zuZahl(state.kaltmieteMonat) : null,
+          kaltmieteMonat: !istMfh ? state.kaltmieteMonat : "",
           status: !istMfh ? state.status : null,
           einheiten: istMfh
             ? state.einheiten.map((e) => ({
                 name: e.name,
-                flaecheQm: zuZahl(e.flaecheQm),
-                kaltmieteMonat: zuZahl(e.kaltmieteMonat) ?? 0,
+                flaecheQm: e.flaecheQm,
+                kaltmieteMonat: e.kaltmieteMonat,
                 status: e.status,
               }))
             : [],
@@ -212,34 +254,32 @@ export function ImmobilienAssistent() {
     }
   }
 
-  const kaufpreisZahl = zuZahl(state.kaufpreis) ?? 0;
+  const kaufpreisZahl = parseDeZahl(state.kaufpreis) ?? 0;
   const bruttorenditeZahl = bruttorendite(
     (istMfh
       ? state.einheiten
           .filter((e) => e.status === "vermietet")
-          .reduce((s, e) => s + (zuZahl(e.kaltmieteMonat) ?? 0), 0)
+          .reduce((s, e) => s + (parseDeZahl(e.kaltmieteMonat) ?? 0), 0)
       : state.status === "vermietet"
-        ? (zuZahl(state.kaltmieteMonat) ?? 0)
+        ? (parseDeZahl(state.kaltmieteMonat) ?? 0)
         : 0) * 12,
     kaufpreisZahl,
   );
   const annuitaetZahl = state.ohneFinanzierung
     ? null
-    : annuitaetMonat(zuZahl(state.darlehenBetrag), zuZahl(state.sollzinsProzent), zuZahl(state.tilgungProzent));
+    : annuitaetMonat(parseDeZahl(state.darlehenBetrag), parseDeZahl(state.sollzinsProzent), parseDeZahl(state.tilgungProzent));
   const kaltmieteFuerCashflow = istMfh
     ? state.einheiten
         .filter((e) => e.status === "vermietet")
-        .reduce((s, e) => s + (zuZahl(e.kaltmieteMonat) ?? 0), 0)
+        .reduce((s, e) => s + (parseDeZahl(e.kaltmieteMonat) ?? 0), 0)
     : state.status === "vermietet"
-      ? (zuZahl(state.kaltmieteMonat) ?? 0)
+      ? (parseDeZahl(state.kaltmieteMonat) ?? 0)
       : 0;
   const laufendeKostenSumme = Object.values(state.laufendeKosten).reduce(
-    (s, wert) => s + (zuZahl(wert) ?? 0),
+    (s, wert) => s + (parseDeZahl(wert) ?? 0),
     0,
   );
   const cashflowZahl = cashflowMonat(kaltmieteFuerCashflow, annuitaetZahl, laufendeKostenSumme);
-
-  const kostenFelder = state.art ? laufendeKostenFelder(state.art) : [];
 
   return (
     <div className="px-6 py-8">
@@ -270,11 +310,15 @@ export function ImmobilienAssistent() {
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-error" />
           <div className="text-[13px] text-error">
             <p className="font-semibold">
-              {Object.keys(fehler).length === 1 ? "Ein Feld fehlt noch" : `Es fehlen noch ${Object.keys(fehler).length} Angaben`}
+              {Object.keys(fehler).length === 1
+                ? "Bitte prüf diese Angabe"
+                : `Bitte prüf diese ${Object.keys(fehler).length} Angaben`}
             </p>
             <ul className="mt-1 list-disc pl-4">
-              {Object.values(fehler).map((text) => (
-                <li key={text}>{text}</li>
+              {Object.entries(fehler).map(([schluessel, text]) => (
+                <li key={schluessel}>
+                  {FELD_NAME[schluessel] ? `${FELD_NAME[schluessel]}: ${text}` : text}
+                </li>
               ))}
             </ul>
           </div>
@@ -365,26 +409,24 @@ export function ImmobilienAssistent() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="baujahr">Baujahr (optional)</Label>
-                  <Input
+                  <ZahlInput
                     id="baujahr"
-                    type="number"
+                    ganzzahl
                     value={state.baujahr}
-                    onChange={(e) => setState({ ...state, baujahr: e.target.value })}
+                    onChange={(baujahr) => setState({ ...state, baujahr })}
+                    fehler={fehler.baujahr}
                   />
                 </div>
                 {!istMfh && (
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="wohnflaeche">Wohnfläche (optional)</Label>
-                    <div className="flex items-center gap-1.5">
-                      <Input
-                        id="wohnflaeche"
-                        type="number"
-                        min={0}
-                        value={state.wohnflaecheQm}
-                        onChange={(e) => setState({ ...state, wohnflaecheQm: e.target.value })}
-                      />
-                      <span className="text-sm text-neutral-600">m²</span>
-                    </div>
+                    <ZahlInput
+                      id="wohnflaeche"
+                      einheit="m²"
+                      value={state.wohnflaecheQm}
+                      onChange={(wohnflaecheQm) => setState({ ...state, wohnflaecheQm })}
+                      fehler={fehler.wohnflaecheQm}
+                    />
                   </div>
                 )}
               </div>
@@ -398,16 +440,13 @@ export function ImmobilienAssistent() {
               {istHaus && (
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="grundstuecksflaeche">Grundstücksfläche (optional)</Label>
-                  <div className="flex items-center gap-1.5">
-                    <Input
-                      id="grundstuecksflaeche"
-                      type="number"
-                      min={0}
-                      value={state.grundstuecksflaecheQm}
-                      onChange={(e) => setState({ ...state, grundstuecksflaecheQm: e.target.value })}
-                    />
-                    <span className="text-sm text-neutral-600">m²</span>
-                  </div>
+                  <ZahlInput
+                    id="grundstuecksflaeche"
+                    einheit="m²"
+                    value={state.grundstuecksflaecheQm}
+                    onChange={(grundstuecksflaecheQm) => setState({ ...state, grundstuecksflaecheQm })}
+                    fehler={fehler.grundstuecksflaecheQm}
+                  />
                 </div>
               )}
 
@@ -428,32 +467,25 @@ export function ImmobilienAssistent() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="kaufpreis">Kaufpreis</Label>
-                  <div className="flex items-center gap-1.5">
-                    <Input
-                      id="kaufpreis"
-                      type="number"
-                      min={0}
-                      value={state.kaufpreis}
-                      onChange={(e) => setState({ ...state, kaufpreis: e.target.value })}
-                      aria-invalid={Boolean(fehler.kaufpreis)}
-                    />
-                    <span className="text-sm text-neutral-600">€</span>
-                  </div>
+                  <ZahlInput
+                    id="kaufpreis"
+                    einheit="€"
+                    value={state.kaufpreis}
+                    onChange={(kaufpreis) => setState({ ...state, kaufpreis })}
+                    fehler={fehler.kaufpreis}
+                  />
                 </div>
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="kaufnebenkosten">Kaufnebenkosten (optional)</Label>
-                <div className="flex items-center gap-1.5">
-                  <Input
-                    id="kaufnebenkosten"
-                    type="number"
-                    min={0}
-                    value={state.kaufnebenkostenBetrag}
-                    onChange={(e) => setState({ ...state, kaufnebenkostenBetrag: e.target.value })}
-                  />
-                  <span className="text-sm text-neutral-600">€</span>
-                </div>
+                <ZahlInput
+                  id="kaufnebenkosten"
+                  einheit="€"
+                  value={state.kaufnebenkostenBetrag}
+                  onChange={(kaufnebenkostenBetrag) => setState({ ...state, kaufnebenkostenBetrag })}
+                  fehler={fehler.kaufnebenkostenBetrag}
+                />
                 <Link
                   href="/rechner/kaufnebenkosten"
                   target="_blank"
@@ -476,16 +508,13 @@ export function ImmobilienAssistent() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="darlehen">Darlehen</Label>
-                      <div className="flex items-center gap-1.5">
-                        <Input
-                          id="darlehen"
-                          type="number"
-                          min={0}
-                          value={state.darlehenBetrag}
-                          onChange={(e) => setState({ ...state, darlehenBetrag: e.target.value })}
-                        />
-                        <span className="text-sm text-neutral-600">€</span>
-                      </div>
+                      <ZahlInput
+                        id="darlehen"
+                        einheit="€"
+                        value={state.darlehenBetrag}
+                        onChange={(darlehenBetrag) => setState({ ...state, darlehenBetrag })}
+                        fehler={fehler.darlehenBetrag}
+                      />
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="zinsbindung">Zinsbindung bis</Label>
@@ -500,31 +529,23 @@ export function ImmobilienAssistent() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="zins">Zins</Label>
-                      <div className="flex items-center gap-1.5">
-                        <Input
-                          id="zins"
-                          type="number"
-                          step="0.1"
-                          min={0}
-                          value={state.sollzinsProzent}
-                          onChange={(e) => setState({ ...state, sollzinsProzent: e.target.value })}
-                        />
-                        <span className="text-sm text-neutral-600">%</span>
-                      </div>
+                      <ZahlInput
+                        id="zins"
+                        einheit="%"
+                        value={state.sollzinsProzent}
+                        onChange={(sollzinsProzent) => setState({ ...state, sollzinsProzent })}
+                        fehler={fehler.sollzinsProzent}
+                      />
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <Label htmlFor="tilgung">Tilgung</Label>
-                      <div className="flex items-center gap-1.5">
-                        <Input
-                          id="tilgung"
-                          type="number"
-                          step="0.1"
-                          min={0}
-                          value={state.tilgungProzent}
-                          onChange={(e) => setState({ ...state, tilgungProzent: e.target.value })}
-                        />
-                        <span className="text-sm text-neutral-600">%</span>
-                      </div>
+                      <ZahlInput
+                        id="tilgung"
+                        einheit="%"
+                        value={state.tilgungProzent}
+                        onChange={(tilgungProzent) => setState({ ...state, tilgungProzent })}
+                        fehler={fehler.tilgungProzent}
+                      />
                     </div>
                   </div>
                 </>
@@ -555,17 +576,13 @@ export function ImmobilienAssistent() {
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="kaltmiete">Kaltmiete pro Monat</Label>
-                    <div className="flex items-center gap-1.5">
-                      <Input
-                        id="kaltmiete"
-                        type="number"
-                        min={0}
-                        value={state.kaltmieteMonat}
-                        onChange={(e) => setState({ ...state, kaltmieteMonat: e.target.value })}
-                        aria-invalid={Boolean(fehler.kaltmieteMonat)}
-                      />
-                      <span className="text-sm text-neutral-600">€</span>
-                    </div>
+                    <ZahlInput
+                      id="kaltmiete"
+                      einheit="€"
+                      value={state.kaltmieteMonat}
+                      onChange={(kaltmieteMonat) => setState({ ...state, kaltmieteMonat })}
+                      fehler={fehler.kaltmieteMonat}
+                    />
                     {state.status !== "vermietet" && (
                       <p className="text-xs text-neutral-600">
                         Gilt als Soll-Miete und zählt erst zur Jahreskaltmiete, wenn die Einheit vermietet ist.
@@ -580,7 +597,7 @@ export function ImmobilienAssistent() {
                   <div className="flex items-baseline justify-between">
                     <p className="text-sm font-semibold">
                       Einheiten — {state.einheiten.length} angelegt ·{" "}
-                      {formatCurrency(state.einheiten.reduce((s, e) => s + (zuZahl(e.kaltmieteMonat) ?? 0), 0))}{" "}
+                      {formatCurrency(state.einheiten.reduce((s, e) => s + (parseDeZahl(e.kaltmieteMonat) ?? 0), 0))}{" "}
                       Kaltmiete
                     </p>
                     <Button
@@ -613,8 +630,8 @@ export function ImmobilienAssistent() {
                         {state.einheiten.map((e, i) => (
                           <tr key={i} className="border-b border-border">
                             <td className="py-2">{e.name}</td>
-                            <td className="py-2 tabular-nums">{e.flaecheQm ? `${e.flaecheQm} m²` : "—"}</td>
-                            <td className="py-2 tabular-nums">{formatCurrency(zuZahl(e.kaltmieteMonat) ?? 0)}</td>
+                            <td className="py-2 tabular-nums">{flaecheText(e.flaecheQm)}</td>
+                            <td className="py-2 tabular-nums">{formatCurrency(parseDeZahl(e.kaltmieteMonat) ?? 0)}</td>
                             <td className="py-2">
                               <StatusPille status={e.status} />
                             </td>
@@ -647,21 +664,18 @@ export function ImmobilienAssistent() {
                   {kostenFelder.map((typ) => (
                     <div key={typ} className="flex flex-col gap-1.5">
                       <Label htmlFor={`kosten-${typ}`}>{LAUFENDE_KOSTEN_LABEL[typ]}</Label>
-                      <div className="flex items-center gap-1.5">
-                        <Input
-                          id={`kosten-${typ}`}
-                          type="number"
-                          min={0}
-                          value={state.laufendeKosten[typ] ?? ""}
-                          onChange={(e) =>
-                            setState({
-                              ...state,
-                              laufendeKosten: { ...state.laufendeKosten, [typ]: e.target.value },
-                            })
-                          }
-                        />
-                        <span className="text-sm text-neutral-600">€</span>
-                      </div>
+                      <ZahlInput
+                        id={`kosten-${typ}`}
+                        einheit="€"
+                        value={state.laufendeKosten[typ] ?? ""}
+                        onChange={(wert) =>
+                          setState({
+                            ...state,
+                            laufendeKosten: { ...state.laufendeKosten, [typ]: wert },
+                          })
+                        }
+                        fehler={fehler[`kosten-${typ}`]}
+                      />
                     </div>
                   ))}
                 </div>

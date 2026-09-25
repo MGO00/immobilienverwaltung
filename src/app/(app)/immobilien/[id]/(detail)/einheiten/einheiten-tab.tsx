@@ -6,7 +6,8 @@ import { AlertCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EinheitDialog, type EinheitFormWert } from "@/components/immobilie/einheit-dialog";
 import { StatusPille } from "@/components/immobilie/status-pille";
-import { formatCurrency } from "@/lib/format";
+import { formatArea, formatCurrency } from "@/lib/format";
+import { formatEingabe, formatEingabeOptional } from "@/lib/zahl";
 import { leerstandsquote, wohnflaecheGesamt } from "@/lib/calculators/immobilie";
 import type { EinheitZeile } from "@/lib/data/immobilie-detail";
 import type { ObjektArt } from "@/lib/validation/immobilie";
@@ -36,8 +37,9 @@ export function EinheitenTab({
       const payload = {
         propertyId,
         name: wert.name,
-        flaecheQm: wert.flaecheQm.trim() === "" ? null : Number(wert.flaecheQm),
-        kaltmieteMonat: Number(wert.kaltmieteMonat || 0),
+        // Als Text, eingelesen auf dem Server mit denselben Regeln wie im Dialog.
+        flaecheQm: wert.flaecheQm,
+        kaltmieteMonat: wert.kaltmieteMonat,
         status: wert.status,
       };
       const ergebnis = bearbeiteteId
@@ -101,7 +103,7 @@ export function EinheitenTab({
               <dl className="mt-3 flex flex-col gap-1.5 text-sm">
                 <div className="flex justify-between">
                   <dt className="text-neutral-600">Fläche</dt>
-                  <dd className="tabular-nums">{einheit.flaecheQm ? `${einheit.flaecheQm} m²` : "—"}</dd>
+                  <dd className="tabular-nums">{einheit.flaecheQm ? formatArea(einheit.flaecheQm) : "—"}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-neutral-600">Kaltmiete</dt>
@@ -156,8 +158,8 @@ export function EinheitenTab({
           bearbeitete
             ? {
                 name: bearbeitete.name,
-                flaecheQm: bearbeitete.flaecheQm?.toString() ?? "",
-                kaltmieteMonat: bearbeitete.kaltmieteMonat.toString(),
+                flaecheQm: formatEingabeOptional(bearbeitete.flaecheQm),
+                kaltmieteMonat: formatEingabe(bearbeitete.kaltmieteMonat),
                 status: bearbeitete.status,
               }
             : undefined

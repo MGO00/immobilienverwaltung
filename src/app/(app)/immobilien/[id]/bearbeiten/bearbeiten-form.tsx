@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { ZahlInput } from "@/components/ui/zahl-input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -23,17 +24,14 @@ import {
 } from "@/components/ui/select";
 import { BUNDESLAENDER, bundeslandLabel } from "@/lib/constants/steuersaetze";
 import { laufendeKostenFelder, LAUFENDE_KOSTEN_LABEL } from "@/lib/constants/laufende-kosten";
+import { kostenPostenFeld, ZAHLENFELDER_IMMOBILIE } from "@/lib/validation/immobilie";
+import { zahlFehler } from "@/lib/validation/zahl";
+import { formatEingabe, formatEingabeOptional } from "@/lib/zahl";
 import { OBJEKTART_LABEL } from "@/lib/constants/objektart";
 import { FotoUpload } from "@/components/immobilie/foto-upload";
 import type { EinheitZeile, ImmobilieDetail, LaufenderKostenZeile } from "@/lib/data/immobilie-detail";
 import type { EinheitStatus } from "@/lib/validation/immobilie";
 import { immobilieAktualisieren, immobilieLoeschen } from "./actions";
-
-function zuZahl(wert: string): number | null {
-  if (wert.trim() === "") return null;
-  const zahl = Number(wert.replace(",", "."));
-  return Number.isFinite(zahl) ? zahl : null;
-}
 
 export function BearbeitenForm({
   immobilie,
@@ -52,32 +50,33 @@ export function BearbeitenForm({
   const [plz, setPlz] = useState(immobilie.plz ?? "");
   const [ort, setOrt] = useState(immobilie.ort ?? "");
   const [bundesland, setBundesland] = useState(immobilie.bundesland ?? "");
-  const [baujahr, setBaujahr] = useState(immobilie.baujahr?.toString() ?? "");
-  const [wohnflaecheQm, setWohnflaecheQm] = useState(einheit?.flaecheQm?.toString() ?? "");
+  const [baujahr, setBaujahr] = useState(formatEingabeOptional(immobilie.baujahr));
+  const [wohnflaecheQm, setWohnflaecheQm] = useState(formatEingabeOptional(einheit?.flaecheQm));
   const [grundstuecksflaecheQm, setGrundstuecksflaecheQm] = useState(
-    immobilie.grundstuecksflaecheQm?.toString() ?? "",
+    formatEingabeOptional(immobilie.grundstuecksflaecheQm),
   );
   const [kaufdatum, setKaufdatum] = useState(immobilie.kaufdatum ?? "");
-  const [kaufpreis, setKaufpreis] = useState(immobilie.kaufpreis.toString());
+  const [kaufpreis, setKaufpreis] = useState(formatEingabe(immobilie.kaufpreis));
   const [kaufnebenkostenBetrag, setKaufnebenkostenBetrag] = useState(
-    immobilie.kaufnebenkostenBetrag?.toString() ?? "",
+    formatEingabeOptional(immobilie.kaufnebenkostenBetrag),
   );
   const [ohneFinanzierung, setOhneFinanzierung] = useState(!immobilie.darlehenBetrag);
-  const [darlehenBetrag, setDarlehenBetrag] = useState(immobilie.darlehenBetrag?.toString() ?? "");
-  const [sollzinsProzent, setSollzinsProzent] = useState(immobilie.sollzinsProzent?.toString() ?? "");
-  const [tilgungProzent, setTilgungProzent] = useState(immobilie.tilgungProzent?.toString() ?? "");
+  const [darlehenBetrag, setDarlehenBetrag] = useState(formatEingabeOptional(immobilie.darlehenBetrag));
+  const [sollzinsProzent, setSollzinsProzent] = useState(formatEingabeOptional(immobilie.sollzinsProzent));
+  const [tilgungProzent, setTilgungProzent] = useState(formatEingabeOptional(immobilie.tilgungProzent));
   const [zinsbindungBis, setZinsbindungBis] = useState(immobilie.zinsbindungBis ?? "");
   const [status, setStatus] = useState<EinheitStatus>(einheit?.status ?? "leer");
-  const [kaltmieteMonat, setKaltmieteMonat] = useState(einheit?.kaltmieteMonat.toString() ?? "");
+  const [kaltmieteMonat, setKaltmieteMonat] = useState(formatEingabeOptional(einheit?.kaltmieteMonat));
   const [kostenState, setKostenState] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     for (const posten of laufendeKosten) {
-      initial[posten.typ] = posten.betragMonat.toString();
+      initial[posten.typ] = formatEingabe(posten.betragMonat);
     }
     return initial;
   });
 
   const [fehler, setFehler] = useState<string | null>(null);
+  const [feldFehler, setFeldFehler] = useState<Record<string, string>>({});
   const [pending, startTransition] = useTransition();
   const [loeschenOffen, setLoeschenOffen] = useState(false);
   const [loeschFehler, setLoeschFehler] = useState<string | null>(null);
@@ -87,10 +86,44 @@ export function BearbeitenForm({
 
   function speichern() {
     setFehler(null);
-    const laufendeKostenPayload: Record<string, number> = {};
+
+    // Zahlenfelder mit genau den Schemas prüfen, die auch der Server nutzt.
+    const Z = ZAHLENFELDER_IMMOBILIE;
+    const pruefungen: [string, Parameters<typeof zahlFehler>[0], string][] = [
+      ["baujahr", Z.baujahr, baujahr],
+      ["kaufpreis", Z.kaufpreis, kaufpreis],
+      ["kaufnebenkostenBetrag", Z.kaufnebenkostenBetrag, kaufnebenkostenBetrag],
+      ...Object.entries(kostenState).map(
+        ([typ, wert]): [string, Parameters<typeof zahlFehler>[0], string] => [`kosten-${typ}`, kostenPostenFeld, wert],
+      ),
+    ];
+    if (!istMfh) {
+      pruefungen.push(["wohnflaecheQm", Z.wohnflaecheQm, wohnflaecheQm], ["kaltmieteMonat", Z.kaltmieteMonat, kaltmieteMonat]);
+    }
+    if (istHaus) pruefungen.push(["grundstuecksflaecheQm", Z.grundstuecksflaecheQm, grundstuecksflaecheQm]);
+    if (!ohneFinanzierung) {
+      pruefungen.push(
+        ["darlehenBetrag", Z.darlehenBetrag, darlehenBetrag],
+        ["sollzinsProzent", Z.sollzinsProzent, sollzinsProzent],
+        ["tilgungProzent", Z.tilgungProzent, tilgungProzent],
+      );
+    }
+    const neueFeldFehler: Record<string, string> = {};
+    for (const [schluessel, schema, text] of pruefungen) {
+      const meldung = zahlFehler(schema, text);
+      if (meldung) neueFeldFehler[schluessel] = meldung;
+    }
+    setFeldFehler(neueFeldFehler);
+    if (Object.keys(neueFeldFehler).length > 0) {
+      setFehler("Bitte prüf die markierten Felder.");
+      return;
+    }
+
+    // Zahlenfelder gehen als Text an den Server und werden dort mit denselben
+    // Regeln eingelesen. Leere Kostenposten werden nicht mitgeschickt.
+    const laufendeKostenPayload: Record<string, string> = {};
     for (const [typ, wert] of Object.entries(kostenState)) {
-      const zahl = zuZahl(wert);
-      if (zahl && zahl > 0) laufendeKostenPayload[typ] = zahl;
+      if (wert.trim()) laufendeKostenPayload[typ] = wert.trim();
     }
 
     startTransition(async () => {
@@ -102,18 +135,18 @@ export function BearbeitenForm({
         plz: plz.trim() || null,
         ort: ort.trim() || null,
         bundesland: bundesland || null,
-        baujahr: zuZahl(baujahr),
-        grundstuecksflaecheQm: istHaus ? zuZahl(grundstuecksflaecheQm) : null,
-        wohnflaecheQm: !istMfh ? zuZahl(wohnflaecheQm) : null,
+        baujahr,
+        grundstuecksflaecheQm: istHaus ? grundstuecksflaecheQm : "",
+        wohnflaecheQm: !istMfh ? wohnflaecheQm : "",
         kaufdatum: kaufdatum || null,
-        kaufpreis: zuZahl(kaufpreis) ?? 0,
-        kaufnebenkostenBetrag: zuZahl(kaufnebenkostenBetrag),
+        kaufpreis,
+        kaufnebenkostenBetrag,
         ohneFinanzierung,
-        darlehenBetrag: zuZahl(darlehenBetrag),
-        sollzinsProzent: zuZahl(sollzinsProzent),
-        tilgungProzent: zuZahl(tilgungProzent),
+        darlehenBetrag: ohneFinanzierung ? "" : darlehenBetrag,
+        sollzinsProzent: ohneFinanzierung ? "" : sollzinsProzent,
+        tilgungProzent: ohneFinanzierung ? "" : tilgungProzent,
         zinsbindungBis: zinsbindungBis || null,
-        kaltmieteMonat: !istMfh ? zuZahl(kaltmieteMonat) : null,
+        kaltmieteMonat: !istMfh ? kaltmieteMonat : "",
         status: !istMfh ? status : null,
         laufendeKosten: laufendeKostenPayload,
       });
@@ -203,21 +236,18 @@ export function BearbeitenForm({
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="baujahr">Baujahr</Label>
-            <Input id="baujahr" type="number" value={baujahr} onChange={(e) => setBaujahr(e.target.value)} />
+            <ZahlInput id="baujahr" ganzzahl value={baujahr} onChange={setBaujahr} fehler={feldFehler.baujahr} />
           </div>
           {!istMfh && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="wohnflaeche">Wohnfläche</Label>
-              <div className="flex items-center gap-1.5">
-                <Input
-                  id="wohnflaeche"
-                  type="number"
-                  min={0}
-                  value={wohnflaecheQm}
-                  onChange={(e) => setWohnflaecheQm(e.target.value)}
-                />
-                <span className="text-sm text-neutral-600">m²</span>
-              </div>
+              <ZahlInput
+                id="wohnflaeche"
+                einheit="m²"
+                value={wohnflaecheQm}
+                onChange={setWohnflaecheQm}
+                fehler={feldFehler.wohnflaecheQm}
+              />
             </div>
           )}
         </div>
@@ -229,16 +259,13 @@ export function BearbeitenForm({
         {istHaus && (
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="grundstuecksflaeche">Grundstücksfläche</Label>
-            <div className="flex items-center gap-1.5">
-              <Input
-                id="grundstuecksflaeche"
-                type="number"
-                min={0}
-                value={grundstuecksflaecheQm}
-                onChange={(e) => setGrundstuecksflaecheQm(e.target.value)}
-              />
-              <span className="text-sm text-neutral-600">m²</span>
-            </div>
+            <ZahlInput
+              id="grundstuecksflaeche"
+              einheit="m²"
+              value={grundstuecksflaecheQm}
+              onChange={setGrundstuecksflaecheQm}
+              fehler={feldFehler.grundstuecksflaecheQm}
+            />
           </div>
         )}
       </div>
@@ -252,24 +279,18 @@ export function BearbeitenForm({
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="kaufpreis">Kaufpreis</Label>
-            <div className="flex items-center gap-1.5">
-              <Input id="kaufpreis" type="number" min={0} value={kaufpreis} onChange={(e) => setKaufpreis(e.target.value)} />
-              <span className="text-sm text-neutral-600">€</span>
-            </div>
+            <ZahlInput id="kaufpreis" einheit="€" value={kaufpreis} onChange={setKaufpreis} fehler={feldFehler.kaufpreis} />
           </div>
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kaufnebenkosten">Kaufnebenkosten</Label>
-          <div className="flex items-center gap-1.5">
-            <Input
-              id="kaufnebenkosten"
-              type="number"
-              min={0}
-              value={kaufnebenkostenBetrag}
-              onChange={(e) => setKaufnebenkostenBetrag(e.target.value)}
-            />
-            <span className="text-sm text-neutral-600">€</span>
-          </div>
+          <ZahlInput
+            id="kaufnebenkosten"
+            einheit="€"
+            value={kaufnebenkostenBetrag}
+            onChange={setKaufnebenkostenBetrag}
+            fehler={feldFehler.kaufnebenkostenBetrag}
+          />
         </div>
         <label className="flex items-center gap-2 text-sm">
           <Checkbox
@@ -283,16 +304,13 @@ export function BearbeitenForm({
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="darlehen">Darlehen</Label>
-                <div className="flex items-center gap-1.5">
-                  <Input
-                    id="darlehen"
-                    type="number"
-                    min={0}
-                    value={darlehenBetrag}
-                    onChange={(e) => setDarlehenBetrag(e.target.value)}
-                  />
-                  <span className="text-sm text-neutral-600">€</span>
-                </div>
+                <ZahlInput
+                  id="darlehen"
+                  einheit="€"
+                  value={darlehenBetrag}
+                  onChange={setDarlehenBetrag}
+                  fehler={feldFehler.darlehenBetrag}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="zinsbindung">Zinsbindung bis</Label>
@@ -307,31 +325,23 @@ export function BearbeitenForm({
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="zins">Zins</Label>
-                <div className="flex items-center gap-1.5">
-                  <Input
-                    id="zins"
-                    type="number"
-                    step="0.1"
-                    min={0}
-                    value={sollzinsProzent}
-                    onChange={(e) => setSollzinsProzent(e.target.value)}
-                  />
-                  <span className="text-sm text-neutral-600">%</span>
-                </div>
+                <ZahlInput
+                  id="zins"
+                  einheit="%"
+                  value={sollzinsProzent}
+                  onChange={setSollzinsProzent}
+                  fehler={feldFehler.sollzinsProzent}
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="tilgung">Tilgung</Label>
-                <div className="flex items-center gap-1.5">
-                  <Input
-                    id="tilgung"
-                    type="number"
-                    step="0.1"
-                    min={0}
-                    value={tilgungProzent}
-                    onChange={(e) => setTilgungProzent(e.target.value)}
-                  />
-                  <span className="text-sm text-neutral-600">%</span>
-                </div>
+                <ZahlInput
+                  id="tilgung"
+                  einheit="%"
+                  value={tilgungProzent}
+                  onChange={setTilgungProzent}
+                  fehler={feldFehler.tilgungProzent}
+                />
               </div>
             </div>
           </>
@@ -365,16 +375,13 @@ export function BearbeitenForm({
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="kaltmiete">Kaltmiete pro Monat</Label>
-              <div className="flex items-center gap-1.5">
-                <Input
-                  id="kaltmiete"
-                  type="number"
-                  min={0}
-                  value={kaltmieteMonat}
-                  onChange={(e) => setKaltmieteMonat(e.target.value)}
-                />
-                <span className="text-sm text-neutral-600">€</span>
-              </div>
+              <ZahlInput
+                id="kaltmiete"
+                einheit="€"
+                value={kaltmieteMonat}
+                onChange={setKaltmieteMonat}
+                fehler={feldFehler.kaltmieteMonat}
+              />
             </div>
           </>
         )}
@@ -385,16 +392,13 @@ export function BearbeitenForm({
             {kostenFelder.map((typ) => (
               <div key={typ} className="flex flex-col gap-1.5">
                 <Label htmlFor={`kosten-${typ}`}>{LAUFENDE_KOSTEN_LABEL[typ]}</Label>
-                <div className="flex items-center gap-1.5">
-                  <Input
-                    id={`kosten-${typ}`}
-                    type="number"
-                    min={0}
-                    value={kostenState[typ] ?? ""}
-                    onChange={(e) => setKostenState({ ...kostenState, [typ]: e.target.value })}
-                  />
-                  <span className="text-sm text-neutral-600">€</span>
-                </div>
+                <ZahlInput
+                  id={`kosten-${typ}`}
+                  einheit="€"
+                  value={kostenState[typ] ?? ""}
+                  onChange={(wert) => setKostenState({ ...kostenState, [typ]: wert })}
+                  fehler={feldFehler[`kosten-${typ}`]}
+                />
               </div>
             ))}
           </div>
