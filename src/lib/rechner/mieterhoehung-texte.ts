@@ -49,7 +49,7 @@ export const HINWEISE_MIETSPIEGEL = [
 export const HINWEIS_STAFFELMIETE =
   "Staffelmiete: Die Erhöhungen ergeben sich aus dem Vertrag; eine Erhöhung nach Mietspiegel oder Index ist währenddessen nicht möglich.";
 
-export const HINWEIS_REFORM_INDEX = `Eine Reform ist geplant, nach der bei einer Inflation über 3 % die Hälfte des darüber liegenden Anteils unberücksichtigt bleibt. Sie ist noch kein geltendes Recht (Stand ${MIETRECHT_STAND}).`;
+export const HINWEIS_REFORM_INDEX = `Eine Reform ist geplant: In Gebieten mit angespanntem Wohnungsmarkt soll bei einer Indexsteigerung über 3 % nur die Hälfte des darüber liegenden Anteils berücksichtigt werden. Der Gesetzentwurf liegt dem Bundestag vor und ist noch kein geltendes Recht (Stand ${MIETRECHT_STAND}).`;
 
 export function warnungZugangZuFrueh(datum: string): string {
   return `Ein Erhöhungsverlangen, das vor dem ${datum} zugeht, ist unwirksam und muss neu gestellt werden.`;

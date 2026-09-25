@@ -78,8 +78,9 @@ function Zeile({ label, wert, fett = false }: { label: string; wert: string; fet
     <div
       className={`flex items-center justify-between gap-3 border-b border-border py-2 text-sm ${fett ? "font-semibold" : ""}`}
     >
-      <span className={fett ? "" : "text-neutral-600"}>{label}</span>
-      <span className="text-right tabular-nums">{wert}</span>
+      {/* Beschriftung darf umbrechen, der Wert nie ("660,00 €" bleibt zusammen). */}
+      <span className={`min-w-0 ${fett ? "" : "text-neutral-600"}`}>{label}</span>
+      <span className="shrink-0 text-right whitespace-nowrap tabular-nums">{wert}</span>
     </div>
   );
 }

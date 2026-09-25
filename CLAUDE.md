@@ -466,8 +466,9 @@ gebaut, wenn sie explizit als eigener Auftrag kommt.
     frühestens am ersten Monatsanfang ab letzte Anpassung + 1 Jahr (Sperrjahr). Greift das
     Sperrjahr, zusätzlich: "Sicherer Weg: Erklärung so zustellen, dass sie nicht vor dem
     [letzte Anpassung + 1 Jahr] zugeht. Ob eine früher zugestellte Erklärung wirkt, ist rechtlich
-    nicht eindeutig." Geplante Reform (Kappung bei Inflation über 3 %) nur als Hinweis mit
-    Stand-Datum, nicht gerechnet.
+    nicht eindeutig." Geplante Reform (in angespannten Wohnungsmärkten
+    zählt bei einer Indexsteigerung über 3 % nur die Hälfte des darüber liegenden Anteils;
+    Gesetzentwurf liegt dem Bundestag vor) nur als Hinweis mit Stand-Datum, nicht gerechnet.
   - Staffelmiete: kein eigener Modus, nur Hinweis. Pflichthinweis wörtlich: "Keine
     Rechtsberatung. Der Rechner gibt eine Orientierung auf Basis deiner Eingaben; für verbindliche
     Aussagen wende dich an einen Mieterverein, Haus & Grund oder eine Anwältin/einen Anwalt."
