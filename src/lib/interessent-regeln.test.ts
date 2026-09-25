@@ -92,12 +92,13 @@ describe("interessentSchema", () => {
     plz: null,
     ort: "Leipzig",
     bundesland: "Sachsen",
-    kaufpreis: 165000,
-    flaecheQm: 72,
-    kaltmieteMonat: 780,
-    darlehenBetrag: null,
-    sollzinsProzent: null,
-    tilgungProzent: null,
+    // Zahlenfelder als Text, wie sie aus dem Formular kommen.
+    kaufpreis: "165.000",
+    flaecheQm: "72",
+    kaltmieteMonat: "780",
+    darlehenBetrag: "",
+    sollzinsProzent: "",
+    tilgungProzent: "",
     inseratUrl: "https://example.com/inserat",
   };
 
@@ -106,7 +107,37 @@ describe("interessentSchema", () => {
   });
   it("verlangt Bezeichnung und Kaufpreis", () => {
     expect(interessentSchema.safeParse({ ...gueltig, bezeichnung: "  " }).success).toBe(false);
-    expect(interessentSchema.safeParse({ ...gueltig, kaufpreis: 0 }).success).toBe(false);
+    expect(interessentSchema.safeParse({ ...gueltig, kaufpreis: "0" }).success).toBe(false);
+    expect(interessentSchema.safeParse({ ...gueltig, kaufpreis: "" }).success).toBe(false);
+  });
+  it("liest Zahlen in deutscher Schreibweise ein", () => {
+    const daten = interessentSchema.parse({
+      ...gueltig,
+      kaufpreis: "189.000,50",
+      flaecheQm: "72,5",
+      darlehenBetrag: "150.000",
+      sollzinsProzent: "3.5",
+      tilgungProzent: "2",
+    });
+    expect(daten).toMatchObject({
+      kaufpreis: 189000.5,
+      flaecheQm: 72.5,
+      kaltmieteMonat: 780,
+      darlehenBetrag: 150000,
+      sollzinsProzent: 3.5,
+      tilgungProzent: 2,
+    });
+    expect(interessentSchema.parse(gueltig).darlehenBetrag).toBeNull();
+  });
+  it("meldet ungültige Zahlen und einen Zins über 20 % am Feld", () => {
+    const zins = interessentSchema.safeParse({ ...gueltig, sollzinsProzent: "1.500" });
+    expect(zins.error?.issues.map((i) => [i.path[0], i.message])).toEqual([
+      ["sollzinsProzent", "Der Zins darf höchstens 20 % betragen."],
+    ]);
+    const miete = interessentSchema.safeParse({ ...gueltig, kaltmieteMonat: "1,2,3" });
+    expect(miete.error?.issues.map((i) => [i.path[0], i.message])).toEqual([
+      ["kaltmieteMonat", "Bitte eine Zahl eingeben, z. B. 1.250,50."],
+    ]);
   });
   it("lehnt javascript:-Links ab", () => {
     expect(interessentSchema.safeParse({ ...gueltig, inseratUrl: "javascript:alert(1)" }).success).toBe(false);

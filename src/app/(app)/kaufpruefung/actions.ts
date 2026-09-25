@@ -13,12 +13,13 @@ import {
   interessentNotizSchema,
   interessentSchema,
   interessentStatusSchema,
+  type InteressentDaten,
   type InteressentEingabe,
 } from "@/lib/validation/interessent";
 
 export type InteressentFormState = { error?: string; fieldErrors?: Record<string, string> };
 
-function zuSpalten(daten: InteressentEingabe) {
+function zuSpalten(daten: InteressentDaten) {
   return {
     art: daten.art,
     bezeichnung: daten.bezeichnung,

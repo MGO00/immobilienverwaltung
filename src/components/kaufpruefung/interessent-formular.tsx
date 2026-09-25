@@ -10,7 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { BUNDESLAENDER, bundeslandLabel } from "@/lib/constants/steuersaetze";
 import type { Interessent } from "@/lib/data/interessenten";
 import type { InteressentFormState } from "@/app/(app)/kaufpruefung/actions";
-import type { InteressentEingabe } from "@/lib/validation/interessent";
+import { ZAHLENFELDER_INTERESSENT, type InteressentEingabe } from "@/lib/validation/interessent";
+import { zahlFehler } from "@/lib/validation/zahl";
+import { formatEingabeOptional } from "@/lib/zahl";
+import { ZahlInput } from "@/components/ui/zahl-input";
 import type { ObjektArt } from "@/lib/validation/immobilie";
 
 const OBJEKTARTEN: { wert: ObjektArt; label: string; hinweis: string }[] = [
@@ -19,13 +22,15 @@ const OBJEKTARTEN: { wert: ObjektArt; label: string; hinweis: string }[] = [
   { wert: "mehrfamilienhaus", label: "Mehrfamilienhaus", hinweis: "Mehrere Einheiten" },
 ];
 
-function zuZahl(wert: string): number | null {
-  if (wert.trim() === "") return null;
-  const zahl = Number(wert.replace(",", "."));
-  return Number.isFinite(zahl) ? zahl : null;
-}
-
-const text = (wert: number | null) => (wert === null ? "" : String(wert));
+// Feldnamen für die Fehlerübersicht oben ("Sollzins: Bitte eine Zahl eingeben …").
+const FELD_NAME: Record<string, string> = {
+  kaufpreis: "Kaufpreis",
+  flaecheQm: "Fläche",
+  kaltmieteMonat: "Erwartete Kaltmiete",
+  darlehenBetrag: "Geplantes Darlehen",
+  sollzinsProzent: "Sollzins",
+  tilgungProzent: "Tilgung",
+};
 
 // Ein einstufiges Formular (kein Assistent) für Anlegen und Bearbeiten: eine
 // grobe erste Einschätzung braucht nur wenige Angaben. Status gibt es hier
@@ -49,12 +54,12 @@ export function InteressentFormular({
   const [plz, setPlz] = useState(initial?.plz ?? "");
   const [ort, setOrt] = useState(initial?.ort ?? "");
   const [bundesland, setBundesland] = useState(initial?.bundesland ?? "");
-  const [kaufpreis, setKaufpreis] = useState(text(initial?.kaufpreis ?? null));
-  const [flaeche, setFlaeche] = useState(text(initial?.flaecheQm ?? null));
-  const [miete, setMiete] = useState(text(initial?.kaltmieteMonat ?? null));
-  const [darlehen, setDarlehen] = useState(text(initial?.darlehenBetrag ?? null));
-  const [zins, setZins] = useState(text(initial?.sollzinsProzent ?? null));
-  const [tilgung, setTilgung] = useState(text(initial?.tilgungProzent ?? null));
+  const [kaufpreis, setKaufpreis] = useState(formatEingabeOptional(initial?.kaufpreis));
+  const [flaeche, setFlaeche] = useState(formatEingabeOptional(initial?.flaecheQm));
+  const [miete, setMiete] = useState(formatEingabeOptional(initial?.kaltmieteMonat));
+  const [darlehen, setDarlehen] = useState(formatEingabeOptional(initial?.darlehenBetrag));
+  const [zins, setZins] = useState(formatEingabeOptional(initial?.sollzinsProzent));
+  const [tilgung, setTilgung] = useState(formatEingabeOptional(initial?.tilgungProzent));
   const [inserat, setInserat] = useState(initial?.inseratUrl ?? "");
   const hatFinanzierung = Boolean(initial?.darlehenBetrag || initial?.sollzinsProzent || initial?.tilgungProzent);
   const [finanzierungOffen, setFinanzierungOffen] = useState(hatFinanzierung);
@@ -67,7 +72,24 @@ export function InteressentFormular({
     const neueFehler: Record<string, string> = {};
     if (!art) neueFehler.art = "Wähl die Objektart.";
     if (!bezeichnung.trim()) neueFehler.bezeichnung = "Gib dem Interessenten eine Bezeichnung.";
-    if (!(zuZahl(kaufpreis) ?? 0)) neueFehler.kaufpreis = "Trag den Kaufpreis ein.";
+    // Zahlenfelder mit genau den Schemas prüfen, die auch der Server nutzt.
+    const Z = ZAHLENFELDER_INTERESSENT;
+    const pruefungen: [string, Parameters<typeof zahlFehler>[0], string][] = [
+      ["kaufpreis", Z.kaufpreis, kaufpreis],
+      ["flaecheQm", Z.flaecheQm, flaeche],
+      ["kaltmieteMonat", Z.kaltmieteMonat, miete],
+    ];
+    if (finanzierungOffen) {
+      pruefungen.push(
+        ["darlehenBetrag", Z.darlehenBetrag, darlehen],
+        ["sollzinsProzent", Z.sollzinsProzent, zins],
+        ["tilgungProzent", Z.tilgungProzent, tilgung],
+      );
+    }
+    for (const [schluessel, schema, text] of pruefungen) {
+      const meldung = zahlFehler(schema, text);
+      if (meldung) neueFehler[schluessel] = meldung;
+    }
     setFehler(neueFehler);
     setSpeichernFehler(null);
     if (Object.keys(neueFehler).length > 0 || !art) return;
@@ -80,13 +102,14 @@ export function InteressentFormular({
         plz: plz.trim() || null,
         ort: ort.trim() || null,
         bundesland: bundesland || null,
-        kaufpreis: zuZahl(kaufpreis) ?? 0,
-        flaecheQm: zuZahl(flaeche),
-        kaltmieteMonat: zuZahl(miete),
+        // Zahlen als Text; der Server liest sie mit denselben Regeln ein.
+        kaufpreis,
+        flaecheQm: flaeche,
+        kaltmieteMonat: miete,
         // Eingeklappte Finanzierung wird nicht gespeichert, auch wenn Werte darin standen.
-        darlehenBetrag: finanzierungOffen ? zuZahl(darlehen) : null,
-        sollzinsProzent: finanzierungOffen ? zuZahl(zins) : null,
-        tilgungProzent: finanzierungOffen ? zuZahl(tilgung) : null,
+        darlehenBetrag: finanzierungOffen ? darlehen : "",
+        sollzinsProzent: finanzierungOffen ? zins : "",
+        tilgungProzent: finanzierungOffen ? tilgung : "",
         inseratUrl: inserat.trim() || null,
       });
       // Bei Erfolg leitet die Server Action weiter; hier kommt nur ein Fehler an.
@@ -95,7 +118,7 @@ export function InteressentFormular({
     });
   }
 
-  const fehlerListe = Object.values(fehler);
+  const fehlerListe = Object.entries(fehler);
 
   return (
     <div className="mx-auto max-w-[720px]">
@@ -109,11 +132,11 @@ export function InteressentFormular({
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-error" />
           <div className="text-[13px] text-error">
             <p className="font-semibold">
-              {fehlerListe.length === 1 ? "Ein Feld fehlt noch" : `Es fehlen noch ${fehlerListe.length} Angaben`}
+              {fehlerListe.length === 1 ? "Bitte prüf diese Angabe" : `Bitte prüf diese ${fehlerListe.length} Angaben`}
             </p>
             <ul className="mt-1 list-disc pl-4">
-              {fehlerListe.map((t) => (
-                <li key={t}>{t}</li>
+              {fehlerListe.map(([schluessel, t]) => (
+                <li key={schluessel}>{FELD_NAME[schluessel] ? `${FELD_NAME[schluessel]}: ${t}` : t}</li>
               ))}
             </ul>
           </div>
@@ -193,32 +216,16 @@ export function InteressentFormular({
         <h2 className="text-sm font-semibold tracking-[0.06em] text-neutral-600 uppercase">Kauf und Miete</h2>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="kaufpreis">Kaufpreis</Label>
-          <div className="flex items-center gap-1.5">
-            <Input
-              id="kaufpreis"
-              type="number"
-              min={0}
-              value={kaufpreis}
-              onChange={(e) => setKaufpreis(e.target.value)}
-              aria-invalid={Boolean(fehler.kaufpreis)}
-            />
-            <span className="text-sm text-neutral-600">€</span>
-          </div>
+          <ZahlInput id="kaufpreis" einheit="€" value={kaufpreis} onChange={setKaufpreis} fehler={fehler.kaufpreis} />
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="flaeche">Fläche gesamt (optional)</Label>
-            <div className="flex items-center gap-1.5">
-              <Input id="flaeche" type="number" min={0} value={flaeche} onChange={(e) => setFlaeche(e.target.value)} />
-              <span className="text-sm text-neutral-600">m²</span>
-            </div>
+            <ZahlInput id="flaeche" einheit="m²" value={flaeche} onChange={setFlaeche} fehler={fehler.flaecheQm} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="miete">Erwartete Kaltmiete pro Monat (optional)</Label>
-            <div className="flex items-center gap-1.5">
-              <Input id="miete" type="number" min={0} value={miete} onChange={(e) => setMiete(e.target.value)} />
-              <span className="text-sm text-neutral-600">€</span>
-            </div>
+            <ZahlInput id="miete" einheit="€" value={miete} onChange={setMiete} fehler={fehler.kaltmieteMonat} />
           </div>
         </div>
         {art === "mehrfamilienhaus" && (
@@ -245,25 +252,16 @@ export function InteressentFormular({
           <div id="finanzierung-felder" className="mt-4 flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="darlehen">Geplantes Darlehen</Label>
-              <div className="flex items-center gap-1.5">
-                <Input id="darlehen" type="number" min={0} value={darlehen} onChange={(e) => setDarlehen(e.target.value)} />
-                <span className="text-sm text-neutral-600">€</span>
-              </div>
+              <ZahlInput id="darlehen" einheit="€" value={darlehen} onChange={setDarlehen} fehler={fehler.darlehenBetrag} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="zins">Sollzins</Label>
-                <div className="flex items-center gap-1.5">
-                  <Input id="zins" type="number" min={0} step="any" value={zins} onChange={(e) => setZins(e.target.value)} />
-                  <span className="text-sm text-neutral-600">%</span>
-                </div>
+                <ZahlInput id="zins" einheit="%" value={zins} onChange={setZins} fehler={fehler.sollzinsProzent} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="tilgung">Tilgung</Label>
-                <div className="flex items-center gap-1.5">
-                  <Input id="tilgung" type="number" min={0} step="any" value={tilgung} onChange={(e) => setTilgung(e.target.value)} />
-                  <span className="text-sm text-neutral-600">%</span>
-                </div>
+                <ZahlInput id="tilgung" einheit="%" value={tilgung} onChange={setTilgung} fehler={fehler.tilgungProzent} />
               </div>
             </div>
           </div>
